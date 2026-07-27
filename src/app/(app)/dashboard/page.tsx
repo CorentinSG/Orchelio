@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Badge, Callout, Card, DataRow } from "@/components/ui";
+import { widgetValue, widgetsFor } from "@/lib/dashboard/widgets";
 import { recordViewEvent } from "@/lib/audit";
 import { AUDIT_ACTIONS } from "@/lib/constants";
 import { requireFirmAccess } from "@/lib/auth/guards";
@@ -16,6 +18,9 @@ import { practiceAreaLabel } from "@/lib/practice-areas";
 
 export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
+
+/** Widgets whose data arrives later show a dash rather than a misleading zero. */
+const CURRENT_PHASE = 4;
 
 /**
  * Firm dashboard.
@@ -67,6 +72,9 @@ export default async function DashboardPage() {
   const actor = actorFor(session.user, firm.id);
   const permissions = permissionsFor(actor).sort();
   const matterTypes = parseStringArray(configuration?.matterTypes);
+  const aiFeatures = parseStringArray(configuration?.aiFeatures);
+  const needsOnboarding = configuration?.onboardingStatus !== "complete";
+  const widgets = widgetsFor(firm.primaryPracticeArea, aiFeatures);
 
   return (
     <div className="space-y-6">
@@ -80,20 +88,43 @@ export default async function DashboardPage() {
         </p>
       </header>
 
-      <Callout tone="brand" title="Phase 3 of 9">
-        Firm isolation is enforced and tested: every figure below is counted within this firm
-        alone. The practice-area dashboard widgets are generated from the onboarding
-        questionnaire, which arrives in Phase 4; matters and documents arrive in Phase 5.
-      </Callout>
+      {needsOnboarding ? (
+        <Callout tone="warning" title="This firm is not configured yet">
+          <p>
+            The dashboard below is generic until the onboarding questionnaire has been answered.
+          </p>
+          <p className="mt-2">
+            <Link href="/onboarding" className="font-medium text-brand underline underline-offset-4">
+              Set up this firm
+            </Link>
+          </p>
+        </Callout>
+      ) : (
+        <Callout tone="brand" title="Phase 4 of 9">
+          This dashboard is assembled from this firm&apos;s configuration — the cards below are
+          the ones an {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about
+          each morning. The figures fill in as matters (Phase 5), analyses (Phase 6) and approvals
+          (Phase 7) arrive.
+        </Callout>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Matters" value={statistics.matters} hint="Phase 5" />
-        <StatTile label="Documents" value={statistics.documents} hint="Phase 5" />
-        <StatTile label="Claude analyses" value={statistics.analyses} hint="Phase 6" />
+        {widgets.map((widget) => (
+          <StatTile
+            key={widget.key}
+            label={widget.label}
+            value={widgetValue(widget, statistics, CURRENT_PHASE)}
+            hint={
+              widget.availableFrom > CURRENT_PHASE
+                ? `Phase ${widget.availableFrom}`
+                : widget.hint
+            }
+          />
+        ))}
         <StatTile
-          label="Simulated AI usage"
+          label="Simulated AI cost"
           value={formatCost(statistics.usageCostCents)}
-          hint="no charge"
+          hint="this firm only — no charge"
         />
       </div>
 

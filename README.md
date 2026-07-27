@@ -15,20 +15,19 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 to 3 of 9 complete
+## Current status: Phases 1 to 4 of 9 complete
 
-Orchelio is built in nine phases. **Phase 1 (Initialisation)**, **Phase 2 (Data and
-authentication)** and **Phase 3 (Multi-firm isolation)** are finished: you can sign in, land in
-the right firm workspace, switch between firms if you belong to more than one, and the separation
-between firms is enforced in three independent layers and proved by tests. It does **not** yet
-deliver the onboarding questionnaire, matters, documents or the AI analysis.
+Orchelio is built in nine phases. **Phases 1 to 4** are finished: you can sign in, land in the
+right firm workspace, switch between firms, answer a seven-step questionnaire that configures the
+firm, and see a dashboard assembled from that configuration. It does **not** yet deliver matters,
+documents or the AI analysis.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
 | 1 | Next.js, TypeScript, Tailwind, Prisma, SQLite, tests, documentation | ✅ Delivered |
 | 2 | Full data model, migrations, seed data, local sign-in, roles | ✅ Delivered |
 | 3 | Firm memberships, `firmId` scoping on every query, isolation tests | ✅ Delivered |
-| 4 | Seven-step onboarding questionnaire and generated configuration | Planned |
+| 4 | Seven-step onboarding questionnaire and generated configuration | ✅ Delivered |
 | 5 | Matters, practice-area fields, simulated document upload | Planned |
 | 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | Planned |
 | 7 | Approval centre, human decisions, append-only audit log | Planned |
@@ -156,6 +155,15 @@ on the real internet.
 6. Sign in as `reviewer@demo.local`. A **Your firms** panel appears in the sidebar, because this
    person belongs to both firms. Switch between them: the whole workspace changes, and the two
    never mix. The other accounts do not see this panel — a switcher offering one option is noise.
+7. **The demonstration that matters most.** Sign in as `immigration.attorney@demo.local` and open
+   **Firm Setup** in the sidebar. Walk through the seven steps and, at step 4, tick *Lead intake*,
+   *Conflict check*, *Initial consultation* and *Document collection*. Confirm, and look at the
+   dashboard: status expiration dates, missing identity documents.
+
+   Now do exactly the same as `employment.attorney@demo.local`, ticking **the same four boxes**.
+   The dashboard that comes out is different: termination letters, missing wage records. One
+   product, one questionnaire, the same answers — two firms that work differently, because the
+   same step means something different in each practice area.
 
 ---
 
@@ -248,8 +256,10 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 to 3 only.** The onboarding questionnaire, matters, documents, AI analysis,
-   approvals, the activity log screen and the cost screens are not built yet.
+1. **Phases 1 to 4 only.** Matters, documents, AI analysis, approvals, the activity log screen
+   and the cost screens are not built yet. The dashboard is assembled from each firm's
+   configuration, but its figures show a dash rather than a zero until the data behind them
+   exists — a zero would be a claim ("there is nothing to do") the product cannot yet support.
 2. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
    account lockout. It exists to demonstrate roles and access control.

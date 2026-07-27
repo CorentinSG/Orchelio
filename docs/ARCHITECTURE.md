@@ -233,6 +233,72 @@ See [`PRODUCTION_READINESS.md`](PRODUCTION_READINESS.md).
 
 ---
 
+## 4bis. Configuration, and why one question has two answers
+
+> Status: delivered in Phase 4.
+
+The onboarding questionnaire writes a `FirmConfiguration`. That record — not the code — is what
+makes one firm's Orchelio different from another's. It decides the matter types, the workflow, the
+AI features, the approval rules, the dashboard and the vocabulary.
+
+### Practice-area vocabulary
+
+The specification promises that a firm's configuration determines "the vocabulary used". Orchelio
+implements that literally: a catalogue entry may carry a per-practice-area key.
+
+| The question asked | Immigration firm stores | Employment firm stores |
+| ------------------ | ----------------------- | ---------------------- |
+| Initial consultation | `consultation_preparation` | `employment_case_assessment` |
+| Document collection | `document_collection` | `evidence_collection` |
+| Create a factual timeline | `timeline` | `employment_timeline` |
+
+Two firms answer the same question identically and receive different configurations, because the
+same step means something different in each practice area. This is also what makes the two
+configurations published in the specification reproducible from one questionnaire — see
+`docs/ROADMAP.md`, Phase 4, for the inconsistency this resolves.
+
+The mapping is one-to-one within a practice area, which is what lets a saved draft re-tick the
+right boxes. Keep it that way.
+
+### Locked rules live in the data
+
+Nine approval rules cannot be switched off. They are rendered with a padlock, submitted by
+nothing, and written in by the server whatever the browser sent — so tampering with the form
+achieves nothing. They are also *stored* with the configuration rather than assumed, so the
+guarantee is auditable in the database rather than asserted in a comment.
+
+### Dashboard composition
+
+`src/lib/dashboard/widgets.ts` declares which widgets belong to which practice area and which AI
+feature each depends on. A firm that switched off "identify missing documents" does not see a card
+counting missing documents — an empty card at a firm that never asked the question is not
+information, it is noise that reads like reassurance. For the same reason a widget whose data
+arrives in a later phase shows a dash, not a zero: a zero is a claim.
+
+---
+
+## 4ter. Forms that change something
+
+Orchelio submits its consequential forms — switching firm, saving an onboarding step, confirming a
+configuration — as plain POSTs to route handlers that answer with an HTTP 303, not as Server
+Actions. `src/lib/http/form-post.ts` holds the two helpers and the full reasoning.
+
+The short version: a Server Action re-renders the redirect target inside its own response, and
+twice during this build that render did not reflect what the action had just done — the firm
+switcher showed the previous firm about half the time, and confirming the configuration navigated
+nowhere at all. In both cases the server was right and the browser was wrong, which is the worst
+combination, because nothing looks broken. A 303 has no such ambiguity.
+
+Two consequences worth knowing:
+
+- Those forms work with JavaScript disabled.
+- The cross-site check compares `Origin` against the request's own `Host` header, never against
+  `request.url` — Next reconstructs that URL and it does not always carry the host the browser
+  used. Redirect targets are relative for the same reason: an absolute redirect built from
+  `request.url` once sent the browser to a different host and silently dropped the session cookie.
+
+---
+
 ## 5. The AI layer
 
 > Status: Phase 6. The interface below is the contract the rest of the product will be written

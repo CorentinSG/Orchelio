@@ -41,9 +41,13 @@ const FIRM_PLANNED: readonly PlannedItem[] = [
   { label: "Activity Log", phase: 7 },
 ];
 
+const ADMIN_NAV: readonly NavItem[] = [
+  { href: "/onboarding", label: "Firm Setup", permission: "firm.settings.edit" },
+];
+
 const ADMIN_PLANNED: readonly PlannedItem[] = [
-  { label: "Firm Settings", phase: 4 },
-  { label: "Workflows", phase: 4 },
+  { label: "Firm Settings", phase: 8 },
+  { label: "Workflows", phase: 8 },
   { label: "Users and Roles", phase: 8 },
   { label: "AI Settings", phase: 6 },
   { label: "Usage and Costs", phase: 8 },
@@ -61,12 +65,20 @@ function NavGroup({
   title,
   items,
   planned,
+  granted,
 }: {
   title: string;
   items?: readonly NavItem[];
   planned?: readonly PlannedItem[];
+  granted?: ReadonlySet<Permission>;
 }) {
-  if ((items?.length ?? 0) === 0 && (planned?.length ?? 0) === 0) {
+  // A link the caller may not follow is worse than no link: it invites a
+  // refusal. Server-side guards still decide; this only avoids offering.
+  const visible = (items ?? []).filter(
+    (item) => !item.permission || granted?.has(item.permission),
+  );
+
+  if (visible.length === 0 && (planned?.length ?? 0) === 0) {
     return null;
   }
 
@@ -74,7 +86,7 @@ function NavGroup({
     <div>
       <h2 className="px-3 text-xs font-semibold uppercase tracking-wide text-ink-subtle">{title}</h2>
       <ul className="mt-2 space-y-0.5">
-        {items?.map((item) => (
+        {visible.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
@@ -102,13 +114,17 @@ export function AppShell({
   session,
   firm,
   roleLabel,
+  permissions,
   children,
 }: {
   session: Session;
   firm: SessionFirm | null;
   roleLabel: string;
+  permissions: readonly Permission[];
   children: React.ReactNode;
 }) {
+  const granted = new Set(permissions);
+
   return (
     <div className="flex min-h-dvh flex-col">
       <DemoBanner variant="long" />
@@ -124,8 +140,13 @@ export function AppShell({
           <nav aria-label="Main" className="space-y-5 px-2 py-4">
             {firm ? (
               <>
-                <NavGroup title="Firm" items={FIRM_NAV} planned={FIRM_PLANNED} />
-                <NavGroup title="Firm administration" planned={ADMIN_PLANNED} />
+                <NavGroup title="Firm" items={FIRM_NAV} planned={FIRM_PLANNED} granted={granted} />
+                <NavGroup
+                  title="Firm administration"
+                  items={ADMIN_NAV}
+                  planned={ADMIN_PLANNED}
+                  granted={granted}
+                />
               </>
             ) : null}
             {session.user.isPlatformAdmin ? (

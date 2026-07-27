@@ -40,7 +40,7 @@ export const PHASES: readonly Phase[] = [
     number: 4,
     title: "Onboarding",
     summary: "Seven-step questionnaire that generates the firm configuration.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 5,

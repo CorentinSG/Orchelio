@@ -14,6 +14,9 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
   await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();
+  // Wait for the sign-in to land before doing anything else: navigating on
+  // while the request is in flight races it and arrives signed out.
+  await page.waitForURL((url) => !url.pathname.startsWith("/login"));
 }
 
 test.describe("Protection of signed-out visitors", () => {

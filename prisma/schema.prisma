@@ -183,6 +183,14 @@ model FirmConfiguration {
   timezone String @default("America/New_York")
   currency String @default("USD")
 
+  /// Step 1 of the onboarding questionnaire. Fictional in this environment.
+  contactName  String?
+  contactEmail String?
+  /// How many people the firm expects to use Orchelio. Sizes the demonstration.
+  userCount    Int?
+  /// Primary jurisdiction, e.g. "NY". Never used to give legal advice.
+  jurisdiction String?
+
   /// "draft" | "complete".
   onboardingStatus String @default("draft")
   /// Last questionnaire step reached, 1-7. Lets a firm resume a draft.

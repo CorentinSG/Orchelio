@@ -87,16 +87,56 @@ Two defects were found by the tests and fixed:
 
 ---
 
-## Phase 4 — Onboarding
+## Phase 4 — Onboarding ✅ Delivered
+
+Delivered:
 
 - Seven-step questionnaire with a progress bar: firm details, practice areas, matter types,
   workflow steps, AI features, human approvals, summary.
-- Locked approval rules shown with a padlock.
-- Saved configuration, generated workflows, dashboard adapted to the primary practice area.
-- "Save as draft" and the ability to restart onboarding.
+- Every answer saved as it is given, so "Save as draft" is not a separate feature — leaving
+  halfway through and coming back is simply what the questionnaire does.
+- Locked approval rules shown with a padlock, submitted by nothing, and written in by the server
+  regardless of what was sent.
+- **Practice-area vocabulary**: the same question produces a different configuration depending on
+  the firm's main area. "Document collection" becomes `document_collection` at an immigration firm
+  and `evidence_collection` at an employment firm; "Create a factual timeline" becomes `timeline`
+  or `employment_timeline`. This is what makes the two published configurations reproducible from
+  one questionnaire, and it is the mechanism behind the specification's promise that Orchelio
+  adapts a firm's vocabulary.
+- Dashboard assembled from the configuration: an immigration firm sees status expiration dates and
+  missing identity documents; an employment firm sees termination letters and missing wage records.
+  A widget that depends on an AI feature the firm switched off is omitted rather than shown empty.
+- Restart the questionnaire without discarding an answer.
 
-**Acceptance:** the two demonstration configurations in the specification are reproduced exactly by
-answering the questionnaire.
+**Acceptance met:** answering the questionnaire reproduces both configurations printed in the
+specification, asserted literally in `tests/unit/onboarding-config.test.ts`, and the same answers
+given at the two demonstration firms produce two different dashboards.
+
+### An inconsistency in the specification, and how it was resolved
+
+The specification's step 4 offers fourteen generic workflow steps, but its example configurations
+contain keys that are not among them — `consultation_preparation` and `document_collection` for
+immigration, `employment_case_assessment` and `evidence_collection` for employment. Taken
+literally, no set of answers produces the published output.
+
+Reading §2, which promises that the configuration determines "the vocabulary used", resolves it:
+these are the *same* four steps, named in each practice area's own language. Orchelio implements
+that as a per-area key mapping, which reproduces both examples exactly and delivers a feature the
+specification asked for. The alternative — declaring the criterion unreachable — would have been
+easier and less useful.
+
+One further deviation, stated rather than hidden: the published `approvals` objects list a subset
+of the rules. Orchelio stores every locked rule as well, so the guarantee is auditable in the data
+rather than merely asserted in a comment. Every key in each published example is present and
+required.
+
+### A defect found and fixed
+
+Confirming the configuration navigated nowhere, silently: the server completed the work and
+redirected, and the browser stayed on the summary page. The cause was `revalidatePath("/", "layout")`
+inside an action that then redirects across routes — the client router discards the navigation.
+The onboarding submissions are now plain form POSTs answered with an HTTP 303, the same mechanism
+adopted for the firm switcher in Phase 3, and both now share `src/lib/http/form-post.ts`.
 
 ---
 

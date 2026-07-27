@@ -180,6 +180,10 @@ const DEMO_FIRMS = [
     primaryPracticeArea: "immigration",
     status: "active",
     configuration: {
+      contactName: "Claire Dupont",
+      contactEmail: "immigration.attorney@demo.local",
+      userCount: 6,
+      jurisdiction: "NY",
       practiceAreas: ["immigration"],
       matterTypes: ["family_based", "employment_based", "naturalisation"],
       enabledWorkflows: [
@@ -208,6 +212,10 @@ const DEMO_FIRMS = [
     primaryPracticeArea: "employment_law",
     status: "active",
     configuration: {
+      contactName: "Alex Carter",
+      contactEmail: "employment.attorney@demo.local",
+      userCount: 9,
+      jurisdiction: "CA",
       practiceAreas: ["employment_law"],
       matterTypes: [
         "unpaid_wages",
@@ -326,6 +334,10 @@ async function main() {
 
       const configuration = {
         primaryPracticeArea: firm.primaryPracticeArea,
+        contactName: firm.configuration.contactName,
+        contactEmail: firm.configuration.contactEmail,
+        userCount: firm.configuration.userCount,
+        jurisdiction: firm.configuration.jurisdiction,
         practiceAreas: JSON.stringify(firm.configuration.practiceAreas),
         matterTypes: JSON.stringify(firm.configuration.matterTypes),
         enabledWorkflows: JSON.stringify(firm.configuration.enabledWorkflows),
