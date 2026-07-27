@@ -15,16 +15,17 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phase 1 of 9 complete
+## Current status: Phases 1 and 2 of 9 complete
 
-Orchelio is built in nine phases. **Phase 1 (Initialisation)** is finished. It delivers the
-technical foundation and a working home page; it does **not** yet deliver sign-in, firms
-workspaces, matters, documents or the AI analysis.
+Orchelio is built in nine phases. **Phase 1 (Initialisation)** and **Phase 2 (Data and
+authentication)** are finished: you can sign in as any demonstration account, land in the right
+firm workspace, and see that access control is enforced. It does **not** yet deliver the
+onboarding questionnaire, matters, documents or the AI analysis.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
 | 1 | Next.js, TypeScript, Tailwind, Prisma, SQLite, tests, documentation | ✅ Delivered |
-| 2 | Full data model, migrations, seed data, local sign-in, roles | Planned |
+| 2 | Full data model, migrations, seed data, local sign-in, roles | ✅ Delivered |
 | 3 | Firm memberships, `firmId` scoping on every query, isolation tests | Planned |
 | 4 | Seven-step onboarding questionnaire and generated configuration | Planned |
 | 5 | Matters, practice-area fields, simulated document upload | Planned |
@@ -125,17 +126,31 @@ To stop the application, press `Ctrl` + `C` in the terminal.
 
 ## Demonstration accounts
 
-Sign-in arrives in **Phase 2**. The accounts below are the ones that will be created; they do not
-work yet. All of them are fictional and all use the reserved `.local` domain, which cannot exist on
-the real internet.
+Go to <http://localhost:3000/login>. The accounts are listed on the page itself — click one to fill
+the form, then sign in. All are fictional and use the reserved `.local` domain, which cannot exist
+on the real internet.
 
-| Email | Role |
-| ----- | ---- |
-| `platform.admin@demo.local` | Platform Administrator |
-| `immigration.attorney@demo.local` | Attorney — Dupont Immigration Law |
-| `immigration.paralegal@demo.local` | Paralegal — Dupont Immigration Law |
-| `employment.attorney@demo.local` | Attorney — Carter Employment & Labor Law |
-| `employment.paralegal@demo.local` | Paralegal — Carter Employment & Labor Law |
+**The password for every account is `orchelio-demo`.**
+
+| Email | Who they are | What they can do |
+| ----- | ------------ | ---------------- |
+| `platform.admin@demo.local` | Platform Administrator | See the list of firms and how much they use the platform. **Cannot** open any firm's matters — operating the platform does not grant access to client files. |
+| `immigration.attorney@demo.local` | Firm Administrator & Attorney, Dupont Immigration Law | Everything inside the immigration firm: matters, analyses, approvals, deadlines, settings. |
+| `immigration.paralegal@demo.local` | Paralegal, Dupont Immigration Law | Prepare work: intake, documents, run an analysis. **Cannot** approve an analysis, confirm a deadline, close a matter or draft a communication. |
+| `employment.attorney@demo.local` | Firm Administrator & Attorney, Carter Employment & Labor Law | Same rights, in the employment firm. |
+| `employment.paralegal@demo.local` | Paralegal, Carter Employment & Labor Law | Same restrictions, in the employment firm. |
+
+### What to try
+
+1. Sign in as `immigration.attorney@demo.local`. The sidebar shows **Orchelio** and, below it,
+   **Dupont Immigration Law** — you always know which firm is open.
+2. Look at the **Your permissions** panel. It lists what this role actually allows, computed on
+   the server.
+3. Sign out, sign in as `immigration.paralegal@demo.local`, and compare: `approval.decide`,
+   `deadline.confirm` and `matter.close` are gone.
+4. While signed in as a firm user, type <http://localhost:3000/admin/firms> into the address bar.
+   You are refused, and the refusal is written to the activity log.
+5. Sign in as `platform.admin@demo.local`. You see both firms exist — and no matter content.
 
 ---
 
@@ -177,18 +192,27 @@ If your machine already has a Chromium you would rather reuse, point Orchelio at
 ```
 orchelio/
 ├── prisma/
-│   ├── schema.prisma        Database model (Phase 1: the Firm tenant only)
+│   ├── schema.prisma        Complete database model
 │   ├── migrations/          Versioned database changes
 │   └── seed.ts              Fictional demonstration data
 ├── src/
 │   ├── app/                 Pages (Next.js App Router)
 │   │   ├── layout.tsx       Shared shell, Orchelio metadata
 │   │   ├── page.tsx         Home page with the live platform status
+│   │   ├── login/           Sign-in page and its server action
+│   │   ├── (app)/           Signed-in area — guarded on the server
+│   │   │   ├── dashboard/   Firm workspace
+│   │   │   └── admin/firms/ Platform administration
+│   │   ├── 403/             Access denied
 │   │   ├── loading.tsx      Loading screen
 │   │   ├── error.tsx        Error screen
 │   │   └── not-found.tsx    404 screen
-│   ├── components/          Reusable interface pieces (brand, cards, badges)
-│   ├── lib/                 Configuration, database access, status checks
+│   ├── components/          Reusable interface pieces (brand, cards, badges, shell)
+│   ├── lib/
+│   │   ├── auth/            Sessions, passwords, roles, permissions, guards
+│   │   ├── audit.ts         Append-only activity log
+│   │   └── ...              Configuration, database access, status checks
+│   ├── middleware.ts        Sign-in redirect only — NOT the security boundary
 │   └── generated/           Prisma client, generated — never edited by hand
 ├── tests/
 │   ├── unit/                Unit and component tests (Vitest)
@@ -217,17 +241,26 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phase 1 only.** Sign-in, firms workspaces, onboarding, matters, documents, AI analysis,
-   approvals, the audit log and the cost screens are not built yet.
-2. **No authentication.** Every page is currently public. Access control arrives in Phase 2.
-3. **Simulated AI.** The `AIProvider` interface and the mock implementation land in Phase 6.
+1. **Phases 1 and 2 only.** The onboarding questionnaire, matters, documents, AI analysis,
+   approvals, the activity log screen and the cost screens are not built yet.
+2. **The sign-in is a demonstration, not a production authentication system.** The passwords are
+   published in this repository, there is no multi-factor authentication, no password reset and no
+   account lockout. It exists to demonstrate roles and access control.
+3. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
+   and is not shared between instances. It raises the cost of guessing on one machine; it is not
+   abuse protection.
+4. **Simulated AI.** The `AIProvider` interface and the mock implementation land in Phase 6.
    Nothing in this build calls Anthropic.
-4. **Multi-tenant isolation is not yet enforced.** The `Firm` table exists, but the `firmId`
-   scoping rules and their tests arrive in Phase 3. Do not read the current build as proof of
-   isolation.
-5. **SQLite, single machine.** Fine for a demonstration, not for concurrent real-world use.
-6. **No production security audit.** See the warning below.
-7. **`npm audit` reports advisories** in transitive dependencies of Next.js itself (`sharp`,
+5. **Multi-tenant isolation is enforced but not yet proven at scale.** Membership is checked on
+   the server for every protected page, and the browser tests confirm a firm user cannot reach
+   platform administration or another firm's workspace. The systematic `firmId` scoping of every
+   query, and the full isolation test suite, arrive in Phase 3 with the matter data.
+6. **The activity log is append-only by application discipline**, not by the database. Nothing in
+   the codebase updates or deletes an audit event, but a database administrator could. Production
+   needs write-once storage.
+7. **SQLite, single machine.** Fine for a demonstration, not for concurrent real-world use.
+8. **No production security audit.** See the warning below.
+9. **`npm audit` reports advisories** in transitive dependencies of Next.js itself (`sharp`,
    `postcss`). They cannot be fixed without downgrading Next.js to an unsupported version. They
    are tracked in [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { DemoBanner } from "@/components/demo-banner";
 import { OrchelioWordmark } from "@/components/brand";
 import { Badge, Callout, Card, CommandLine, DataRow, StatusDot } from "@/components/ui";
@@ -61,10 +63,18 @@ export default async function HomePage() {
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <OrchelioWordmark size="md" />
-          <Badge tone={databaseOk ? "success" : "danger"}>
-            <StatusDot tone={databaseOk ? "success" : "danger"} />
-            {databaseOk ? "System operational" : "Setup required"}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge tone={databaseOk ? "success" : "danger"}>
+              <StatusDot tone={databaseOk ? "success" : "danger"} />
+              {databaseOk ? "System operational" : "Setup required"}
+            </Badge>
+            <Link
+              href="/login"
+              className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
+            >
+              Sign in
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -165,7 +175,11 @@ export default async function HomePage() {
               </ul>
             )}
             <p className="mt-4 text-sm text-ink-subtle">
-              Firm workspaces, sign-in and the onboarding questionnaire arrive in phases 2 to 4.
+              <Link href="/login" className="font-medium text-brand underline underline-offset-4">
+                Sign in
+              </Link>{" "}
+              with a demonstration account to open a firm workspace. The onboarding questionnaire
+              that configures a firm arrives in Phase 4.
             </p>
           </Card>
         </div>

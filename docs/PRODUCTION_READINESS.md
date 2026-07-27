@@ -16,22 +16,26 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | ---- | ------ | ----- |
 | Independent security audit and penetration test | ⛔ | Must precede any real use. |
 | Threat model for a multi-tenant legal platform | ⛔ | Tenant crossing is the primary risk. |
-| Server-side authorisation on every route and action | 🟡 | Layering exists; enforcement is Phase 2–3. |
-| Input validation on every write path | ⛔ | Phase 5. |
-| Upload restrictions: extension allow-list, size cap, content sniffing | ⛔ | Phase 5. Real malware scanning is additional. |
-| Generic error messages that leak nothing | ✅ | `src/app/error.tsx`, `src/lib/system-status.ts`. |
+| Server-side authorisation on every route and action | 🟡 | Enforced on every page that exists (`src/lib/auth/guards.ts`); the boundary must be re-verified as matters, documents and AI screens are added. |
+| Input validation on every write path | 🟡 | The sign-in action validates and normalises; matter and document writes arrive in Phase 5. |
+| Upload restrictions: extension allow-list, size cap, content sniffing | 🟡 | Allow-list and size cap defined in `src/lib/constants.ts`; enforcement lands with uploads in Phase 5. Real malware scanning is additional. |
+| Generic error messages that leak nothing | ✅ | `src/app/error.tsx`, `src/app/403/page.tsx`, `src/lib/system-status.ts`. A refusal never confirms a record exists. |
+| Account enumeration resistance | ✅ | Identical message and comparable timing for an unknown address and a wrong password. |
 | Secrets never reachable from the browser | ✅ | Enforced by `src/lib/env.ts` and `server-only`. |
-| CSRF protection on state-changing requests | ⛔ | Phase 2, alongside sessions. |
-| Rate limiting and abuse protection | ⛔ | |
+| Password storage | ✅ | scrypt, per-password salt, constant-time comparison, self-describing cost parameters. |
+| Session management, expiry, revocation | ✅ | Server-side sessions; only the token hash is stored; revalidated on every request. |
+| CSRF protection on state-changing requests | ✅ | All writes go through Server Actions, which Next.js protects with an origin check. Re-verify if any raw route handler is added. |
+| Rate limiting and abuse protection | 🟡 | Sign-in throttling is in-memory and per-process: it resets on restart and is not shared across instances. Needs a shared store and per-IP limits. |
 | Dependency advisories | 🟡 | `npm audit` reports advisories in transitive dependencies of Next.js itself (`sharp`, `postcss`). They cannot be resolved without downgrading Next.js to an unsupported release. Re-check on each Next.js update. |
 
 ## 2. Multi-tenant isolation
 
 | Item | Status | Notes |
 | ---- | ------ | ----- |
-| `firmId` on every business resource | 🟡 | `Firm` exists; the rest arrives Phase 2–3. |
-| Scoped data-access functions only | ⛔ | Phase 3. |
-| Automated cross-tenant access tests | ⛔ | Phase 3. |
+| `firmId` on every business resource | ✅ | Every firm-scoped model carries it, indexed. |
+| Membership checked before any workspace page renders | ✅ | `requireFirmAccess` / `requirePermission`, with the refusal logged. |
+| Scoped data-access functions only | 🟡 | Queries written so far pass `firmId`; the enforced data-access layer arrives in Phase 3. |
+| Automated cross-tenant access tests | 🟡 | Browser tests cover refusal of platform administration and absence of the other firm's name; the full suite arrives in Phase 3 with matter data. |
 | Database-enforced isolation (row-level security, separate schemas or databases) | ⛔ | The demo relies on application-level scoping alone — the weakest option. |
 | Separate document storage per firm | ⛔ | |
 | Separate search index per firm | ⛔ | |
@@ -42,11 +46,11 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 
 | Item | Status | Notes |
 | ---- | ------ | ----- |
-| Professional authentication (Auth.js, Clerk, Entra ID, Google Workspace, SSO) | ⛔ | The demo sign-in is for demonstration only. |
+| Professional authentication (Auth.js, Clerk, Entra ID, Google Workspace, SSO) | ⛔ | The demo sign-in is for demonstration only, and its passwords are published in this repository. `src/lib/auth/session.ts` is the seam to replace. |
 | Multi-factor authentication | ⛔ | Should be mandatory for attorneys and administrators. |
-| Session management, expiry, revocation | ⛔ | |
-| Password policy, or no passwords at all | ⛔ | |
-| Least-privilege review of every role | ⛔ | |
+| Session expiry and revocation | ✅ | Eight-hour expiry, server-side revocation on sign-out. |
+| Password policy, reset and lockout | ⛔ | None of the three exist. |
+| Least-privilege review of every role | 🟡 | The matrix is defined and unit-tested against the specification's exclusions; it has not been reviewed by a practising lawyer. |
 
 ## 4. Data protection
 
@@ -66,7 +70,7 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | ---- | ------ | ----- |
 | Monitoring and alerting | ⛔ | |
 | Structured application logging | 🟡 | Server-side logging exists; not structured or shipped. |
-| Immutable audit log (append-only storage, not just application discipline) | ⛔ | Phase 7 delivers application-level append-only. |
+| Immutable audit log (append-only storage, not just application discipline) | 🟡 | `src/lib/audit.ts` exposes only a write path and nothing in the codebase updates or deletes an event — but a database administrator could. Needs write-once storage or an INSERT-only role. |
 | Incident response plan | ⛔ | |
 | Business continuity and disaster recovery plan | ⛔ | |
 | Load testing | ⛔ | |
@@ -108,6 +112,9 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 
 ## The short version
 
-Orchelio Demo demonstrates a product idea. It is not a secure system, it does not enforce tenant
-isolation yet, it has no authentication, it makes no real AI calls, and it has never been audited.
+Orchelio Demo demonstrates a product idea. It now has sign-in, roles and server-side access
+control, and those are built the way a real system would build them — but the passwords are
+published, there is no multi-factor authentication, tenant isolation rests on application
+discipline rather than the database, no real AI call is made, and none of it has been audited.
+
 Treat every screen as a demonstration of intent, and keep real client information out of it.

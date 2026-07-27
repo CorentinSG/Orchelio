@@ -28,7 +28,7 @@ export const PHASES: readonly Phase[] = [
     number: 2,
     title: "Data & authentication",
     summary: "Full data model, migrations, seed data, local demo sign-in, roles.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 3,

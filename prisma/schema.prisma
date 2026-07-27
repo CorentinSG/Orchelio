@@ -1,16 +1,26 @@
 // Orchelio — Prisma schema
 //
-// Scope note (Phase 1 — Initialisation):
-// This file intentionally contains only the foundational `Firm` model. It exists
-// to prove the full chain Next.js -> Prisma -> SQLite works end to end.
+// Scope note (Phase 2 — Data & authentication):
+// This file now carries the complete Orchelio data model. The screens that use
+// most of it arrive in later phases (matters and documents in Phase 5, AI in
+// Phase 6, approvals and audit in Phase 7), but the model is defined once, up
+// front, so those phases add behaviour rather than reshaping the database.
 //
-// The complete Orchelio data model (User, FirmMembership, FirmConfiguration,
-// Matter, Document, AIAnalysis, AIReview, ApprovalRequest, AuditEvent, ...) is
-// introduced in Phase 2 (Data & authentication) and Phase 3 (Multi-firm).
-// See docs/ROADMAP.md.
+// Conventions applied throughout
+//   * UUID primary keys — identifiers are not guessable and databases merge safely.
+//   * `firmId` on every business resource. Nothing that belongs to a firm is
+//     reachable without it. See docs/ARCHITECTURE.md §4.
+//   * `createdAt` / `updatedAt` everywhere; `createdById` wherever authorship matters.
+//   * snake_case table names via @@map, so a PostgreSQL migration is uneventful.
+//   * Enum-like columns are plain strings: SQLite has no native enums. The allowed
+//     values live in TypeScript (src/lib/constants.ts) and are the single source of
+//     truth. On PostgreSQL these become real enums without an application change.
+//   * Structured payloads are stored as JSON text: Prisma does not support the Json
+//     type on SQLite. src/lib/json-field.ts parses them. On PostgreSQL these become
+//     jsonb columns.
 //
-// Multi-tenancy rule (applies from Phase 3 onwards): every business resource
-// carries a `firmId` and every read must be scoped by it. See docs/ARCHITECTURE.md.
+// Multi-tenancy rule: every read of a firm-scoped model must filter on firmId.
+// Enforcement helpers and their isolation tests land in Phase 3.
 
 generator client {
   provider = "prisma-client"
@@ -19,6 +29,70 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+}
+
+// ---------------------------------------------------------------------------
+// Identity and tenancy
+// ---------------------------------------------------------------------------
+
+/// A person who can sign in. A user is not owned by a firm: access to a firm is
+/// granted by a FirmMembership, so the model already supports a user belonging
+/// to several firms later on.
+model User {
+  id    String @id @default(uuid())
+  email String @unique
+  name  String
+
+  /// scrypt hash, self-describing: "scrypt$N$r$p$salt$hash". Never a plain password.
+  passwordHash String
+
+  /// Platform administrators operate the platform itself. They are deliberately
+  /// NOT given matter content access by default — see docs/ARCHITECTURE.md §6.
+  isPlatformAdmin Boolean @default(false)
+
+  /// "active" | "suspended".
+  status String @default("active")
+
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  memberships      FirmMembership[]
+  sessions         Session[]
+  auditEvents      AuditEvent[]
+  createdMatters   Matter[]             @relation("MatterCreatedBy")
+  assignedMatters  Matter[]             @relation("MatterResponsibleAttorney")
+  uploadedDocuments Document[]
+  intakeResponses  IntakeResponse[]
+  analyses         AIAnalysis[]
+  approvalsRequested ApprovalRequest[]  @relation("ApprovalRequestedBy")
+  approvalsDecided   ApprovalRequest[]  @relation("ApprovalDecidedBy")
+  tasksCreated     Task[]               @relation("TaskCreatedBy")
+  tasksAssigned    Task[]               @relation("TaskAssignedTo")
+  draftCommunications DraftCommunication[]
+  completedSteps   WorkflowStep[]
+
+  @@index([status])
+  @@map("users")
+}
+
+/// A signed-in session. Server-side and revocable: the cookie carries a random
+/// token, the database stores only its SHA-256 hash, so a database leak does
+/// not hand over usable sessions.
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
 }
 
 /// A law firm tenant. Everything else in Orchelio hangs off a firm.
@@ -38,6 +112,633 @@ model Firm {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  configuration       FirmConfiguration?
+  memberships         FirmMembership[]
+  clientProfiles      ClientProfile[]
+  matters             Matter[]
+  documents           Document[]
+  intakeResponses     IntakeResponse[]
+  firmWorkflows       FirmWorkflow[]
+  workflowRuns        WorkflowRun[]
+  workflowSteps       WorkflowStep[]
+  analyses            AIAnalysis[]
+  reviews             AIReview[]
+  approvalRequests    ApprovalRequest[]
+  tasks               Task[]
+  draftCommunications DraftCommunication[]
+  usageRecords        UsageRecord[]
+  auditEvents         AuditEvent[]
+
   @@index([status])
   @@map("firms")
+}
+
+/// Grants a user access to a firm, with one role. The unique constraint means a
+/// user has exactly one role per firm.
+model FirmMembership {
+  id     String @id @default(uuid())
+  userId String
+  firmId String
+
+  /// "firm_admin" | "attorney" | "paralegal" | "read_only".
+  /// Platform administration is on User.isPlatformAdmin, not here.
+  role String
+
+  /// "active" | "suspended".
+  status String @default("active")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firm Firm @relation(fields: [firmId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, firmId])
+  @@index([firmId])
+  @@index([role])
+  @@map("firm_memberships")
+}
+
+/// The output of the onboarding questionnaire: what this firm does, how it
+/// works, and what it lets the AI do. This record — not the code — is what
+/// makes one firm's Orchelio different from another's.
+model FirmConfiguration {
+  id     String @id @default(uuid())
+  firmId String @unique
+
+  primaryPracticeArea String
+  /// JSON string array of practice area keys.
+  practiceAreas       String @default("[]")
+  /// JSON string array of matter type keys.
+  matterTypes         String @default("[]")
+  /// JSON string array of workflow template keys.
+  enabledWorkflows    String @default("[]")
+  /// JSON string array of AI feature keys.
+  aiFeatures          String @default("[]")
+  /// JSON object: { "sendEmail": true, ... }. Locked rules are always enforced
+  /// server-side regardless of what this contains.
+  approvals           String @default("{}")
+
+  language String @default("en")
+  timezone String @default("America/New_York")
+  currency String @default("USD")
+
+  /// "draft" | "complete".
+  onboardingStatus String @default("draft")
+  /// Last questionnaire step reached, 1-7. Lets a firm resume a draft.
+  onboardingStep   Int    @default(1)
+
+  /// Display name, logo and theme overrides. JSON object.
+  branding String @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firm Firm @relation(fields: [firmId], references: [id], onDelete: Cascade)
+
+  @@map("firm_configurations")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogues — platform-wide reference data, not firm-scoped
+// ---------------------------------------------------------------------------
+
+/// The areas of law Orchelio can configure a firm for.
+model PracticeArea {
+  id    String @id @default(uuid())
+  key   String @unique
+  label String
+  /// "available" (full template) | "planned" ("Template coming soon").
+  status String @default("planned")
+  sortOrder Int  @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  matterTypes MatterType[]
+
+  @@map("practice_areas")
+}
+
+/// The kinds of matter a practice area supports. Selected during onboarding;
+/// drives visible fields, workflows, document categories and dashboard widgets.
+model MatterType {
+  id               String @id @default(uuid())
+  key              String @unique
+  label            String
+  practiceAreaKey  String
+  sortOrder        Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  practiceArea PracticeArea @relation(fields: [practiceAreaKey], references: [key], onDelete: Cascade)
+  matters      Matter[]
+
+  @@index([practiceAreaKey])
+  @@map("matter_types")
+}
+
+/// A reusable workflow definition, e.g. "Immigration — consultation preparation".
+model WorkflowTemplate {
+  id              String @id @default(uuid())
+  key             String @unique
+  name            String
+  /// null means the template applies to any practice area.
+  practiceAreaKey String?
+  description     String?
+
+  /// JSON array of steps: [{ "key": "...", "label": "...", "requiresApproval": bool }].
+  steps            String @default("[]")
+  /// JSON array of approval keys this workflow requires.
+  requiredApprovals String @default("[]")
+  /// JSON array of AI feature keys this workflow uses.
+  aiFeatures       String @default("[]")
+  /// JSON array of role keys permitted to run it.
+  allowedRoles     String @default("[]")
+
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firmWorkflows FirmWorkflow[]
+
+  @@index([practiceAreaKey])
+  @@map("workflow_templates")
+}
+
+// ---------------------------------------------------------------------------
+// Matters and their contents — all firm-scoped
+// ---------------------------------------------------------------------------
+
+/// A fictional client. Never holds real personal data in this environment.
+model ClientProfile {
+  id     String @id @default(uuid())
+  firmId String
+
+  displayName String
+  email       String?
+  phone       String?
+  notes       String?
+
+  /// Always true in the demonstration. Kept explicit so a screen can refuse to
+  /// treat demo data as real.
+  isFictional Boolean @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?
+
+  firm    Firm     @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matters Matter[]
+
+  @@index([firmId])
+  @@map("client_profiles")
+}
+
+/// A legal matter. The central record of the product.
+model Matter {
+  id     String @id @default(uuid())
+  firmId String
+
+  /// Human reference, e.g. "IMM-2026-001". Unique within a firm, not globally.
+  reference String
+  title     String
+
+  clientProfileId String?
+  practiceAreaKey String
+  matterTypeKey   String
+
+  /// Generic and practice-area statuses. See src/lib/constants.ts.
+  status String @default("lead")
+
+  /// Employment matters only: "employee" | "employer". Null elsewhere.
+  representationSide String?
+
+  responsibleAttorneyId String?
+
+  /// Practice-area specific fields (immigration status data, employment dates,
+  /// pay information, ...). JSON object; the visible keys come from the firm
+  /// configuration, which is why this is not a fixed set of columns.
+  fields String @default("{}")
+
+  /// "none" | "running" | "completed" | "failed" — status of the latest analysis.
+  aiStatus String @default("none")
+
+  openedAt       DateTime  @default(now())
+  nextDeadlineAt DateTime?
+  lastActivityAt DateTime  @default(now())
+  closedAt       DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?
+
+  firm                Firm                 @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  clientProfile       ClientProfile?       @relation(fields: [clientProfileId], references: [id], onDelete: SetNull)
+  matterType          MatterType           @relation(fields: [matterTypeKey], references: [key])
+  responsibleAttorney User?                @relation("MatterResponsibleAttorney", fields: [responsibleAttorneyId], references: [id], onDelete: SetNull)
+  createdBy           User?                @relation("MatterCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  documents           Document[]
+  intakeResponses     IntakeResponse[]
+  analyses            AIAnalysis[]
+  workflowRuns        WorkflowRun[]
+  approvalRequests    ApprovalRequest[]
+  tasks               Task[]
+  draftCommunications DraftCommunication[]
+  usageRecords        UsageRecord[]
+
+  @@unique([firmId, reference])
+  @@index([firmId, status])
+  @@index([firmId, matterTypeKey])
+  @@index([responsibleAttorneyId])
+  @@map("matters")
+}
+
+/// A completed intake questionnaire for a matter.
+model IntakeResponse {
+  id       String @id @default(uuid())
+  firmId   String
+  matterId String
+
+  /// JSON object of answers.
+  payload String @default("{}")
+  /// "draft" | "submitted".
+  status  String @default("draft")
+
+  submittedById String?
+  submittedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  firm        Firm   @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter      Matter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  submittedBy User?  @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+
+  @@index([firmId])
+  @@index([matterId])
+  @@map("intake_responses")
+}
+
+/// A document attached to a matter. In the demonstration the file itself is
+/// simulated: only metadata is stored, and no content is ever analysed.
+model Document {
+  id       String @id @default(uuid())
+  firmId   String
+  matterId String
+
+  filename String
+  /// Practice-area document category, e.g. "passport", "pay_stub".
+  category String @default("other")
+  mimeType String
+  sizeBytes Int    @default(0)
+  /// Where the file would live. Simulated in the demonstration.
+  storageKey String?
+
+  /// "pending" | "classified" | "analysed".
+  analysisStatus String @default("pending")
+  /// True only once a human has confirmed the document is what it claims to be.
+  verified       Boolean @default(false)
+
+  receivedAt   DateTime @default(now())
+  uploadedById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  firm       Firm   @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter     Matter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  uploadedBy User?  @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([firmId])
+  @@index([matterId, category])
+  @@map("documents")
+}
+
+// ---------------------------------------------------------------------------
+// Workflows
+// ---------------------------------------------------------------------------
+
+/// A workflow template enabled for a firm, with that firm's overrides.
+model FirmWorkflow {
+  id          String  @id @default(uuid())
+  firmId      String
+  templateKey String
+  enabled     Boolean @default(true)
+  /// JSON object of firm-level overrides (step labels, extra approvals, ...).
+  overrides   String  @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firm     Firm             @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  template WorkflowTemplate @relation(fields: [templateKey], references: [key], onDelete: Cascade)
+  runs     WorkflowRun[]
+
+  @@unique([firmId, templateKey])
+  @@index([firmId])
+  @@map("firm_workflows")
+}
+
+/// One execution of a firm workflow against a matter.
+model WorkflowRun {
+  id             String @id @default(uuid())
+  firmId         String
+  matterId       String
+  firmWorkflowId String
+
+  /// "pending" | "running" | "blocked" | "completed" | "cancelled".
+  status String @default("pending")
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  firm         Firm           @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter       Matter         @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  firmWorkflow FirmWorkflow   @relation(fields: [firmWorkflowId], references: [id], onDelete: Cascade)
+  steps        WorkflowStep[]
+
+  @@index([firmId, status])
+  @@index([matterId])
+  @@map("workflow_runs")
+}
+
+/// One step of a workflow run.
+model WorkflowStep {
+  id            String @id @default(uuid())
+  firmId        String
+  workflowRunId String
+
+  key       String
+  label     String
+  position  Int
+  /// "pending" | "in_progress" | "waiting_approval" | "completed" | "skipped".
+  status    String  @default("pending")
+  requiresApproval Boolean @default(false)
+
+  completedAt   DateTime?
+  completedById String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  firm        Firm        @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  workflowRun WorkflowRun @relation(fields: [workflowRunId], references: [id], onDelete: Cascade)
+  completedBy User?       @relation(fields: [completedById], references: [id], onDelete: SetNull)
+
+  @@index([firmId])
+  @@index([workflowRunId, position])
+  @@map("workflow_steps")
+}
+
+// ---------------------------------------------------------------------------
+// Artificial intelligence
+// ---------------------------------------------------------------------------
+
+/// A Claude Analyst run against a matter. Never a legal conclusion: the result
+/// is factual extraction that a human must review.
+model AIAnalysis {
+  id       String @id @default(uuid())
+  firmId   String
+  matterId String
+
+  /// "mock" | "anthropic" — which provider produced this.
+  provider String @default("mock")
+  /// Model identifier, recorded so a past output can be explained later.
+  model    String @default("simulated")
+  /// Prompt version, same reason.
+  promptVersion String @default("v1")
+
+  /// "running" | "completed" | "failed".
+  status String @default("running")
+
+  /// JSON MatterAnalysisResult. Null until completed.
+  result   String?
+  /// JSON string array of warnings.
+  warnings String @default("[]")
+  /// Set when status is "failed". Generic, never leaks internals to the browser.
+  errorMessage String?
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById String?
+
+  firm      Firm       @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter    Matter     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  createdBy User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  reviews   AIReview[]
+
+  @@index([firmId, status])
+  @@index([matterId])
+  @@map("ai_analyses")
+}
+
+/// A Claude Reviewer run checking an analysis. Independent of the Analyst, and
+/// never able to approve anything on its own.
+model AIReview {
+  id         String @id @default(uuid())
+  firmId     String
+  analysisId String
+
+  provider      String @default("mock")
+  model         String @default("simulated")
+  promptVersion String @default("v1")
+
+  /// "approved_for_human_review" | "corrections_required" | "insufficient_information".
+  status String
+
+  /// JSON AnalysisReviewResult.
+  result String?
+  /// Always true in Orchelio. Stored so the value is auditable, not assumed.
+  humanReviewRequired Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firm     Firm       @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  analysis AIAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([firmId])
+  @@index([analysisId])
+  @@map("ai_reviews")
+}
+
+// ---------------------------------------------------------------------------
+// Human control
+// ---------------------------------------------------------------------------
+
+/// A pending action that a human must decide before it can take effect.
+/// Nothing sensitive in Orchelio completes without one of these.
+model ApprovalRequest {
+  id       String @id @default(uuid())
+  firmId   String
+  matterId String?
+
+  /// What is awaiting approval, e.g. "ai_analysis", "draft_communication".
+  resourceType String
+  resourceId   String?
+  /// The action itself, e.g. "legal_analysis", "send_email".
+  action       String
+
+  /// "low" | "medium" | "high".
+  riskLevel String @default("medium")
+  summary   String
+
+  /// "pending" | "approved" | "approved_with_edits" | "rejected" | "new_analysis_requested".
+  status String @default("pending")
+
+  /// Mandatory for approved_with_edits, rejected and new_analysis_requested.
+  decisionNote String?
+
+  requestedById String?
+  decidedById   String?
+  decidedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  firm        Firm    @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter      Matter? @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  requestedBy User?   @relation("ApprovalRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  decidedBy   User?   @relation("ApprovalDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([firmId, status])
+  @@index([matterId])
+  @@map("approval_requests")
+}
+
+model Task {
+  id       String  @id @default(uuid())
+  firmId   String
+  matterId String?
+
+  title       String
+  description String?
+  /// "open" | "in_progress" | "blocked" | "done".
+  status      String  @default("open")
+  /// "low" | "medium" | "high".
+  priority    String  @default("medium")
+
+  dueAt        DateTime?
+  assignedToId String?
+  createdById  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  firm       Firm    @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter     Matter? @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  assignedTo User?   @relation("TaskAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?   @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([firmId, status])
+  @@index([matterId])
+  @@map("tasks")
+}
+
+/// A prepared draft. Orchelio never sends anything: there is no "send" status
+/// and no transport. Drafts exist to be copied out by a human.
+model DraftCommunication {
+  id       String  @id @default(uuid())
+  firmId   String
+  matterId String?
+
+  /// "email" | "letter" | "note".
+  channel     String @default("email")
+  templateKey String?
+  subject     String
+  body        String
+
+  /// "draft" | "approved_for_use". Deliberately no "sent".
+  status String @default("draft")
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  firm      Firm    @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter    Matter? @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([firmId, status])
+  @@index([matterId])
+  @@map("draft_communications")
+}
+
+// ---------------------------------------------------------------------------
+// Usage and audit
+// ---------------------------------------------------------------------------
+
+/// Simulated AI consumption. The cost columns exist now so that real costs can
+/// be recorded later without a schema change.
+model UsageRecord {
+  id       String  @id @default(uuid())
+  firmId   String
+  matterId String?
+
+  /// "claude_analyst" | "claude_reviewer".
+  operation String
+  provider  String @default("mock")
+  model     String @default("simulated")
+
+  inputTokens  Int @default(0)
+  outputTokens Int @default(0)
+  /// Stored in cents to avoid floating-point money. Simulated in this build.
+  costCents    Int @default(0)
+  /// False until a real provider is billed. Makes "simulated" a property of the
+  /// data rather than a label on a screen.
+  isRealCharge Boolean @default(false)
+
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  firm   Firm    @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  matter Matter? @relation(fields: [matterId], references: [id], onDelete: SetNull)
+
+  @@index([firmId, occurredAt])
+  @@index([matterId])
+  @@map("usage_records")
+}
+
+/// Append-only activity log.
+///
+/// Append-only is enforced at the application level: src/lib/audit.ts exposes a
+/// record function and no update or delete path exists anywhere in the codebase.
+/// A database-level guarantee (write-once storage, or a table the application
+/// role may only INSERT into) is required before production — see
+/// docs/PRODUCTION_READINESS.md.
+model AuditEvent {
+  id String @id @default(uuid())
+
+  /// Null for platform-level events that belong to no firm (e.g. a sign-in
+  /// before a firm is chosen).
+  firmId String?
+  userId String?
+
+  /// Dotted action name, e.g. "auth.login.succeeded", "matter.viewed".
+  action String
+  /// What the action was about, e.g. "matter", "document", "firm".
+  resourceType String?
+  resourceId   String?
+
+  /// JSON snapshots. Null when not applicable.
+  oldValue String?
+  newValue String?
+
+  /// "success" | "failure" | "denied".
+  status String @default("success")
+
+  /// Ties together the events produced by one user action.
+  correlationId String?
+
+  createdAt DateTime @default(now())
+
+  firm Firm? @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([firmId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action])
+  @@index([correlationId])
+  @@map("audit_events")
 }

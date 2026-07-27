@@ -87,10 +87,67 @@ name such as "Legal AI Platform" ever appears in those surfaces.
 
 ---
 
+## 3bis. Authentication and access control
+
+> Status: delivered in Phase 2.
+
+### The seam
+
+Every screen asks for its caller through a guard in `src/lib/auth/guards.ts`. Nothing reads a
+cookie directly, and nothing trusts an identifier taken from a URL. Replacing the demonstration
+sign-in with Auth.js, Clerk, Microsoft Entra ID, Google Workspace or SSO means reimplementing
+`currentSession()` in `src/lib/auth/session.ts` — no page changes.
+
+### Sessions
+
+Server-side and revocable. The cookie carries 256 bits of randomness; the database stores only its
+SHA-256 hash, so a database leak yields no usable session and there is no signing secret to
+manage. Every request revalidates against the database, so a revoked session stops working
+immediately rather than at the cookie's own expiry. The cookie is `httpOnly`, `SameSite=Lax`, and
+`Secure` outside development.
+
+### Passwords
+
+scrypt from the Node.js standard library, with a per-password salt and self-describing cost
+parameters, so the cost can be raised later without invalidating existing hashes. Comparison is
+constant-time. An unknown email address still runs a verification against a dummy hash, so
+response timing does not reveal which accounts exist — and the failure message is identical either
+way, so the form cannot be used to enumerate accounts.
+
+### Where enforcement lives
+
+**In the page or action that does the work.** There is a `src/middleware.ts`, and it is
+deliberately *not* the security boundary: it only checks whether a session cookie is present, so
+that a signed-out visitor is returned to where they were going after signing in. A boundary that
+depends on a URL matcher staying in sync with the routes is not a boundary — add a route, forget
+the matcher, and the protection silently disappears. Deleting the middleware would cost polish and
+no safety.
+
+### Roles
+
+Four firm roles — Firm Administrator, Attorney, Paralegal, Read-only Reviewer — plus the platform
+role held on the user, not on a membership. Screens ask `can(actor, permission)`, never
+"is this an attorney?", so adding a role later does not mean hunting down scattered role checks.
+
+The exclusions from the specification are asserted directly in
+`tests/unit/permissions.test.ts`: a paralegal cannot approve an analysis, confirm a deadline,
+close a matter or draft a communication; a read-only reviewer holds nothing but `.view`
+permissions; and a platform administrator cannot read matter or document content.
+
+### Refusals are events
+
+Every refusal — no membership, missing permission, not a platform administrator — is written to
+the activity log before the user is redirected. An attempt to reach another firm's data is exactly
+what a firm would want to see in its log. The message shown is identical in every case, so a
+refusal never confirms that a record exists.
+
+---
+
 ## 4. Multi-tenancy
 
-> Status: the `Firm` table exists as of Phase 1. The enforcement rules and their tests land in
-> Phase 3. **Do not read the current build as proof of isolation.**
+> Status: membership is enforced on every protected page as of Phase 2. The systematic `firmId`
+> scoping of every business query, and the full isolation test suite, land in Phase 3 alongside
+> the matter data.
 
 ### 4.1 The rule
 
@@ -203,18 +260,43 @@ browser.
 
 ## 7. Data model
 
-Phase 1 defines one model, `Firm`, deliberately. The full model — `User`, `FirmMembership`,
-`FirmConfiguration`, `PracticeArea`, `MatterType`, `Matter`, `ClientProfile`, `IntakeResponse`,
-`Document`, `WorkflowTemplate`, `FirmWorkflow`, `WorkflowRun`, `WorkflowStep`, `AIAnalysis`,
-`AIReview`, `ApprovalRequest`, `Task`, `DraftCommunication`, `UsageRecord`, `AuditEvent` — arrives
-in Phase 2.
+> Status: complete as of Phase 2. The screens that use most of it arrive later, but the model is
+> defined once, up front, so those phases add behaviour rather than reshaping the database.
 
-Conventions applied from the start:
+`User`, `Session`, `Firm`, `FirmMembership`, `FirmConfiguration`, `PracticeArea`, `MatterType`,
+`WorkflowTemplate`, `FirmWorkflow`, `WorkflowRun`, `WorkflowStep`, `ClientProfile`, `Matter`,
+`IntakeResponse`, `Document`, `AIAnalysis`, `AIReview`, `ApprovalRequest`, `Task`,
+`DraftCommunication`, `UsageRecord`, `AuditEvent`.
+
+`Session` is an addition to the minimum list in the specification: server-side sessions are what
+make sign-out and revocation real rather than cosmetic.
+
+Conventions applied throughout:
 
 - UUID primary keys, so identifiers are not guessable and merging databases is safe.
 - `createdAt` / `updatedAt` on every model; `firmId` and `createdById` wherever meaningful.
 - Table names in `snake_case` via `@@map`, so a future PostgreSQL migration is uneventful.
-- The audit log is **append-only at the application level**: no update path, no delete path.
+- **Enum-like columns are plain strings.** SQLite has no native enums; the allowed values live in
+  `src/lib/constants.ts` and are the single source of truth. On PostgreSQL these become real
+  database enums with no application change.
+- **Structured payloads are JSON text.** Prisma does not support the `Json` type on SQLite, so
+  firm configuration, matter fields and AI results are stored as text and parsed by
+  `src/lib/json-field.ts`, which degrades to a documented default rather than throwing inside a
+  page render. On PostgreSQL these become `jsonb` columns.
+- The audit log is **append-only at the application level**: `src/lib/audit.ts` exposes a record
+  function and no update or delete path exists anywhere. That is discipline, not a guarantee —
+  production needs write-once storage or an INSERT-only database role.
+
+### Two deliberate choices worth knowing
+
+**`Matter.fields` is a JSON column, not a set of columns.** Immigration matters carry a status
+expiration date and an I-94 classification; employment matters carry a termination date and an
+hourly rate. Which fields are visible comes from the firm's configuration, so they cannot be a
+fixed schema without one table per practice area — which is exactly the fork Orchelio exists to
+avoid.
+
+**`UsageRecord.isRealCharge` defaults to false.** "Simulated" is a property of the data, not a
+label painted on a screen, so a real charge can never be mistaken for a simulated one later.
 
 ---
 

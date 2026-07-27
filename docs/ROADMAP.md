@@ -10,6 +10,7 @@ file when a phase status changes, so the product and the documentation cannot di
 
 ## Phase 1 — Initialisation ✅ Delivered
 
+
 **Goal:** a real, running foundation — not a static mock-up.
 
 Delivered:
@@ -29,21 +30,28 @@ audit log, cost screens.
 
 ---
 
-## Phase 2 — Data and authentication
+## Phase 2 — Data and authentication ✅ Delivered
 
-- Full data model: `User`, `FirmMembership`, `FirmConfiguration`, `PracticeArea`, `MatterType`,
-  `Matter`, `ClientProfile`, `IntakeResponse`, `Document`, `WorkflowTemplate`, `FirmWorkflow`,
-  `WorkflowRun`, `WorkflowStep`, `AIAnalysis`, `AIReview`, `ApprovalRequest`, `Task`,
-  `DraftCommunication`, `UsageRecord`, `AuditEvent`.
-- Migrations and an extended seed (the five fictional demo users).
-- Local demonstration sign-in at `/login`, with the demo passwords shown on the page.
-- The four roles: Platform Administrator, Firm Administrator, Attorney, Paralegal, plus
-  Read-only Reviewer.
-- Server-side permission checks. Structured so Auth.js, Clerk, Entra ID or SSO can replace the
-  demo sign-in without touching the screens.
+Delivered:
 
-**Acceptance:** signing in as each demo user lands on the right workspace; every protected page
-refuses an unauthenticated request server-side.
+- Complete data model — 22 models, one migration, indexes on every `firmId`.
+- Extended seed: 8 practice areas, 20 matter types, 4 workflow templates, 2 firms with their
+  configurations, 5 demonstration users and their memberships. Idempotent.
+- Local sign-in at `/login`: server-side sessions (random token, only its hash stored), scrypt
+  password hashing, constant-time comparison, identical failure message for an unknown address and
+  a wrong password, and in-memory attempt throttling.
+- Four firm roles plus the platform role, and a permission matrix enforced on the server.
+- Guards (`requireSession`, `requireFirmAccess`, `requirePermission`, `requirePlatformAdmin`) that
+  record every refusal to the activity log.
+- Firm dashboard and platform firm list, both reading real data.
+- 50 unit tests and 19 browser tests.
+
+**Acceptance met:** each demonstration account lands in its own workspace; a firm user is refused
+platform administration; a signed-out request for a protected page never receives workspace
+content.
+
+Not in this phase: the onboarding questionnaire, matters, documents, AI, approvals, the activity
+log screen, the cost screens.
 
 ---
 

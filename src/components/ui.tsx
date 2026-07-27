@@ -49,6 +49,21 @@ export function StatusDot({ tone = "neutral" }: { tone?: Tone }) {
   return <span aria-hidden className={`inline-block size-2 rounded-full ${dot[tone]}`} />;
 }
 
+/** Turns a card title into a stable element id, e.g. "Your permissions" -> "card-your-permissions". */
+function titleId(title: ReactNode): string | undefined {
+  if (typeof title !== "string") return undefined;
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return slug.length > 0 ? `card-${slug}` : undefined;
+}
+
+/**
+ * A card is an accessible landmark: when its title is plain text, the section
+ * is labelled by that title, so screen-reader users can navigate between cards
+ * by name instead of hearing an undifferentiated run of content.
+ */
 export function Card({
   title,
   description,
@@ -60,12 +75,19 @@ export function Card({
   action?: ReactNode;
   children?: ReactNode;
 }) {
+  const headingId = titleId(title);
+
   return (
-    <section className="rounded-card border border-line bg-surface">
+    <section
+      className="rounded-card border border-line bg-surface"
+      {...(headingId ? { "aria-labelledby": headingId } : {})}
+    >
       {title ? (
         <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div>
-            <h2 className="font-semibold text-ink">{title}</h2>
+            <h2 id={headingId} className="font-semibold text-ink">
+              {title}
+            </h2>
             {description ? (
               <p className="mt-0.5 text-sm text-ink-muted">{description}</p>
             ) : null}
