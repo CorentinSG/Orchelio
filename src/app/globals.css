@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+/*
+ * Orchelio design tokens.
+ *
+ * Sober, professional, high contrast. No decorative gradients, no animation
+ * beyond what communicates state. Colours are declared once here and consumed
+ * as Tailwind utilities (bg-surface, text-ink, border-line, ...).
+ *
+ * Light and dark are both first-class. The theme follows the operating system
+ * by default; a stored preference on <html data-theme="..."> overrides it and
+ * is wired to the firm settings screen in Phase 8.
+ */
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Surfaces */
+  --color-canvas: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f3f6;
+
+  /* Text */
+  --color-ink: #10182a;
+  --color-ink-muted: #55607a;
+  --color-ink-subtle: #7b8499;
+
+  /* Lines */
+  --color-line: #dfe3ea;
+  --color-line-strong: #c4cbd8;
+
+  /* Brand — deep, calm blue. Used for primary actions and the wordmark mark. */
+  --color-brand: #1f4e79;
+  --color-brand-strong: #163a5c;
+  --color-brand-soft: #e8eef5;
+  --color-brand-ink: #ffffff;
+
+  /* Semantic */
+  --color-success: #1d6f42;
+  --color-success-soft: #e6f2ea;
+  --color-warning: #955009;
+  --color-warning-soft: #fbf0e2;
+  --color-danger: #a52121;
+  --color-danger-soft: #fbeaea;
+
+  /* AI-generated content is always visually distinct from verified content. */
+  --color-ai: #5b3fa8;
+  --color-ai-soft: #efeafb;
+
+  --radius-card: 0.625rem;
+}
+
+/*
+ * Dark palette. Declared twice on purpose: once behind the OS preference, once
+ * behind an explicit data-theme attribute so a firm can pin its theme later
+ * without a flash of the wrong colours.
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+
+      --color-canvas: #0c1017;
+      --color-surface: #141a24;
+      --color-surface-muted: #1b2230;
+
+      --color-ink: #e8ecf3;
+      --color-ink-muted: #a3adc0;
+      --color-ink-subtle: #808b9f;
+
+      --color-line: #27303f;
+      --color-line-strong: #3a4557;
+
+      --color-brand: #7ba7d4;
+      --color-brand-strong: #a3c3e2;
+      --color-brand-soft: #182534;
+      --color-brand-ink: #0c1017;
+
+      --color-success: #6cc48f;
+      --color-success-soft: #14261c;
+      --color-warning: #e0a35c;
+      --color-warning-soft: #2a2015;
+      --color-danger: #e58b8b;
+      --color-danger-soft: #2b1818;
+
+      --color-ai: #b7a2ec;
+      --color-ai-soft: #1f1a2e;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-canvas: #0c1017;
+    --color-surface: #141a24;
+    --color-surface-muted: #1b2230;
+
+    --color-ink: #e8ecf3;
+    --color-ink-muted: #a3adc0;
+    --color-ink-subtle: #808b9f;
+
+    --color-line: #27303f;
+    --color-line-strong: #3a4557;
+
+    --color-brand: #7ba7d4;
+    --color-brand-strong: #a3c3e2;
+    --color-brand-soft: #182534;
+    --color-brand-ink: #0c1017;
+
+    --color-success: #6cc48f;
+    --color-success-soft: #14261c;
+    --color-warning: #e0a35c;
+    --color-warning-soft: #2a2015;
+    --color-danger: #e58b8b;
+    --color-danger-soft: #2b1818;
+
+    --color-ai: #b7a2ec;
+    --color-ai-soft: #1f1a2e;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visible, consistent keyboard focus everywhere. Accessibility is a
+     requirement of the specification, not a later polish pass. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 50;
+
+  &:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    border: 1px solid var(--color-line-strong);
+    border-radius: 0.375rem;
+  }
+}

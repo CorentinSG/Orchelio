@@ -1,0 +1,43 @@
+// Orchelio — Prisma schema
+//
+// Scope note (Phase 1 — Initialisation):
+// This file intentionally contains only the foundational `Firm` model. It exists
+// to prove the full chain Next.js -> Prisma -> SQLite works end to end.
+//
+// The complete Orchelio data model (User, FirmMembership, FirmConfiguration,
+// Matter, Document, AIAnalysis, AIReview, ApprovalRequest, AuditEvent, ...) is
+// introduced in Phase 2 (Data & authentication) and Phase 3 (Multi-firm).
+// See docs/ROADMAP.md.
+//
+// Multi-tenancy rule (applies from Phase 3 onwards): every business resource
+// carries a `firmId` and every read must be scoped by it. See docs/ARCHITECTURE.md.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// A law firm tenant. Everything else in Orchelio hangs off a firm.
+model Firm {
+  id   String @id @default(uuid())
+  /// URL-safe identifier, e.g. "dupont-immigration-law".
+  slug String @unique
+  /// Display name shown in the sidebar, e.g. "Dupont Immigration Law".
+  name String
+
+  /// Primary practice area key, e.g. "immigration" or "employment_law".
+  primaryPracticeArea String
+
+  /// Lifecycle of the tenant: "onboarding" | "active" | "suspended".
+  status String @default("onboarding")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("firms")
+}
