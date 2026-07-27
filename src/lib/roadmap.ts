@@ -34,7 +34,7 @@ export const PHASES: readonly Phase[] = [
     number: 3,
     title: "Multi-firm",
     summary: "Firm memberships, firmId scoping on every query, isolation tests.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 4,

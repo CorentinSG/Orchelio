@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
@@ -97,6 +98,12 @@ export async function signInAction(
     correlationId,
   });
 
+  // Drop anything the browser cached for the previous occupant of this browser.
+  // Server rendering would have produced the right pages anyway, but a cached
+  // payload could still be shown — and in this product that would mean one
+  // person seeing another's workspace.
+  revalidatePath("/", "layout");
+
   // redirect() throws to unwind the action, so it must be the last statement.
   redirect(next ?? "/dashboard");
 }
@@ -114,5 +121,10 @@ export async function signOutAction(): Promise<void> {
   }
 
   await destroySession();
+
+  // Signing out must leave nothing behind that the next person at this browser
+  // could see, including cached render payloads.
+  revalidatePath("/", "layout");
+
   redirect("/login");
 }

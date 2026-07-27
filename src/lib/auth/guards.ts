@@ -6,6 +6,7 @@ import { recordAuditEvent } from "@/lib/audit";
 import { AUDIT_ACTIONS } from "@/lib/constants";
 import { type Permission, can } from "@/lib/auth/permissions";
 import { type Session, type SessionFirm, actorFor, currentSession } from "@/lib/auth/session";
+import type { FirmScope } from "@/lib/data/scope";
 
 /**
  * Orchelio — server-side access control.
@@ -110,13 +111,13 @@ export async function requirePlatformAdmin(): Promise<Session> {
 }
 
 /**
- * The firm a signed-in user should land in.
+ * Requires membership of a firm named in a URL, and returns the scope for it.
  *
- * A user with exactly one firm goes straight to it. A user with several will
- * get the firm switcher in Phase 3; until then the first is used. A platform
- * administrator with no membership has no firm at all, which is correct — the
- * platform role does not grant access to any firm's matters.
+ * This is the guard that a copied link runs into. The identifier arrives from
+ * the address bar, is checked against the caller's own memberships, and — if it
+ * is not one of them — produces the same refusal as a page that does not exist.
  */
-export function defaultFirmFor(session: Session): SessionFirm | null {
-  return session.user.firms[0] ?? null;
+export async function requireFirmScope(firmId: string): Promise<FirmContext & { scope: FirmScope }> {
+  const context = await requireFirmAccess(firmId);
+  return { ...context, scope: { firmId: context.firm.id } };
 }

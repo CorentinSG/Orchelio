@@ -15,14 +15,26 @@ describe("demonstration accounts", () => {
     }
   });
 
-  it("provides exactly the five accounts named in the specification", () => {
-    expect(DEMO_ACCOUNTS.map((account) => account.email).sort()).toEqual([
+  it("provides all five accounts named in the specification", () => {
+    const emails = DEMO_ACCOUNTS.map((account) => account.email);
+
+    for (const required of [
       "employment.attorney@demo.local",
       "employment.paralegal@demo.local",
       "immigration.attorney@demo.local",
       "immigration.paralegal@demo.local",
       "platform.admin@demo.local",
-    ]);
+    ]) {
+      expect(emails).toContain(required);
+    }
+  });
+
+  it("adds one account beyond the specification, deliberately", () => {
+    // reviewer@demo.local belongs to both firms. It is the only way to
+    // demonstrate the firm switcher and the Read-only Reviewer role, and it
+    // makes isolation vivid: one person, two workspaces, nothing in common.
+    expect(DEMO_ACCOUNTS).toHaveLength(6);
+    expect(DEMO_ACCOUNTS.map((account) => account.email)).toContain("reviewer@demo.local");
   });
 
   it("advertises the accounts in the demonstration build", () => {

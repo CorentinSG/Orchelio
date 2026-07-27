@@ -55,16 +55,35 @@ log screen, the cost screens.
 
 ---
 
-## Phase 3 — Multi-firm
+## Phase 3 — Multi-firm ✅ Delivered
 
-- Firm memberships and the firm switcher.
-- `firmId` on every business resource, and scoped data-access functions
-  (`getMatter({ matterId, firmId })`).
-- Isolation tests: cross-firm matter access, copied URLs, search results, document downloads,
-  analyses, statistics, costs and logs.
+Delivered:
 
-**Acceptance:** an Immigration user cannot open an Employment matter by any route, and the refusal
-is recorded.
+- **Scoping guard.** The Prisma client itself refuses any query against a firm-scoped model that
+  does not name a firm (`src/lib/data/firm-scope.ts`). `AND` and `OR` are treated oppositely:
+  one scoped branch satisfies an `AND`, but every branch of an `OR` must be scoped, because
+  `OR: [{ firmId }, { status }]` would return the whole database.
+- **Data-access layer** (`src/lib/data`): matters, documents, analyses, usage, activity, search
+  and statistics — each function takes the firm as a required first argument.
+- **Firm switcher** for users who belong to more than one firm, plus the `reviewer@demo.local`
+  account that belongs to both demonstration firms.
+- **Active firm resolution**: the cookie is a preference, not a credential. An identifier that
+  does not match a membership is ignored.
+- **40 integration tests** against a real migrated database with two firms holding deliberately
+  similar records, and **7 browser tests** covering the switcher and cross-firm access.
+
+**Acceptance met:** an immigration user cannot open an employment matter by any route — through
+the data layer, through a copied identifier, through search, through a forged cookie or through a
+tampered form — and every refusal is recorded.
+
+Two defects were found by the tests and fixed:
+
+1. Switching firms left the browser showing the **previous** firm's dashboard about half the time.
+   The server was always right; the render returned inside the Server Action's response was not.
+   Switching is now a plain form POST answered with an HTTP 303, which has no such ambiguity.
+2. Redirects built from `request.url` pointed at a different host than the browser was using
+   (`localhost` instead of `127.0.0.1`), which silently dropped the session cookie. Redirects are
+   now relative, and the cross-site check compares `Origin` against the real `Host` header.
 
 ---
 

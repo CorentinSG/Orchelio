@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { OrchelioWordmark } from "@/components/brand";
 import { DemoBanner } from "@/components/demo-banner";
+import { FirmSwitcher } from "@/components/firm-switcher";
 import { Badge } from "@/components/ui";
 import { signOutAction } from "@/app/login/actions";
 import { POWERED_BY } from "@/lib/app-config";
@@ -117,6 +118,8 @@ export function AppShell({
           <div className="border-b border-line px-4 py-4">
             <OrchelioWordmark subtitle={firm?.name ?? "No firm workspace"} />
           </div>
+
+          {firm ? <FirmSwitcher firms={session.user.firms} activeFirmId={firm.id} /> : null}
 
           <nav aria-label="Main" className="space-y-5 px-2 py-4">
             {firm ? (

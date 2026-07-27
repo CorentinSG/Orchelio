@@ -145,9 +145,7 @@ refusal never confirms that a record exists.
 
 ## 4. Multi-tenancy
 
-> Status: membership is enforced on every protected page as of Phase 2. The systematic `firmId`
-> scoping of every business query, and the full isolation test suite, land in Phase 3 alongside
-> the matter data.
+> Status: enforced and tested as of Phase 3.
 
 ### 4.1 The rule
 
@@ -161,23 +159,71 @@ getMatter({ matterId, firmId });
 getMatter(matterId);
 ```
 
-This applies to users, memberships, client profiles, matters, documents, workflows, analyses,
-reviews, approvals, tasks, communications, usage records, audit events, settings and templates.
+This applies to memberships, configurations, client profiles, matters, intake responses,
+documents, firm workflows, workflow runs and steps, analyses, reviews, approvals, tasks, draft
+communications, usage records and audit events.
 
-Copying a URL from one firm's session into another firm's session must produce a refusal, not a
+Copying a URL from one firm's session into another firm's session produces a refusal, not a
 result, and the refusal itself is an audit event.
 
-### 4.2 Demo isolation vs production isolation
+### 4.2 Three layers, not one
+
+A convention is not a control. The rule is enforced three times over, because the cost of one
+missed `where` clause is a firm reading another firm's client file.
+
+**Layer 1 — the type system.** Every function in `src/lib/data` takes a `FirmScope` as its first
+argument. Forgetting the firm is not a subtle bug; it is a compile error.
+
+**Layer 2 — the database client.** `src/lib/data/firm-scope.ts` wraps Prisma so that every
+operation on a firm-scoped model is inspected before it runs. One that does not name a firm throws
+`FirmScopeError` instead of returning rows. The guard is applied once, to the application's single
+client, and no unguarded client is exported from anywhere — opting out would have to be a visible
+change to `src/lib/prisma.ts`.
+
+The subtlety worth knowing is how boolean combinators are treated, because getting it backwards is
+itself a leak:
+
+| Combinator | Rule | Why |
+| ---------- | ---- | --- |
+| `AND` | one branch naming the firm is enough | every condition must hold |
+| `OR` | **every** branch must name the firm | any branch may match on its own — `OR: [{ firmId }, { status: "active" }]` returns every active matter in the database |
+| `NOT` | never counts | a negated firm is the opposite of a scope |
+
+**Layer 3 — the guards.** `requireFirmAccess` and `requirePermission` check the caller's
+membership before a page renders, and log the refusal when there is none.
+
+Stated limitation: layer 2 checks that a firm is *named*, not that it is named *correctly*. A
+deliberately perverse query would still pass. It defends against omission — the realistic
+mistake — not against sabotage.
+
+### 4.3 The active firm
+
+A user may belong to several firms. Which one is open is remembered in a cookie, and that cookie is
+**a preference, not a credential**: `resolveActiveFirm` can only select among the firms the user's
+memberships already permit. Editing it to another firm's identifier selects nothing and silently
+falls back. The same check runs when the switcher is submitted, and a mismatch is refused and
+logged.
+
+Switching is a plain form POST answered with an HTTP 303, not a Server Action. That is deliberate
+and the reason is measured: the render returned inside a Server Action's response did not reliably
+reflect the cookie the action had just written, so roughly half the time the browser displayed the
+*previous* firm's dashboard. The server state was always correct — a reload fixed it — but showing
+a user the wrong firm's screen is the one failure this product cannot have. A 303 makes the browser
+store the cookie and then issue a fresh GET. Boring, and correct every time.
+
+### 4.4 Demo isolation vs production isolation
 
 The demonstration uses a **shared database with a `firmId` column**. That is a legitimate
 multi-tenant pattern and it is enough to demonstrate the product, but it is the weakest of the
-available options: a single missing `where` clause crosses a tenant boundary.
+available options: everything above runs inside the application, so it protects against a
+programming mistake, not against a compromised application process or a mistaken database
+administrator.
 
 Before production, isolation must be strengthened. Options, from lightest to strongest:
 
 | Level | Mechanism | Notes |
 | ----- | --------- | ----- |
-| 1 | `firmId` column + scoped data-access functions | Where the demo stops. |
+| 1 | `firmId` column + scoped data-access functions + the client-level guard | Where the demo stops. |
 | 2 | Row-level security in PostgreSQL | Enforced by the database, not by the application. |
 | 3 | One schema per firm | Stronger blast-radius containment. |
 | 4 | One database per firm | Separate credentials, separate backups. |

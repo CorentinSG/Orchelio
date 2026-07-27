@@ -34,9 +34,11 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | ---- | ------ | ----- |
 | `firmId` on every business resource | ✅ | Every firm-scoped model carries it, indexed. |
 | Membership checked before any workspace page renders | ✅ | `requireFirmAccess` / `requirePermission`, with the refusal logged. |
-| Scoped data-access functions only | 🟡 | Queries written so far pass `firmId`; the enforced data-access layer arrives in Phase 3. |
-| Automated cross-tenant access tests | 🟡 | Browser tests cover refusal of platform administration and absence of the other firm's name; the full suite arrives in Phase 3 with matter data. |
-| Database-enforced isolation (row-level security, separate schemas or databases) | ⛔ | The demo relies on application-level scoping alone — the weakest option. |
+| Scoped data-access functions only | ✅ | `src/lib/data` — the firm is a required argument, so omitting it is a compile error. |
+| Query-level enforcement | ✅ | The Prisma client refuses any unscoped query on a firm-scoped model (`src/lib/data/firm-scope.ts`). Checks that a firm is *named*, not that it is named correctly — it defends against omission, not sabotage. |
+| Active-firm selection cannot be forged | ✅ | The cookie can only select among existing memberships; a mismatch is ignored, and a forged form submission is refused and logged. |
+| Automated cross-tenant access tests | ✅ | 40 integration tests against a real database with two firms holding deliberately similar records, plus 7 browser tests. |
+| Database-enforced isolation (row-level security, separate schemas or databases) | ⛔ | **The most important remaining gap.** All three enforcement layers run inside the application, so they protect against a programming mistake — not against a compromised application process or a mistaken database administrator. |
 | Separate document storage per firm | ⛔ | |
 | Separate search index per firm | ⛔ | |
 | Separate encryption keys per firm | ⛔ | |
@@ -112,9 +114,10 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 
 ## The short version
 
-Orchelio Demo demonstrates a product idea. It now has sign-in, roles and server-side access
-control, and those are built the way a real system would build them — but the passwords are
-published, there is no multi-factor authentication, tenant isolation rests on application
-discipline rather than the database, no real AI call is made, and none of it has been audited.
+Orchelio Demo demonstrates a product idea. It now has sign-in, roles, server-side access control
+and firm isolation enforced in three layers and proved by tests, and those are built the way a
+real system would build them — but the passwords are published, there is no multi-factor
+authentication, isolation is enforced by the application rather than by the database, no real AI
+call is made, and none of it has been audited.
 
 Treat every screen as a demonstration of intent, and keep real client information out of it.

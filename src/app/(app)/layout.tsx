@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app-shell";
-import { defaultFirmFor, requireSession } from "@/lib/auth/guards";
+import { requireSession } from "@/lib/auth/guards";
+import { activeFirmFor } from "@/lib/auth/firm-context";
 import { roleLabel } from "@/lib/auth/permissions";
 
 /**
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
-  const firm = defaultFirmFor(session);
+  const firm = await activeFirmFor(session);
 
   return (
     <AppShell

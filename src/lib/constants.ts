@@ -151,6 +151,7 @@ export const AUDIT_ACTIONS = {
   accessDenied: "access.denied",
   firmCreated: "firm.created",
   firmViewed: "firm.viewed",
+  firmSwitched: "firm.switched",
   firmConfigurationUpdated: "firm.configuration.updated",
   matterCreated: "matter.created",
   matterViewed: "matter.viewed",

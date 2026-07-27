@@ -4,6 +4,7 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 
 import { PrismaClient } from "@/generated/prisma/client";
 import { serverEnv } from "@/lib/env";
+import { type GuardedPrismaClient, withFirmScopeGuard } from "@/lib/data/firm-scope";
 
 /**
  * Orchelio — Prisma client singleton.
@@ -15,25 +16,33 @@ import { serverEnv } from "@/lib/env";
  * `server-only` makes the build fail loudly if this module is ever pulled into
  * a client component — the database must never be reachable from the browser.
  *
+ * The client is wrapped in the firm scoping guard, so a query against a
+ * firm-scoped model that forgets `firmId` throws instead of quietly returning
+ * another firm's rows. There is deliberately no unguarded client exported from
+ * anywhere: opting out would have to be a visible, reviewable change to this
+ * file.
+ *
  * Prisma 7 talks to SQLite through a driver adapter. Replacing SQLite with
  * PostgreSQL later means swapping this adapter for `@prisma/adapter-pg` and
  * changing the datasource provider; no query in the application changes.
  */
-function createPrismaClient(): PrismaClient {
+function createPrismaClient(): GuardedPrismaClient {
   const { databaseUrl } = serverEnv();
   const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
 
-  return new PrismaClient({
+  const client = new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
+
+  return withFirmScopeGuard(client);
 }
 
 const globalForPrisma = globalThis as unknown as {
-  orchelioPrisma?: PrismaClient;
+  orchelioPrisma?: GuardedPrismaClient;
 };
 
-export const prisma: PrismaClient = globalForPrisma.orchelioPrisma ?? createPrismaClient();
+export const prisma: GuardedPrismaClient = globalForPrisma.orchelioPrisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.orchelioPrisma = prisma;

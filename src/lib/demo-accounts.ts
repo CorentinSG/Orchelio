@@ -59,6 +59,18 @@ export const DEMO_ACCOUNTS: readonly DemoAccount[] = [
     roleLabel: "Paralegal",
     firmName: "Carter Employment & Labor Law",
   },
+  {
+    // Sixth account, beyond the five named in the specification. It exists to
+    // demonstrate two things the other five cannot: the Read-only Reviewer
+    // role, and the firm switcher — which needs somebody who belongs to more
+    // than one firm. Belonging to both firms makes isolation vivid: the same
+    // person, two workspaces, and not one row in common.
+    email: "reviewer@demo.local",
+    password: DEMO_PASSWORD,
+    name: "Sam Whitfield",
+    roleLabel: "Read-only Reviewer",
+    firmName: "Both demonstration firms",
+  },
 ] as const;
 
 /** The accounts to advertise on the sign-in page. Empty outside the demo build. */

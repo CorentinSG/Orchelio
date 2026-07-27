@@ -15,18 +15,19 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 and 2 of 9 complete
+## Current status: Phases 1 to 3 of 9 complete
 
-Orchelio is built in nine phases. **Phase 1 (Initialisation)** and **Phase 2 (Data and
-authentication)** are finished: you can sign in as any demonstration account, land in the right
-firm workspace, and see that access control is enforced. It does **not** yet deliver the
-onboarding questionnaire, matters, documents or the AI analysis.
+Orchelio is built in nine phases. **Phase 1 (Initialisation)**, **Phase 2 (Data and
+authentication)** and **Phase 3 (Multi-firm isolation)** are finished: you can sign in, land in
+the right firm workspace, switch between firms if you belong to more than one, and the separation
+between firms is enforced in three independent layers and proved by tests. It does **not** yet
+deliver the onboarding questionnaire, matters, documents or the AI analysis.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
 | 1 | Next.js, TypeScript, Tailwind, Prisma, SQLite, tests, documentation | ✅ Delivered |
 | 2 | Full data model, migrations, seed data, local sign-in, roles | ✅ Delivered |
-| 3 | Firm memberships, `firmId` scoping on every query, isolation tests | Planned |
+| 3 | Firm memberships, `firmId` scoping on every query, isolation tests | ✅ Delivered |
 | 4 | Seven-step onboarding questionnaire and generated configuration | Planned |
 | 5 | Matters, practice-area fields, simulated document upload | Planned |
 | 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | Planned |
@@ -139,6 +140,7 @@ on the real internet.
 | `immigration.paralegal@demo.local` | Paralegal, Dupont Immigration Law | Prepare work: intake, documents, run an analysis. **Cannot** approve an analysis, confirm a deadline, close a matter or draft a communication. |
 | `employment.attorney@demo.local` | Firm Administrator & Attorney, Carter Employment & Labor Law | Same rights, in the employment firm. |
 | `employment.paralegal@demo.local` | Paralegal, Carter Employment & Labor Law | Same restrictions, in the employment firm. |
+| `reviewer@demo.local` | Read-only Reviewer, **both** firms | Look and nothing else. This is the account that demonstrates the firm switcher. |
 
 ### What to try
 
@@ -151,6 +153,9 @@ on the real internet.
 4. While signed in as a firm user, type <http://localhost:3000/admin/firms> into the address bar.
    You are refused, and the refusal is written to the activity log.
 5. Sign in as `platform.admin@demo.local`. You see both firms exist — and no matter content.
+6. Sign in as `reviewer@demo.local`. A **Your firms** panel appears in the sidebar, because this
+   person belongs to both firms. Switch between them: the whole workspace changes, and the two
+   never mix. The other accounts do not see this panel — a switcher offering one option is noise.
 
 ---
 
@@ -210,12 +215,14 @@ orchelio/
 │   ├── components/          Reusable interface pieces (brand, cards, badges, shell)
 │   ├── lib/
 │   │   ├── auth/            Sessions, passwords, roles, permissions, guards
+│   │   ├── data/            Firm-scoped data access — every function needs a firm
 │   │   ├── audit.ts         Append-only activity log
 │   │   └── ...              Configuration, database access, status checks
 │   ├── middleware.ts        Sign-in redirect only — NOT the security boundary
 │   └── generated/           Prisma client, generated — never edited by hand
 ├── tests/
 │   ├── unit/                Unit and component tests (Vitest)
+│   ├── integration/         Firm isolation, against a real throwaway database
 │   └── e2e/                 Browser tests (Playwright)
 ├── docs/                    Architecture, roadmap, production readiness
 ├── .env.example             Template for your own .env
@@ -241,7 +248,7 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 and 2 only.** The onboarding questionnaire, matters, documents, AI analysis,
+1. **Phases 1 to 3 only.** The onboarding questionnaire, matters, documents, AI analysis,
    approvals, the activity log screen and the cost screens are not built yet.
 2. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
@@ -251,10 +258,12 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
    abuse protection.
 4. **Simulated AI.** The `AIProvider` interface and the mock implementation land in Phase 6.
    Nothing in this build calls Anthropic.
-5. **Multi-tenant isolation is enforced but not yet proven at scale.** Membership is checked on
-   the server for every protected page, and the browser tests confirm a firm user cannot reach
-   platform administration or another firm's workspace. The systematic `firmId` scoping of every
-   query, and the full isolation test suite, arrive in Phase 3 with the matter data.
+5. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
+   protect it — required arguments, a database client that refuses an unscoped query, and
+   membership guards — and 40 integration tests prove it against a real database holding two firms
+   with deliberately similar records. But all three run inside the application, so they protect
+   against a programming mistake, not against a compromised process or a mistaken database
+   administrator. Production needs row-level security or separate schemas.
 6. **The activity log is append-only by application discipline**, not by the database. Nothing in
    the codebase updates or deletes an audit event, but a database administrator could. Production
    needs write-once storage.

@@ -238,13 +238,29 @@ const DEMO_FIRMS = [
   },
 ] as const;
 
-/** Which firm each demonstration account belongs to, and with which role. */
-const MEMBERSHIPS: Record<string, { firmSlug: string; role: string } | null> = {
-  "platform.admin@demo.local": null,
-  "immigration.attorney@demo.local": { firmSlug: "dupont-immigration-law", role: "firm_admin" },
-  "immigration.paralegal@demo.local": { firmSlug: "dupont-immigration-law", role: "paralegal" },
-  "employment.attorney@demo.local": { firmSlug: "carter-employment-labor-law", role: "firm_admin" },
-  "employment.paralegal@demo.local": { firmSlug: "carter-employment-labor-law", role: "paralegal" },
+/**
+ * Which firms each demonstration account belongs to, and with which role.
+ * An empty list means a platform administrator: no firm membership at all.
+ */
+const MEMBERSHIPS: Record<string, ReadonlyArray<{ firmSlug: string; role: string }>> = {
+  "platform.admin@demo.local": [],
+  "immigration.attorney@demo.local": [
+    { firmSlug: "dupont-immigration-law", role: "firm_admin" },
+  ],
+  "immigration.paralegal@demo.local": [
+    { firmSlug: "dupont-immigration-law", role: "paralegal" },
+  ],
+  "employment.attorney@demo.local": [
+    { firmSlug: "carter-employment-labor-law", role: "firm_admin" },
+  ],
+  "employment.paralegal@demo.local": [
+    { firmSlug: "carter-employment-labor-law", role: "paralegal" },
+  ],
+  // Belongs to both firms — the account that demonstrates the firm switcher.
+  "reviewer@demo.local": [
+    { firmSlug: "dupont-immigration-law", role: "read_only" },
+    { firmSlug: "carter-employment-labor-law", role: "read_only" },
+  ],
 };
 
 async function main() {
@@ -344,26 +360,25 @@ async function main() {
     const passwordHash = await hashPassword(DEMO_ACCOUNTS[0]!.password);
 
     for (const account of DEMO_ACCOUNTS) {
-      const membership = MEMBERSHIPS[account.email] ?? null;
+      const memberships = MEMBERSHIPS[account.email];
+      if (!memberships) {
+        throw new Error(`No membership entry for demonstration account: ${account.email}`);
+      }
+      const isPlatformAdmin = memberships.length === 0;
 
       const user = await prisma.user.upsert({
         where: { email: account.email },
-        update: {
-          name: account.name,
-          passwordHash,
-          isPlatformAdmin: membership === null,
-          status: "active",
-        },
+        update: { name: account.name, passwordHash, isPlatformAdmin, status: "active" },
         create: {
           email: account.email,
           name: account.name,
           passwordHash,
-          isPlatformAdmin: membership === null,
+          isPlatformAdmin,
           status: "active",
         },
       });
 
-      if (membership) {
+      for (const membership of memberships) {
         const firmId = firmIdBySlug.get(membership.firmSlug);
         if (!firmId) {
           throw new Error(`Unknown firm slug in seed data: ${membership.firmSlug}`);
