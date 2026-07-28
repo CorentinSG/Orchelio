@@ -61,6 +61,7 @@ decided, and what it cost.
 | 8 | [Locked approvals are stored, not merely enforced](decisions/ADR-0008-locked-approvals-are-stored.md) | 4 |
 | 9 | [A dash, not a zero](decisions/ADR-0009-a-dash-not-a-zero.md) | 4 |
 | 10 | [Two caches, and never firm data across requests](decisions/ADR-0010-two-caches-only.md) | harness |
+| 11 | [Loading boundaries are placed per segment](decisions/ADR-0011-loading-boundaries-are-placed-per-segment.md) | 5 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)

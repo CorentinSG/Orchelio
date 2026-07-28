@@ -42,7 +42,7 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | Scoped data-access functions only | ✅ | `src/lib/data` — the firm is a required argument, so omitting it is a compile error. |
 | Query-level enforcement | ✅ | The Prisma client refuses any unscoped query on a firm-scoped model (`src/lib/data/firm-scope.ts`). Checks that a firm is *named*, not that it is named correctly — it defends against omission, not sabotage. |
 | Active-firm selection cannot be forged | ✅ | The cookie can only select among existing memberships; a mismatch is ignored, and a forged form submission is refused and logged. |
-| Automated cross-tenant access tests | ✅ | 40 integration tests against a real database with two firms holding deliberately similar records, plus 7 browser tests. |
+| Automated cross-tenant access tests | ✅ | 62 integration tests against a real database with two firms holding deliberately similar records, plus 14 browser tests. |
 | Database-enforced isolation (row-level security, separate schemas or databases) | ⛔ | **The most important remaining gap.** All three enforcement layers run inside the application, so they protect against a programming mistake — not against a compromised application process or a mistaken database administrator. |
 | Separate document storage per firm | ⛔ | |
 | Separate search index per firm | ⛔ | |

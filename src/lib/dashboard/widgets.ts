@@ -37,23 +37,24 @@ const SHARED_WIDGETS: readonly DashboardWidget[] = [
 ];
 
 const IMMIGRATION_WIDGETS: readonly DashboardWidget[] = [
-  { key: "new_leads", label: "New leads", hint: "Prospective clients", tone: "brand", availableFrom: 5 },
-  { key: "consultations_to_prepare", label: "Consultations to prepare", hint: "Upcoming first meetings", tone: "brand", availableFrom: 5 },
-  { key: "status_dates_to_review", label: "Status expiration dates to review", hint: "Immigration status approaching expiry", tone: "warning", availableFrom: 5 },
-  { key: "missing_identity_documents", label: "Missing identity documents", hint: "Passport, I-94, visa", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
-  { key: "missing_immigration_documents", label: "Missing immigration documents", hint: "USCIS notices, prior filings", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "new_leads", label: "New leads", hint: "Matters still at the lead stage", tone: "brand", availableFrom: 5 },
+  { key: "consultations_to_prepare", label: "Consultations to prepare", hint: "Matters with a consultation scheduled", tone: "brand", availableFrom: 5 },
+  { key: "status_dates_to_review", label: "Status expiration dates to review", hint: "Recorded expiry within 90 days — not confirmed", tone: "warning", availableFrom: 5 },
+  { key: "missing_identity_documents", label: "Missing identity documents", hint: "Matters missing a passport, I-94 or birth certificate", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "missing_immigration_documents", label: "Missing immigration documents", hint: "Matters missing another expected document", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
   { key: "awaiting_attorney_approval", label: "Matters awaiting attorney approval", hint: "Analyses not yet approved", tone: "warning", availableFrom: 7 },
-  { key: "upcoming_deadlines", label: "Upcoming deadlines", hint: "Fictional deadlines", tone: "neutral", availableFrom: 5 },
+  { key: "upcoming_deadlines", label: "Dates to review", hint: "Within 30 days — recorded, never confirmed", tone: "neutral", availableFrom: 5 },
 ];
 
 const EMPLOYMENT_WIDGETS: readonly DashboardWidget[] = [
-  { key: "new_employee_intakes", label: "New employee intakes", hint: "Recently received intakes", tone: "brand", availableFrom: 5 },
-  { key: "employee_side_matters", label: "Employee-side matters", hint: "Representing the employee", tone: "brand", availableFrom: 5 },
-  { key: "employer_side_matters", label: "Employer-side matters", hint: "Representing the employer", tone: "brand", availableFrom: 5 },
-  { key: "termination_letters_to_review", label: "Termination letters to review", hint: "Received, not yet reviewed", tone: "warning", availableFrom: 5 },
-  { key: "wage_records_missing", label: "Wage records missing", hint: "Pay stubs and time records", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
-  { key: "discrimination_awaiting_assessment", label: "Discrimination matters awaiting assessment", hint: "Not yet assessed", tone: "warning", availableFrom: 5 },
-  { key: "settlement_deadlines", label: "Settlement deadlines to review", hint: "Acceptance deadlines to confirm", tone: "warning", availableFrom: 5 },
+  { key: "new_employee_intakes", label: "New employee intakes", hint: "Intakes recorded for this firm", tone: "brand", availableFrom: 5 },
+  { key: "employee_side_matters", label: "Employee-side matters", hint: "Open, representing the employee", tone: "brand", availableFrom: 5 },
+  { key: "employer_side_matters", label: "Employer-side matters", hint: "Open, representing the employer", tone: "brand", availableFrom: 5 },
+  { key: "termination_letters_to_review", label: "Termination letters to review", hint: "On file, not yet checked by a person", tone: "warning", availableFrom: 5 },
+  { key: "wage_records_missing", label: "Wage records missing", hint: "Matters missing a pay stub or time record", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  // "Assessed" is something the analysis decides, so this one waits for it.
+  { key: "discrimination_awaiting_assessment", label: "Discrimination matters awaiting assessment", hint: "Not yet assessed", tone: "warning", availableFrom: 6 },
+  { key: "settlement_deadlines", label: "Settlement dates to review", hint: "In settlement discussions with a date recorded", tone: "warning", availableFrom: 5 },
 ];
 
 const BY_PRACTICE_AREA: Record<string, readonly DashboardWidget[]> = {
@@ -92,6 +93,7 @@ export function widgetValue(
   widget: DashboardWidget,
   statistics: FirmStatistics,
   currentPhase: number,
+  practiceAreaCounts: Readonly<Record<string, number>> = {},
 ): string | number {
   if (widget.availableFrom > currentPhase) {
     return "—";
@@ -104,7 +106,11 @@ export function widgetValue(
       return statistics.pendingApprovals;
     case "recent_analyses":
       return statistics.analyses;
-    default:
-      return "—";
+    default: {
+      // A practice-area widget knows its own number, or it does not exist yet.
+      // An absent key is a dash rather than a zero — see ADR-0009.
+      const counted = practiceAreaCounts[widget.key];
+      return counted === undefined ? "—" : counted;
+    }
   }
 }

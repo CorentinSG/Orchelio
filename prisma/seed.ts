@@ -5,6 +5,7 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { DEMO_ACCOUNTS } from "../src/lib/demo-accounts";
 import { hashPassword } from "../src/lib/auth/password";
+import { DEMO_MATTERS } from "./demo-matters";
 
 /**
  * Orchelio — demonstration seed data.
@@ -13,10 +14,11 @@ import { hashPassword } from "../src/lib/auth/password";
  * firm, a real person or a real legal matter. Email addresses use the reserved
  * `.local` domain, which cannot exist on the real internet.
  *
- * Phase 2 scope: the practice-area and matter-type catalogues, the workflow
- * templates, the two firm tenants, their configurations, the five demonstration
- * users and their memberships. The six fictional matters and their documents
- * arrive in Phase 5; the simulated analyses in Phase 6.
+ * Contents: the practice-area and matter-type catalogues, the workflow
+ * templates, the two firm tenants and their configurations, the six
+ * demonstration users and their memberships, and the six fictional matters with
+ * their clients, documents, intake answers and tasks. The simulated analyses
+ * arrive in Phase 6.
  *
  * Every write is an upsert, so `npm run seed` is safe to run repeatedly and
  * never destroys anything.
@@ -405,6 +407,115 @@ async function main() {
       console.log(`  ✓ ${account.name} — ${account.roleLabel}`);
     }
 
+    console.log("\nFictional matters");
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000);
+    const inDays = (days: number) => new Date(Date.now() + days * 86_400_000);
+
+    for (const matter of DEMO_MATTERS) {
+      const firmId = firmIdBySlug.get(matter.firmSlug);
+      if (!firmId) throw new Error(`Unknown firm slug in demo matters: ${matter.firmSlug}`);
+
+      const attorney = await prisma.user.findUnique({ where: { email: matter.attorneyEmail } });
+      if (!attorney) throw new Error(`Unknown attorney in demo matters: ${matter.attorneyEmail}`);
+
+      // The client profile is keyed by firm and display name, so re-running the
+      // seed updates the same fictional person rather than creating another.
+      const existingClient = await prisma.clientProfile.findFirst({
+        where: { firmId, displayName: matter.clientName },
+      });
+      const client =
+        existingClient ??
+        (await prisma.clientProfile.create({
+          data: { firmId, displayName: matter.clientName, isFictional: true },
+        }));
+
+      const saved = await prisma.matter.upsert({
+        where: { firmId_reference: { firmId, reference: matter.reference } },
+        update: {
+          title: matter.title,
+          status: matter.status,
+          matterTypeKey: matter.matterTypeKey,
+          practiceAreaKey: matter.practiceAreaKey,
+          representationSide: matter.representationSide ?? null,
+          responsibleAttorneyId: attorney.id,
+          clientProfileId: client.id,
+          fields: JSON.stringify(matter.fields),
+          nextDeadlineAt: matter.nextDeadlineInDays ? inDays(matter.nextDeadlineInDays) : null,
+          lastActivityAt: daysAgo(Math.min(...matter.documents.map((d) => d.receivedDaysAgo), 1)),
+        },
+        create: {
+          firmId,
+          reference: matter.reference,
+          title: matter.title,
+          status: matter.status,
+          matterTypeKey: matter.matterTypeKey,
+          practiceAreaKey: matter.practiceAreaKey,
+          representationSide: matter.representationSide ?? null,
+          responsibleAttorneyId: attorney.id,
+          createdById: attorney.id,
+          clientProfileId: client.id,
+          fields: JSON.stringify(matter.fields),
+          openedAt: daysAgo(matter.openedDaysAgo),
+          nextDeadlineAt: matter.nextDeadlineInDays ? inDays(matter.nextDeadlineInDays) : null,
+          lastActivityAt: daysAgo(Math.min(...matter.documents.map((d) => d.receivedDaysAgo), 1)),
+        },
+      });
+
+      // Documents, tasks and the intake are replaced wholesale rather than
+      // merged: they are fixtures, and a half-updated fixture is worse than a
+      // rebuilt one. Nothing a user created lives under these references.
+      await prisma.document.deleteMany({ where: { firmId, matterId: saved.id } });
+      for (const document of matter.documents) {
+        await prisma.document.create({
+          data: {
+            firmId,
+            matterId: saved.id,
+            filename: document.filename,
+            category: document.category,
+            mimeType: document.mimeType,
+            sizeBytes: document.sizeBytes,
+            storageKey: `${matter.firmSlug}/${matter.reference}/${document.filename}`,
+            verified: document.verified,
+            analysisStatus: document.verified ? "classified" : "pending",
+            receivedAt: daysAgo(document.receivedDaysAgo),
+            uploadedById: attorney.id,
+          },
+        });
+      }
+
+      await prisma.task.deleteMany({ where: { firmId, matterId: saved.id } });
+      for (const task of matter.tasks) {
+        await prisma.task.create({
+          data: {
+            firmId,
+            matterId: saved.id,
+            title: task.title,
+            description: task.description ?? null,
+            status: task.status,
+            priority: task.priority,
+            dueAt: task.dueInDays ? inDays(task.dueInDays) : null,
+            createdById: attorney.id,
+          },
+        });
+      }
+
+      await prisma.intakeResponse.deleteMany({ where: { firmId, matterId: saved.id } });
+      await prisma.intakeResponse.create({
+        data: {
+          firmId,
+          matterId: saved.id,
+          payload: JSON.stringify(matter.intake),
+          status: "submitted",
+          submittedById: attorney.id,
+          submittedAt: daysAgo(matter.openedDaysAgo),
+        },
+      });
+
+      console.log(
+        `  ✓ ${matter.reference} — ${matter.clientName} (${matter.documents.length} documents, ${matter.tasks.length} tasks)`,
+      );
+    }
+
     await prisma.auditEvent.create({
       data: {
         action: "demo.seeded",
@@ -418,14 +529,17 @@ async function main() {
       },
     });
 
-    const [firms, users, memberships] = await Promise.all([
+    const [firms, users, memberships, matters, documents] = await Promise.all([
       prisma.firm.count(),
       prisma.user.count(),
       prisma.firmMembership.count(),
+      prisma.matter.count(),
+      prisma.document.count(),
     ]);
 
     console.log(
-      `\nSeed complete — ${firms} firm(s), ${users} user(s), ${memberships} membership(s) in orchelio-demo.db.`,
+      `\nSeed complete — ${firms} firm(s), ${users} user(s), ${memberships} membership(s), ` +
+        `${matters} matter(s), ${documents} document(s) in orchelio-demo.db.`,
     );
     console.log(`Sign in at /login with any account above. Password: ${DEMO_ACCOUNTS[0]!.password}`);
   } finally {

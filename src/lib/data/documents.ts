@@ -55,3 +55,66 @@ export async function getDocumentForDownload({
     select: { id: true, filename: true, mimeType: true, sizeBytes: true, storageKey: true },
   });
 }
+
+export type NewDocument = {
+  matterId: string;
+  filename: string;
+  category: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedById: string;
+};
+
+/**
+ * Records an uploaded document.
+ *
+ * The matter is re-read within the firm's scope first, so a document cannot be
+ * attached to a matter the caller may not see — even if the identifier is real.
+ * The file itself is simulated: only metadata is stored, and `storageKey` names
+ * where a real deployment would have put it.
+ */
+export async function addDocument(scope: FirmScope, input: NewDocument) {
+  const matter = await prisma.matter.findFirst({
+    where: { id: input.matterId, firmId: scope.firmId },
+    select: { id: true, reference: true },
+  });
+  if (!matter) return null;
+
+  return prisma.document.create({
+    data: {
+      firmId: scope.firmId,
+      matterId: matter.id,
+      filename: input.filename,
+      category: input.category,
+      mimeType: input.mimeType,
+      sizeBytes: input.sizeBytes,
+      storageKey: `${scope.firmId}/${matter.reference}/${input.filename}`,
+      uploadedById: input.uploadedById,
+      analysisStatus: "pending",
+      verified: false,
+    },
+  });
+}
+
+/** Marks a document as checked by a person. Only a person may do this. */
+export async function setDocumentVerified(
+  scope: FirmScope,
+  documentId: string,
+  verified: boolean,
+): Promise<number> {
+  const result = await prisma.document.updateMany({
+    where: { id: documentId, firmId: scope.firmId },
+    data: { verified, analysisStatus: verified ? "classified" : "pending" },
+  });
+  return result.count;
+}
+
+/** Document counts by category for one matter, for the missing-document list. */
+export async function documentCategories(scope: FirmScope, matterId: string): Promise<string[]> {
+  const rows = await prisma.document.findMany({
+    where: { firmId: scope.firmId, matterId },
+    select: { category: true },
+    distinct: ["category"],
+  });
+  return rows.map((row) => row.category);
+}

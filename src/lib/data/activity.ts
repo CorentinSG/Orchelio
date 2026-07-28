@@ -50,3 +50,37 @@ export async function activityActions(scope: FirmScope): Promise<string[]> {
 
   return rows.map((row) => row.action).sort();
 }
+
+/** Open tasks for a firm, newest deadline first. */
+export async function listTasks(scope: FirmScope, onlyOpen = true) {
+  return prisma.task.findMany({
+    where: {
+      firmId: scope.firmId,
+      ...(onlyOpen ? { status: { in: ["open", "in_progress"] } } : {}),
+    },
+    orderBy: [{ dueAt: "asc" }],
+    include: {
+      matter: { select: { id: true, reference: true, title: true } },
+      assignedTo: { select: { name: true } },
+    },
+  });
+}
+
+/** Matters whose intake has been submitted, for the intake screen. */
+export async function listIntakes(scope: FirmScope) {
+  return prisma.intakeResponse.findMany({
+    where: { firmId: scope.firmId },
+    orderBy: { submittedAt: "desc" },
+    include: {
+      matter: {
+        select: {
+          id: true,
+          reference: true,
+          title: true,
+          status: true,
+          clientProfile: { select: { displayName: true } },
+        },
+      },
+    },
+  });
+}

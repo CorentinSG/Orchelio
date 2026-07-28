@@ -15,12 +15,13 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 to 4 of 9 complete
+## Current status: Phases 1 to 5 of 9 complete
 
-Orchelio is built in nine phases. **Phases 1 to 4** are finished: you can sign in, land in the
+Orchelio is built in nine phases. **Phases 1 to 5** are finished: you can sign in, land in the
 right firm workspace, switch between firms, answer a seven-step questionnaire that configures the
-firm, and see a dashboard assembled from that configuration. It does **not** yet deliver matters,
-documents or the AI analysis.
+firm, see a dashboard assembled from that configuration, and work through matters — a filtered
+list, a matter record with practice-area fields, and simulated document upload. It does **not**
+yet deliver the AI analysis, the approval centre or the cost screens.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
@@ -28,7 +29,7 @@ documents or the AI analysis.
 | 2 | Full data model, migrations, seed data, local sign-in, roles | ✅ Delivered |
 | 3 | Firm memberships, `firmId` scoping on every query, isolation tests | ✅ Delivered |
 | 4 | Seven-step onboarding questionnaire and generated configuration | ✅ Delivered |
-| 5 | Matters, practice-area fields, simulated document upload | Planned |
+| 5 | Matters, practice-area fields, simulated document upload | ✅ Delivered |
 | 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | Planned |
 | 7 | Approval centre, human decisions, append-only audit log | Planned |
 | 8 | Simulated AI costs, firm creation, settings, guided demo | Planned |
@@ -259,10 +260,11 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 to 4 only.** Matters, documents, AI analysis, approvals, the activity log screen
-   and the cost screens are not built yet. The dashboard is assembled from each firm's
-   configuration, but its figures show a dash rather than a zero until the data behind them
-   exists — a zero would be a claim ("there is nothing to do") the product cannot yet support.
+1. **Phases 1 to 5 only.** The AI analysis, the approval centre, the activity log screen and the
+   cost screens are not built yet. The dashboard is assembled from each firm's configuration;
+   matters and documents now fill their figures, while the widgets waiting on a later phase show a
+   dash rather than a zero — a zero would be a claim ("there is nothing to do") the product cannot
+   yet support.
 2. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
    account lockout. It exists to demonstrate roles and access control.
@@ -273,7 +275,7 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
    Nothing in this build calls Anthropic.
 5. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
    protect it — required arguments, a database client that refuses an unscoped query, and
-   membership guards — and 40 integration tests prove it against a real database holding two firms
+   membership guards — and 62 integration tests prove it against a real database holding two firms
    with deliberately similar records. But all three run inside the application, so they protect
    against a programming mistake, not against a compromised process or a mistaken database
    administrator. Production needs row-level security or separate schemas.

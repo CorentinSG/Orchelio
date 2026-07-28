@@ -145,15 +145,74 @@ adopted for the firm switcher in Phase 3, and both now share `src/lib/http/form-
 
 ---
 
-## Phase 5 — Matters and documents
+## Phase 5 — Matters and documents ✅ Delivered
 
-- Matter list with filters, and the matter record with its tabs.
-- Practice-area-specific fields (immigration status fields; employment representation, pay and
-  termination fields).
-- Simulated document upload: drag and drop, extension allow-list, size limit, classification,
-  attachment to a matter. No real OCR.
+Delivered:
 
-**Acceptance:** the six fictional matters exist, with their documents, under the right firm.
+- Matter list with server-side filters — free text across reference, title and client; status;
+  matter type; and, at an employment firm only, the side represented. Every filter is applied in
+  the query, so a filtered list is a filtered *query*, not a filtered render.
+- Matter record with four working tabs (Overview, Intake, Documents, Tasks) and the five the
+  specification requires later, shown by name with the phase that fills them.
+- **Practice-area fields**: seventeen immigration fields (status, expiry, entry, parties, history)
+  and thirty employment fields (representation, pay and hours, complaint and action, evidence,
+  agency, severance), grouped into sections, some offered only for certain matter types — a
+  petitioner belongs on a family-based petition, not on an asylum claim.
+- Matter creation, with a reference assigned by the server and sequential within the firm and the
+  year. The practice area comes from the firm, never from the form.
+- **Simulated document upload**: drag and drop or choose, extension allow-list, size limit,
+  practice-area categories, attachment to a matter, and a human "Mark as checked". The file itself
+  never leaves the browser — see below.
+- Expected-document checklist per matter type: what this kind of matter usually needs and does not
+  have, presented as a checklist and not as a judgement.
+- Firm-wide Documents, Tasks and Intake screens.
+
+**Acceptance met:** the six fictional matters exist with their twenty-two documents under the
+right firm, each demonstrating what Phase 6 will need — including the Daniel Moreau matter, whose
+intake says the last entry was 11 February 2024 while the I-94 on file is dated 4 March 2024.
+
+The dashboard's practice-area widgets now hold real figures — leads, consultations scheduled,
+recorded expiry dates within ninety days, matters missing an expected document, the two
+representation sides, unchecked termination letters. A widget whose meaning needs the analysis
+("discrimination matters awaiting assessment") was moved to Phase 6 rather than given an invented
+one, and any widget whose count is not supplied still shows a dash rather than a zero.
+
+Tested by **36 unit tests** on the field catalogue, the category catalogue and the widget rules,
+**28 integration tests** on the paths that write (creating a matter, attaching a document, marking
+one checked, the dashboard counts — each tried once inside the owning firm and once with an
+identifier borrowed from the other), and **31 browser tests** covering the list, the filters, the
+record, creation, upload, the dashboard figures, and what each role may do.
+
+### The file is never uploaded, structurally
+
+The browser reads the chosen file's name, type and size and posts those three values as text. The
+bytes are never read and never sent, and the route handler has no code path that could receive
+them. This makes "no real upload, no OCR" a property of the design rather than a promise in the
+documentation — and it is why the size shown is the browser's report of the file, not a
+measurement of anything stored.
+
+Everything the browser checks, the server checks again: extension, size, MIME type, and that the
+category belongs to this firm's practice area. The browser's copy runs on a machine the user
+controls, so it is a courtesy, not a control. `tests/e2e/matters.spec.ts` submits a hand-crafted
+post that skips the browser's checks and asserts the server refuses it.
+
+### One answer, one place
+
+The side an employment firm represents is a column on the matter, because the list filters on it.
+It was also being written into the JSON field blob, and the creation form asked for it twice —
+once in the basics and once among the practice-area fields. Two places holding the same answer is
+two places that can disagree, so the field is now marked as living on the matter row: forms do not
+ask for it a second time, `sanitiseFieldValues` refuses to copy it into the JSON, and the record
+page reads it from the column.
+
+### A defect found and fixed
+
+Refusing another firm's matter rendered "Page not found" correctly but answered HTTP **200**. The
+cause was the root `loading.tsx`: a Suspense boundary above a page makes Next commit the response
+status before the page has run. Measured both ways — with the boundary, 200; without it, 404, and
+identical for a matter that exists in another firm and one that exists nowhere, so isolation never
+depended on it. The loading screen is now placed per segment and deliberately not above
+`/matters/[id]`. See `docs/decisions/ADR-0011-loading-boundaries-are-placed-per-segment.md`.
 
 ---
 

@@ -83,3 +83,102 @@ export async function matterCountsByStatus(scope: FirmScope): Promise<Record<str
 
   return Object.fromEntries(rows.map((row) => [row.status, row._count._all]));
 }
+
+/**
+ * The next matter reference for a firm, e.g. "IMM-2026-004".
+ *
+ * Sequential within a firm and a year, which is how a firm actually refers to
+ * its files. Derived from the highest existing number rather than a counter, so
+ * it survives a reseed and never depends on a row nobody can see.
+ */
+export async function nextReference(scope: FirmScope, practiceArea: string): Promise<string> {
+  const prefix = practiceArea === "employment_law" ? "EMP" : "IMM";
+  const year = new Date().getFullYear();
+  const stem = `${prefix}-${year}-`;
+
+  const existing = await prisma.matter.findMany({
+    where: { firmId: scope.firmId, reference: { startsWith: stem } },
+    select: { reference: true },
+  });
+
+  const highest = existing.reduce((max, matter) => {
+    const suffix = Number(matter.reference.slice(stem.length));
+    return Number.isFinite(suffix) ? Math.max(max, suffix) : max;
+  }, 0);
+
+  return `${stem}${String(highest + 1).padStart(3, "0")}`;
+}
+
+export type NewMatter = {
+  title: string;
+  clientName: string;
+  matterTypeKey: string;
+  practiceAreaKey: string;
+  status: string;
+  representationSide?: string | null;
+  responsibleAttorneyId?: string | null;
+  createdById: string;
+  fields: Record<string, string | number | boolean>;
+};
+
+/**
+ * Creates a matter, and the client profile it belongs to.
+ *
+ * Both writes name the firm, so neither can land in another firm's workspace
+ * even if the caller passed an identifier from one.
+ */
+export async function createMatter(scope: FirmScope, input: NewMatter) {
+  const existingClient = await prisma.clientProfile.findFirst({
+    where: { firmId: scope.firmId, displayName: input.clientName },
+  });
+
+  const client =
+    existingClient ??
+    (await prisma.clientProfile.create({
+      data: {
+        firmId: scope.firmId,
+        displayName: input.clientName,
+        isFictional: true,
+        createdById: input.createdById,
+      },
+    }));
+
+  return prisma.matter.create({
+    data: {
+      firmId: scope.firmId,
+      reference: await nextReference(scope, input.practiceAreaKey),
+      title: input.title,
+      clientProfileId: client.id,
+      practiceAreaKey: input.practiceAreaKey,
+      matterTypeKey: input.matterTypeKey,
+      status: input.status,
+      representationSide: input.representationSide ?? null,
+      responsibleAttorneyId: input.responsibleAttorneyId ?? null,
+      createdById: input.createdById,
+      fields: JSON.stringify(input.fields),
+    },
+  });
+}
+
+/** Everything one matter page needs, in one round trip. */
+export async function matterDetail({ matterId, firmId }: { matterId: string } & FirmScope) {
+  return prisma.matter.findFirst({
+    where: { id: matterId, firmId },
+    include: {
+      clientProfile: true,
+      matterType: true,
+      responsibleAttorney: { select: { id: true, name: true } },
+      documents: { orderBy: { receivedAt: "desc" } },
+      tasks: { orderBy: [{ status: "asc" }, { dueAt: "asc" }] },
+      intakeResponses: { orderBy: { createdAt: "desc" }, take: 1 },
+    },
+  });
+}
+
+/** Records that a matter was touched, so the list orders by real activity. */
+export async function touchMatter(scope: FirmScope, matterId: string): Promise<void> {
+  await prisma.matter.updateMany({
+    where: { id: matterId, firmId: scope.firmId },
+    data: { lastActivityAt: new Date() },
+  });
+}

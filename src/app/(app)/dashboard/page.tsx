@@ -11,8 +11,9 @@ import { actorFor, currentSession } from "@/lib/auth/session";
 import { permissionsFor, roleLabel } from "@/lib/auth/permissions";
 import { listActivity } from "@/lib/data/activity";
 import { firmConfiguration } from "@/lib/data/firms";
-import { firmStatistics } from "@/lib/data/statistics";
+import { firmStatistics, practiceAreaCounts } from "@/lib/data/statistics";
 import { formatCost } from "@/lib/data/usage";
+import { requestNow } from "@/lib/clock";
 import { parseStringArray } from "@/lib/json-field";
 import { practiceAreaLabel } from "@/lib/practice-areas";
 
@@ -20,7 +21,7 @@ export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
 
 /** Widgets whose data arrives later show a dash rather than a misleading zero. */
-const CURRENT_PHASE = 4;
+const CURRENT_PHASE = 5;
 
 /**
  * Firm dashboard.
@@ -63,9 +64,10 @@ export default async function DashboardPage() {
     resourceId: firm.id,
   });
 
-  const [configuration, statistics, recentActivity] = await Promise.all([
+  const [configuration, statistics, areaCounts, recentActivity] = await Promise.all([
     firmConfiguration(scope),
     firmStatistics(scope),
+    practiceAreaCounts(scope, firm.primaryPracticeArea, requestNow()),
     listActivity(scope, {}, 5),
   ]);
 
@@ -100,11 +102,11 @@ export default async function DashboardPage() {
           </p>
         </Callout>
       ) : (
-        <Callout tone="brand" title="Phase 4 of 9">
+        <Callout tone="brand" title="Phase 5 of 9">
           This dashboard is assembled from this firm&apos;s configuration — the cards below are
           the ones an {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about
-          each morning. The figures fill in as matters (Phase 5), analyses (Phase 6) and approvals
-          (Phase 7) arrive.
+          each morning. Matters and documents are live; the analyses (Phase 6) and approvals
+          (Phase 7) still show a dash, because a zero would claim there is nothing to do.
         </Callout>
       )}
 
@@ -113,7 +115,7 @@ export default async function DashboardPage() {
           <StatTile
             key={widget.key}
             label={widget.label}
-            value={widgetValue(widget, statistics, CURRENT_PHASE)}
+            value={widgetValue(widget, statistics, CURRENT_PHASE, areaCounts)}
             hint={
               widget.availableFrom > CURRENT_PHASE
                 ? `Phase ${widget.availableFrom}`
@@ -151,8 +153,9 @@ export default async function DashboardPage() {
               label="Matter types enabled"
               value={matterTypes.length > 0 ? matterTypes.length : "—"}
             />
-            <DataRow label="Clients" value={statistics.clients} hint="Phase 5" />
-            <DataRow label="Pending approvals" value={statistics.pendingApprovals} hint="Phase 7" />
+            <DataRow label="Clients" value={statistics.clients} />
+            <DataRow label="Documents" value={statistics.documents} />
+            <DataRow label="Open tasks" value={statistics.openTasks} />
           </dl>
         </Card>
 

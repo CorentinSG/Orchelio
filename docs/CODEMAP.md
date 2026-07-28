@@ -15,9 +15,15 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 82.
+Modules: 106.
 
 ## `prisma/`
+
+### `prisma/demo-matters.ts`
+
+Every person, employer, date and document below is invented.
+
+Exports: `DEMO_MATTERS`, `DemoDocument`, `DemoTask`, `DemoMatter`
 
 ### `prisma/schema.prisma`
 
@@ -51,11 +57,15 @@ Exports: `middleware`, `config`
 
 ## `src/app/`
 
+### `src/app/(app)/admin/firms/loading.tsx`
+
 ### `src/app/(app)/admin/firms/page.tsx`
 
 Platform administration — firms.
 
 Exports: `metadata`, `dynamic`, `AdminFirmsPage`
+
+### `src/app/(app)/dashboard/loading.tsx`
 
 ### `src/app/(app)/dashboard/page.tsx`
 
@@ -63,15 +73,45 @@ Widgets whose data arrives later show a dash rather than a misleading zero.
 
 Exports: `metadata`, `dynamic`, `DashboardPage`
 
+### `src/app/(app)/documents/page.tsx`
+
+Every document in the firm, in one place.
+
+Exports: `metadata`, `dynamic`, `DocumentsPage`
+
+### `src/app/(app)/intake/page.tsx`
+
+What clients told the firm, before anyone checked it.
+
+Exports: `metadata`, `dynamic`, `IntakePage`
+
 ### `src/app/(app)/layout.tsx`
 
 Layout for every signed-in page.
 
 Exports: `dynamic`, `AppLayout`
 
+### `src/app/(app)/matters/[id]/page.tsx`
+
+Tabs the specification requires that later phases fill.
+
+Exports: `metadata`, `dynamic`, `MatterPage`
+
+### `src/app/(app)/matters/new/page.tsx`
+
+Creating a matter.
+
+Exports: `metadata`, `dynamic`, `NewMatterPage`
+
+### `src/app/(app)/matters/page.tsx`
+
+Exports: `metadata`, `dynamic`, `MattersPage`
+
 ### `src/app/(app)/onboarding/[step]/page.tsx`
 
 Exports: `metadata`, `dynamic`, `OnboardingStepPage`
+
+### `src/app/(app)/onboarding/loading.tsx`
 
 ### `src/app/(app)/onboarding/page.tsx`
 
@@ -79,15 +119,39 @@ Exports: `metadata`, `dynamic`, `OnboardingStepPage`
 
 Exports: `dynamic`, `OnboardingPage`
 
+### `src/app/(app)/tasks/page.tsx`
+
+Open work across the firm.
+
+Exports: `metadata`, `dynamic`, `TasksPage`
+
 ### `src/app/403/page.tsx`
 
 403.
 
 Exports: `metadata`, `ForbiddenPage`
 
+### `src/app/api/documents/route.ts`
+
+The file never reaches this handler.
+
+Exports: `POST`
+
+### `src/app/api/documents/verify/route.ts`
+
+"Verified" means somebody looked at it and confirmed it is what it claims to be.
+
+Exports: `POST`
+
 ### `src/app/api/firms/switch/route.ts`
 
 A plain form POST answered with a 303 — see src/lib/http/form-post.ts for why Orchelio does not use a Server Action here.
+
+Exports: `POST`
+
+### `src/app/api/matters/route.ts`
+
+The practice area is taken from the firm, never from the form: a firm creates matters in its own area, and accepting it as input would let a submission conjure fields …
 
 Exports: `POST`
 
@@ -107,17 +171,13 @@ Exports: `GlobalError`
 
 Exports: `metadata`, `viewport`, `RootLayout`
 
-### `src/app/loading.tsx`
-
-Loading screen.
-
-Exports: `Loading`
-
 ### `src/app/login/actions.ts`
 
 These are Server Actions, which Next.js protects against cross-site requests by checking the request origin.
 
 Exports: `signInAction`, `signOutAction`, `SignInState`
+
+### `src/app/login/loading.tsx`
 
 ### `src/app/login/login-form.tsx`
 
@@ -169,6 +229,18 @@ Firm switcher.
 
 Exports: `FirmSwitcher`
 
+### `src/components/loading-screen.tsx`
+
+Loading screen.
+
+Exports: `LoadingScreen`
+
+### `src/components/matter-ui.tsx`
+
+Two rules live here so that every screen obeys them without remembering to: a value that is not known reads "Unknown" rather than being left blank, and a date is never…
+
+Exports: `statusLabel`, `StatusBadge`, `formatDate`, `relativeDays`, `UnconfirmedDate`, `MatterLink`, `fileSize`, `ALL_STATUSES`
+
 ### `src/components/onboarding-ui.tsx`
 
 The audience is a lawyer, not an administrator: every control is a labelled checkbox or a plain field, every option says what it means, and nothing is hidden behind an…
@@ -180,6 +252,12 @@ Exports: `ProgressBar`, `Field`, `CheckboxOption`, `LockIcon`, `StepActions`, `W
 Deliberately small: cards, badges and callouts, built directly on the design tokens in globals.css.
 
 Exports: `Badge`, `StatusDot`, `Card`, `Callout`, `DataRow`, `CommandLine`, `Tone`
+
+### `src/components/upload-panel.tsx`
+
+Drag a file in, or choose one.
+
+Exports: `UploadPanel`
 
 ## `src/lib/`
 
@@ -231,11 +309,23 @@ Sessions are server-side and revocable.
 
 Exports: `createSession`, `destroySession`, `actorFor`, `currentSession`, `SessionFirm`, `SessionUser`, `Session`
 
+### `src/lib/auth/workspace.ts`
+
+Signed in, a firm open, membership verified, scope in hand.
+
+Exports: `requireWorkspace`, `requireWorkspacePermission`, `requireMatterAccess`, `WorkspaceContext`
+
 ### `src/lib/cache.ts`
 
 ## The rule **Firm-scoped data is never cached across requests.
 
 Exports: `platformCatalogue`, `clearCatalogueCache`, `catalogueCacheSize`, `requestScoped`, `UncacheableModelError`, `CACHEABLE_MODEL_NAMES`
+
+### `src/lib/clock.ts`
+
+Memoised for the request, so every date on a page is measured from the same moment.
+
+Exports: `requestNow`
 
 ### `src/lib/constants.ts`
 
@@ -253,7 +343,7 @@ Exports: `widgetsFor`, `widgetValue`, `WidgetTone`, `DashboardWidget`
 
 Writing is in `src/lib/audit.ts`; this module only reads, and only ever for one firm.
 
-Exports: `listActivity`, `countActivity`, `activityActions`, `ActivityFilters`
+Exports: `listActivity`, `countActivity`, `activityActions`, `listTasks`, `listIntakes`, `ActivityFilters`
 
 ### `src/lib/data/analyses.ts`
 
@@ -271,7 +361,7 @@ Exports: `matterTypesForPracticeAreas`, `workflowTemplatesFor`, `allPracticeArea
 
 A document is reachable only through its own firm.
 
-Exports: `getDocument`, `listDocuments`, `countDocuments`, `getDocumentForDownload`
+Exports: `getDocument`, `listDocuments`, `countDocuments`, `getDocumentForDownload`, `addDocument`, `setDocumentVerified`, `documentCategories`, `NewDocument`
 
 ### `src/lib/data/firm-scope.ts`
 
@@ -289,7 +379,7 @@ Exports: `firmConfiguration`, `firmMembers`, `enabledWorkflows`, `getFirm`
 
 Note the shape of every function here: the firm comes first and is required.
 
-Exports: `getMatter`, `listMatters`, `countMatters`, `matterCountsByStatus`, `MatterFilters`
+Exports: `getMatter`, `listMatters`, `countMatters`, `matterCountsByStatus`, `nextReference`, `createMatter`, `matterDetail`, `touchMatter`, `MatterFilters`, `NewMatter`
 
 ### `src/lib/data/onboarding.ts`
 
@@ -313,7 +403,7 @@ Exports: `searchFirm`, `SearchResult`
 
 These are the numbers the dashboard puts in large type, which makes them the numbers a user trusts without checking.
 
-Exports: `firmStatistics`, `FirmStatistics`
+Exports: `firmStatistics`, `practiceAreaCounts`, `FirmStatistics`
 
 ### `src/lib/data/usage.ts`
 
@@ -344,6 +434,18 @@ Exports: `isSameOrigin`, `seeOther`
 Prisma does not support the Json type on SQLite, so structured payloads — firm configuration, matter fields, AI results — are stored as JSON text.
 
 Exports: `parseJsonObject`, `parseStringArray`, `toJsonColumn`
+
+### `src/lib/matters/documents.ts`
+
+Each practice area has its own filing cabinet.
+
+Exports: `categoriesFor`, `categoryLabel`, `isKnownCategory`, `expectedButMissing`, `IMMIGRATION_CATEGORIES`, `EMPLOYMENT_CATEGORIES`, `IDENTITY_CATEGORIES`, `WAGE_CATEGORIES`, `DocumentCategory`
+
+### `src/lib/matters/fields.ts`
+
+An immigration matter records a status expiration date and an I-94 classification.
+
+Exports: `fieldsFor`, `editableFieldsFor`, `sectionsFor`, `editableSectionsFor`, `sanitiseFieldValues`, `displayValue`, `IMMIGRATION_FIELDS`, `EMPLOYMENT_FIELDS`, `FieldType`, `MatterField`
 
 ### `src/lib/onboarding/catalogue.ts`
 
@@ -399,6 +501,10 @@ Phase 3 acceptance, in a real browser.
 
 Phase 1 acceptance: the application actually runs, renders under the Orchelio identity, warns that this is a demonstration, and reports live database state rather than…
 
+### `tests/e2e/matters.spec.ts`
+
+Phase 5 acceptance, in a real browser.
+
 ### `tests/e2e/onboarding.spec.ts`
 
 Phase 4 acceptance, in a real browser.
@@ -419,6 +525,10 @@ Exports: `createTwoFirmFixture`, `SHARED_CLIENT_NAME`, `SHARED_DOCUMENT_NAME`, `
 
 This is the suite the whole product rests on.
 
+### `tests/integration/matters.test.ts`
+
+The sibling suites prove that *reads* stay inside one firm.
+
 ## `tests/stubs/`
 
 ### `tests/stubs/server-only.ts`
@@ -434,6 +544,10 @@ Product naming is a requirement of the specification, not a cosmetic detail: the
 ### `tests/unit/cache.test.ts`
 
 A cache is a place where one request's answer is handed to another.
+
+### `tests/unit/dashboard-widgets.test.ts`
+
+Two product rules meet in this module, and both are easy to break by accident.
 
 ### `tests/unit/demo-accounts.test.ts`
 
@@ -454,6 +568,10 @@ The guard is the backstop that turns a forgotten `where` clause from a silent da
 ### `tests/unit/json-field.test.ts`
 
 These columns hold firm configuration and AI results.
+
+### `tests/unit/matter-fields.test.ts`
+
+`Matter.fields` is a JSON column, which is what makes one product serve two practice areas — and also what would let a hand-crafted form post store anything at all.
 
 ### `tests/unit/onboarding-config.test.ts`
 

@@ -41,6 +41,7 @@ export type FirmFixture = {
   approvalId: string;
   taskId: string;
   draftId: string;
+  intakeId: string;
 };
 
 /** Text that appears in BOTH firms, so a leaking query cannot hide behind it. */
@@ -217,6 +218,16 @@ async function seedFirm(
     data: { firmId: firm.id, matterId: matter.id, title: "Request missing documents" },
   });
 
+  const intake = await client.intakeResponse.create({
+    data: {
+      firmId: firm.id,
+      matterId: matter.id,
+      payload: JSON.stringify({ note: `Intake for ${options.name}` }),
+      status: "submitted",
+      submittedAt: new Date("2026-01-15T09:00:00Z"),
+    },
+  });
+
   const draft = await client.draftCommunication.create({
     data: {
       firmId: firm.id,
@@ -271,5 +282,6 @@ async function seedFirm(
     approvalId: approval.id,
     taskId: task.id,
     draftId: draft.id,
+    intakeId: intake.id,
   };
 }

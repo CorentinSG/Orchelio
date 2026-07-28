@@ -29,13 +29,15 @@ type NavItem = {
 
 type PlannedItem = { label: string; phase: number };
 
-const FIRM_NAV: readonly NavItem[] = [{ href: "/dashboard", label: "Dashboard" }];
+const FIRM_NAV: readonly NavItem[] = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/matters", label: "Matters", permission: "matter.view" },
+  { href: "/intake", label: "Intake", permission: "matter.view" },
+  { href: "/documents", label: "Documents", permission: "document.view" },
+  { href: "/tasks", label: "Tasks", permission: "matter.view" },
+];
 
 const FIRM_PLANNED: readonly PlannedItem[] = [
-  { label: "Matters", phase: 5 },
-  { label: "Intake", phase: 5 },
-  { label: "Documents", phase: 5 },
-  { label: "Tasks", phase: 5 },
   { label: "AI Workspace", phase: 6 },
   { label: "Approvals", phase: 7 },
   { label: "Activity Log", phase: 7 },

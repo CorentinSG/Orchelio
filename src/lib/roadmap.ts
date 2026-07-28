@@ -46,7 +46,7 @@ export const PHASES: readonly Phase[] = [
     number: 5,
     title: "Matters & documents",
     summary: "Matter list and record, practice-area fields, simulated document upload.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 6,
