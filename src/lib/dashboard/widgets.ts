@@ -32,8 +32,8 @@ export type DashboardWidget = {
 const SHARED_WIDGETS: readonly DashboardWidget[] = [
   { key: "active_matters", label: "Active matters", hint: "Open matters", tone: "brand", availableFrom: 5 },
   { key: "pending_approvals", label: "Pending approvals", hint: "Awaiting a human decision", tone: "warning", availableFrom: 7 },
-  { key: "recent_analyses", label: "Recent Claude analyses", hint: "Completed analyses", tone: "ai", availableFrom: 6 },
-  { key: "monthly_usage", label: "Simulated AI usage", hint: "This firm only — no charge", tone: "neutral", availableFrom: 6 },
+  { key: "recent_analyses", label: "Claude analyses run", hint: "Every one still needs a person", tone: "ai", availableFrom: 6 },
+  { key: "monthly_usage", label: "Simulated tokens used", hint: "This firm only — no charge", tone: "neutral", availableFrom: 6 },
 ];
 
 const IMMIGRATION_WIDGETS: readonly DashboardWidget[] = [
@@ -53,7 +53,7 @@ const EMPLOYMENT_WIDGETS: readonly DashboardWidget[] = [
   { key: "termination_letters_to_review", label: "Termination letters to review", hint: "On file, not yet checked by a person", tone: "warning", availableFrom: 5 },
   { key: "wage_records_missing", label: "Wage records missing", hint: "Matters missing a pay stub or time record", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
   // "Assessed" is something the analysis decides, so this one waits for it.
-  { key: "discrimination_awaiting_assessment", label: "Discrimination matters awaiting assessment", hint: "Not yet assessed", tone: "warning", availableFrom: 6 },
+  { key: "discrimination_awaiting_assessment", label: "Discrimination matters not yet analysed", hint: "No analysis has been run on them", tone: "warning", availableFrom: 6 },
   { key: "settlement_deadlines", label: "Settlement dates to review", hint: "In settlement discussions with a date recorded", tone: "warning", availableFrom: 5 },
 ];
 

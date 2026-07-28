@@ -21,7 +21,7 @@ export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
 
 /** Widgets whose data arrives later show a dash rather than a misleading zero. */
-const CURRENT_PHASE = 5;
+const CURRENT_PHASE = 6;
 
 /**
  * Firm dashboard.
@@ -32,7 +32,9 @@ const CURRENT_PHASE = 5;
  *
  * The practice-area widgets (consultations to prepare, missing documents,
  * status dates to review) are generated from the onboarding configuration in
- * Phase 4 and filled by the matters in Phase 5.
+ * Phase 4 and filled by the matters in Phase 5. Their counts live in
+ * `practiceAreaCounts`; a widget whose key that function does not return shows
+ * a dash rather than a zero.
  */
 export default async function DashboardPage() {
   const session = await currentSession();
@@ -102,10 +104,10 @@ export default async function DashboardPage() {
           </p>
         </Callout>
       ) : (
-        <Callout tone="brand" title="Phase 5 of 9">
+        <Callout tone="brand" title="Phase 6 of 9">
           This dashboard is assembled from this firm&apos;s configuration — the cards below are
           the ones an {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about
-          each morning. Matters and documents are live; the analyses (Phase 6) and approvals
+          each morning. Matters, documents and the simulated analyses are live; the approvals
           (Phase 7) still show a dash, because a zero would claim there is nothing to do.
         </Callout>
       )}

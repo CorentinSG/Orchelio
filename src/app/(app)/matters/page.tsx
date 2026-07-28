@@ -231,8 +231,9 @@ export default async function MattersPage({ searchParams }: PageProps) {
         )}
       </Card>
 
-      <Callout tone="ai" title="Claude analyses arrive in Phase 6">
-        The AI column shows a dash because no analysis has been run — not because none is needed.
+      <Callout tone="ai" title="The AI column is a state, not a verdict">
+        A dash means no analysis has been run on that matter — not that none is needed. An
+        analysis that has run still requires a person to read it before it is used.
       </Callout>
     </div>
   );

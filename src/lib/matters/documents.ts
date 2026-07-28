@@ -15,45 +15,56 @@ export type DocumentCategory = {
   label: string;
   /** Expected for these matter types. Absent means "useful, not expected". */
   expectedFor?: readonly string[];
+  /**
+   * Why a matter of this kind usually needs it.
+   *
+   * Phrased as what the document establishes, never as what its absence
+   * implies. "Records the date and terms of entry" is useful; "without it the
+   * claim will fail" is a legal conclusion Orchelio must not reach.
+   */
+  whyItMatters?: string;
 };
 
 export const IMMIGRATION_CATEGORIES: readonly DocumentCategory[] = [
-  { key: "passport", label: "Passport", expectedFor: ["*"] },
-  { key: "i94", label: "I-94", expectedFor: ["*"] },
+  { key: "passport", label: "Passport", expectedFor: ["*"], whyItMatters: "Establishes identity, nationality and the validity dates the rest of the file is read against." },
+  { key: "i94", label: "I-94", expectedFor: ["*"], whyItMatters: "Records the date, place and class of the last admission — the dates a status calculation starts from." },
   { key: "visa", label: "Visa" },
   { key: "uscis_notice", label: "USCIS Notice" },
-  { key: "birth_certificate", label: "Birth Certificate", expectedFor: ["family_based", "naturalisation"] },
-  { key: "marriage_certificate", label: "Marriage Certificate", expectedFor: ["family_based"] },
-  { key: "employment_letter", label: "Employment Letter", expectedFor: ["employment_based"] },
-  { key: "tax_record", label: "Tax Record", expectedFor: ["naturalisation"] },
+  { key: "birth_certificate", label: "Birth Certificate", expectedFor: ["family_based", "naturalisation"], whyItMatters: "Evidences the family relationship a petition is built on." },
+  { key: "marriage_certificate", label: "Marriage Certificate", expectedFor: ["family_based"], whyItMatters: "Evidences the marriage a family-based petition relies on." },
+  { key: "employment_letter", label: "Employment Letter", expectedFor: ["employment_based"], whyItMatters: "Sets out the role, salary and terms the petitioning employer is offering." },
+  { key: "tax_record", label: "Tax Record", expectedFor: ["naturalisation"], whyItMatters: "Shows the filing history a naturalisation application is assessed against." },
   { key: "prior_filing", label: "Prior Filing" },
   { key: "police_certificate", label: "Police Certificate" },
   { key: "other", label: "Other" },
 ] as const;
 
 export const EMPLOYMENT_CATEGORIES: readonly DocumentCategory[] = [
-  { key: "employment_agreement", label: "Employment Agreement", expectedFor: ["*"] },
+  { key: "employment_agreement", label: "Employment Agreement", expectedFor: ["*"], whyItMatters: "Sets out the agreed terms — pay, hours, classification and any clauses that bind the parties." },
   { key: "offer_letter", label: "Offer Letter" },
   { key: "employee_handbook", label: "Employee Handbook" },
-  { key: "pay_stub", label: "Pay Stub", expectedFor: ["unpaid_wages", "wage_and_hour"] },
-  { key: "time_record", label: "Time Record", expectedFor: ["unpaid_wages", "wage_and_hour"] },
+  { key: "pay_stub", label: "Pay Stub", expectedFor: ["unpaid_wages", "wage_and_hour"], whyItMatters: "Shows what was actually paid, period by period." },
+  { key: "time_record", label: "Time Record", expectedFor: ["unpaid_wages", "wage_and_hour"], whyItMatters: "Shows the hours actually recorded, to compare against what was paid." },
   { key: "payroll_record", label: "Payroll Record" },
   {
     key: "performance_review",
     label: "Performance Review",
     expectedFor: ["wrongful_termination", "retaliation", "workplace_discrimination"],
+    whyItMatters: "Records how the employer assessed the employee, and when.",
   },
   { key: "disciplinary_notice", label: "Disciplinary Notice" },
   {
     key: "termination_letter",
     label: "Termination Letter",
     expectedFor: ["wrongful_termination", "retaliation"],
+    whyItMatters: "Records the stated reason for the ending of employment, and its date.",
   },
-  { key: "severance_agreement", label: "Severance Agreement", expectedFor: ["severance_review"] },
+  { key: "severance_agreement", label: "Severance Agreement", expectedFor: ["severance_review"], whyItMatters: "Contains the release, the consideration and any deadline for acceptance." },
   {
     key: "internal_complaint",
     label: "Internal Complaint",
     expectedFor: ["retaliation", "workplace_discrimination", "workplace_harassment"],
+    whyItMatters: "Records what was raised with the employer, and on what date.",
   },
   { key: "hr_correspondence", label: "HR Correspondence" },
   { key: "email", label: "Email" },

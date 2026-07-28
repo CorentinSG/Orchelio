@@ -216,17 +216,67 @@ depended on it. The loading screen is now placed per segment and deliberately no
 
 ---
 
-## Phase 6 — Simulated AI
+## Phase 6 — Simulated AI ✅ Delivered
 
-- The `AIProvider` interface and `MockAIProvider`.
-- Claude Analyst: summary, key facts with sources and simulated confidence, timeline, missing
-  documents, contradictions, attorney questions, client questions, warnings.
-- Claude Reviewer: independent review with issue categories, and mandatory human review.
-- Simulated progress states, and honest error states.
-- `prompts/` written for the future Anthropic provider.
+Delivered:
 
-**Acceptance:** the Daniel Moreau matter surfaces its date contradiction; the Amira Hassan matter
-returns "More information required" and no conclusion.
+- **The `AIProvider` interface** (`src/lib/ai/provider.ts`) — two methods, one seam. Selection is
+  by `AI_PROVIDER` and nothing else. Asking for `anthropic` throws with the reason rather than
+  quietly behaving like the mock, because a silent fallback would let a firm believe it was
+  getting a real analysis when it was not.
+- **Claude Analyst**: summary, key facts with their sources and a simulated confidence, timeline,
+  missing documents, contradictions, attorney questions, client questions, warnings.
+- **Claude Reviewer**: an independent pass with five issue categories, every check reported
+  whether it passed or failed, and `humanReviewRequired` always true.
+- The **AI Analysis** and **Timeline** tabs on a matter, and the **AI Workspace** listing every
+  analysis a firm has run alongside its simulated usage.
+- Honest states throughout: a run that fails says so and keeps nothing partial; a firm with no AI
+  features switched on is refused rather than shown a page of empty sections.
+- `prompts/analyst.v1.md` and `prompts/reviewer.v1.md`, written for the future Anthropic provider,
+  including the prompt-injection defence.
+
+**Acceptance met:** the Daniel Moreau matter surfaces the disagreement between the entry date on
+the record (11 February 2024) and the date in the I-94's own filename (4 March 2024), shows both
+with their sources, and refuses to resolve it. The Amira Hassan matter reaches "more information
+required" and states no conclusion. Both are asserted in `tests/unit/ai-analyst.test.ts` against
+the same data the seed writes.
+
+### Derived, not looked up
+
+The obvious way to build this phase was a table of hand-written results for the six fictional
+matters. That would have demonstrated nothing: the Moreau contradiction would have been "found"
+because somebody typed it in, and a firm creating its own matter would have got an empty page.
+
+Instead the Analyst is a set of deterministic rules over the matter's recorded fields, its intake
+answers and its document *names*. The rule that finds Moreau's contradiction — a date carried in a
+document's filename disagreeing with the date on the record — is a general one, which is why the
+Vasquez matter is the more interesting test: its filenames carry dates too
+(`internal-complaint-2026-04-28.pdf`), and they agree, so the same rule stays silent.
+
+### It never opens a document
+
+There is no upload and no OCR (Phase 5), so nothing here can read a file. Every fact sourced to a
+document comes from that document's name and kind. Every analysis says so in its own warnings, and
+the Reviewer fails an analysis that has lost that caveat.
+
+This shaped the confidence model. An early version called a fact "corroborated" when two documents
+of a plausible kind were on file — which is not two sources agreeing, it is two unopened documents
+existing. The support levels now say exactly what is true: a document's *name* agrees; a document
+of the right kind is on file, checked or not; the client said it twice; the client said it once;
+the sources disagree.
+
+### A conclusion has nowhere to live
+
+`MatterAnalysisResult` has no `conclusion`, `recommendation`, `eligibility` or `advice` field —
+absent from the shape, not merely left empty, so filling one in would take a deliberate decision
+rather than a careless line. The Reviewer scans the Analyst's own prose against ten patterns for
+eligibility findings, recommendations, predictions and confirmed deadlines. That check has never
+fired in normal operation, which is the point: it is a regression guard, and
+`tests/unit/ai-reviewer.test.ts` proves it fires by handing it eight sentences that should trip it.
+
+Tested by **101 unit tests** across the date parser, the Analyst against all six fictional matters,
+and the Reviewer against deliberately damaged analyses; **14 integration tests** on the runner
+(isolation, failure handling, simulated charges, determinism); and **23 browser tests**.
 
 ---
 

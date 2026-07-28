@@ -39,7 +39,7 @@ the code — is what makes one firm's Orchelio different from another's. Each
 firm's data is isolated from every other firm's, enforced in three independent
 layers and proved by tests.
 
-Built in nine phases. Four are delivered; see [Roadmap](ROADMAP.md).
+Built in nine phases. Six are delivered; see [Roadmap](ROADMAP.md).
 
 ---
 
@@ -62,6 +62,8 @@ decided, and what it cost.
 | 9 | [A dash, not a zero](decisions/ADR-0009-a-dash-not-a-zero.md) | 4 |
 | 10 | [Two caches, and never firm data across requests](decisions/ADR-0010-two-caches-only.md) | harness |
 | 11 | [Loading boundaries are placed per segment](decisions/ADR-0011-loading-boundaries-are-placed-per-segment.md) | 5 |
+| 12 | [The simulated analysis derives rather than looks up](decisions/ADR-0012-the-simulation-derives-rather-than-looks-up.md) | 6 |
+| 13 | [A conclusion has nowhere to live](decisions/ADR-0013-a-conclusion-has-nowhere-to-live.md) | 6 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)
@@ -91,3 +93,5 @@ differently without knowing what you knew. Preferences do not need a note.
 - [Production readiness](PRODUCTION_READINESS.md) — what must happen before this
   could hold a real client file. Written to be honest, not reassuring.
 - [Phase 1 plan](PLAN_PHASE_1.md) — the analysis that opened the project.
+- [Prompts](../prompts/README.md) — the instructions a real Anthropic provider
+  would be given. Nothing in this build sends them anywhere.

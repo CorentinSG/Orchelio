@@ -52,7 +52,7 @@ export const PHASES: readonly Phase[] = [
     number: 6,
     title: "Simulated AI",
     summary: "AIProvider interface, MockAIProvider, Claude Analyst and Claude Reviewer.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 7,

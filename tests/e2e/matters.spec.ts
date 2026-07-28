@@ -160,15 +160,17 @@ test.describe("A matter record", () => {
     expect(body).not.toContain("I-94 available");
   });
 
-  test("moves between the four tabs that exist and names the ones that do not", async ({
+  test("moves between the tabs that exist and names the ones that do not", async ({
     page,
   }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-001");
 
     const tabs = page.getByRole("navigation", { name: "Matter sections" });
+    // Timeline and AI Analysis landed in Phase 6; Approvals has not.
     await expect(tabs).toContainText("Timeline");
-    await expect(tabs).toContainText("Phase 6");
+    await expect(tabs).toContainText("Approvals");
+    await expect(tabs).toContainText("Phase 7");
 
     await tabs.getByRole("link", { name: "Documents" }).click();
     await expect(page.getByRole("region", { name: /^Documents \(/ })).toBeVisible();
@@ -203,8 +205,10 @@ test.describe("A matter record", () => {
     });
     await expect(checklist).toBeVisible();
     await expect(checklist).toContainText("Not received");
-    // A checklist, not a conclusion: the AI's own view is a later phase.
-    await expect(checklist).toContainText("Phase 6");
+    // A checklist, not a conclusion — and it says so, pointing at the analysis
+    // for the reasons rather than stating them here.
+    await expect(checklist).toContainText(/read by a person before it is used/i);
+    await expect(checklist).not.toContainText(/will fail|cannot succeed|fatal/i);
   });
 
   test("refuses another firm's matter as though it did not exist", async ({ page }) => {
@@ -525,11 +529,13 @@ test.describe("The firm workspace pages", () => {
   test("still shows a dash for the phases that have not landed", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
 
-    for (const label of ["Pending approvals", "Recent Claude analyses"]) {
+    // Approvals arrive in Phase 7. The analyses tile is filled from Phase 6, so
+    // it is no longer part of this assertion.
+    for (const label of ["Pending approvals"]) {
       const tile = page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
       // A zero would claim there is nothing to do. See ADR-0009.
       await expect(tile.locator("p").first(), label).toHaveText("—");
-      await expect(tile, label).toContainText(/Phase [67]/);
+      await expect(tile, label).toContainText("Phase 7");
     }
   });
 

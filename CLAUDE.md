@@ -100,7 +100,17 @@ communication, no final deadline or eligibility conclusion without a person.
 a generic name ("Legal AI Platform", "JurisFlow", …) ever appears in a
 user-visible surface.
 
-### 6. Say less than you know, not more
+### 6. An analysis may describe, never conclude
+
+`src/lib/ai/reviewer.ts` scans Orchelio's own prose for eligibility findings,
+recommendations, predictions and confirmed deadlines, and fails the analysis if
+it finds one. That check has never fired in normal operation — it is a
+regression guard, and `tests/unit/ai-reviewer.test.ts` proves it can fail.
+
+It scans only text Orchelio wrote. A recorded field's *value* is what the firm
+wrote down about the client; flagging it would be flagging the client.
+
+### 7. Say less than you know, not more
 
 A widget whose data does not exist yet shows a dash, not a zero — a zero is a
 claim ("there is nothing to do"). A widget depending on an AI feature the firm
@@ -116,7 +126,11 @@ whether a record is missing or forbidden, so a refusal never confirms existence.
   change would require one, it is the wrong change.
 - **AI is simulated** (`AI_PROVIDER=mock`). `ANTHROPIC_API_KEY` is server-only
   and absent; selecting the Anthropic provider without it throws at startup
-  rather than silently falling back.
+  rather than silently falling back. The simulation *derives* its output from
+  each matter's fields, intake answers and document **names** — it never opens a
+  document, and every analysis says so. An analysis has no field for a
+  conclusion, a recommendation or an eligibility finding: absent from the type,
+  not left empty. See ADR-0012 and ADR-0013.
 - **Orchelio never sends anything.** `DraftCommunication` has no "sent" status
   and there is no transport.
 

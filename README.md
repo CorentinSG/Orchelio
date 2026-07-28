@@ -15,13 +15,14 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 to 5 of 9 complete
+## Current status: Phases 1 to 6 of 9 complete
 
-Orchelio is built in nine phases. **Phases 1 to 5** are finished: you can sign in, land in the
+Orchelio is built in nine phases. **Phases 1 to 6** are finished: you can sign in, land in the
 right firm workspace, switch between firms, answer a seven-step questionnaire that configures the
-firm, see a dashboard assembled from that configuration, and work through matters — a filtered
-list, a matter record with practice-area fields, and simulated document upload. It does **not**
-yet deliver the AI analysis, the approval centre or the cost screens.
+firm, see a dashboard assembled from that configuration, work through matters — a filtered list, a
+matter record with practice-area fields, simulated document upload — and run a simulated Claude
+analysis that is independently reviewed. It does **not** yet deliver the approval centre, the
+activity log screen or the cost screens.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
@@ -30,7 +31,7 @@ yet deliver the AI analysis, the approval centre or the cost screens.
 | 3 | Firm memberships, `firmId` scoping on every query, isolation tests | ✅ Delivered |
 | 4 | Seven-step onboarding questionnaire and generated configuration | ✅ Delivered |
 | 5 | Matters, practice-area fields, simulated document upload | ✅ Delivered |
-| 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | Planned |
+| 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | ✅ Delivered |
 | 7 | Approval centre, human decisions, append-only audit log | Planned |
 | 8 | Simulated AI costs, firm creation, settings, guided demo | Planned |
 | 9 | Unit, integration and end-to-end tests, accessibility, final documentation | Planned |
@@ -260,19 +261,25 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 to 5 only.** The AI analysis, the approval centre, the activity log screen and the
-   cost screens are not built yet. The dashboard is assembled from each firm's configuration;
-   matters and documents now fill their figures, while the widgets waiting on a later phase show a
-   dash rather than a zero — a zero would be a claim ("there is nothing to do") the product cannot
-   yet support.
+1. **Phases 1 to 6 only.** The approval centre, the activity log screen and the cost screens are
+   not built yet. The dashboard is assembled from each firm's configuration; matters, documents
+   and analyses now fill their figures, while the widgets waiting on Phase 7 show a dash rather
+   than a zero — a zero would be a claim ("there is nothing to do") the product cannot yet
+   support.
 2. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
    account lockout. It exists to demonstrate roles and access control.
 3. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
    and is not shared between instances. It raises the cost of guessing on one machine; it is not
    abuse protection.
-4. **Simulated AI.** The `AIProvider` interface and the mock implementation land in Phase 6.
-   Nothing in this build calls Anthropic.
+4. **Simulated AI, and not a language model.** Nothing in this build calls Anthropic; there is no
+   API key and no request leaves the machine. What produces an analysis is a set of deterministic
+   rules over each matter's recorded fields, its intake answers and its document *names* — a
+   different mechanism producing the same kind of result, so that every screen could be built and
+   tested now. **No document is ever opened**: Orchelio stores a filename, a type and a size, and
+   there is no OCR, so nothing in an analysis comes from inside a file. Every analysis says so in
+   its own warnings. The prompts a real provider would be given are in
+   [`prompts/`](prompts/README.md).
 5. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
    protect it — required arguments, a database client that refuses an unscoped query, and
    membership guards — and 62 integration tests prove it against a real database holding two firms

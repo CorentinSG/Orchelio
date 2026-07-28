@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 106.
+Modules: 120.
 
 ## `prisma/`
 
@@ -64,6 +64,12 @@ Exports: `middleware`, `config`
 Platform administration — firms.
 
 Exports: `metadata`, `dynamic`, `AdminFirmsPage`
+
+### `src/app/(app)/ai/page.tsx`
+
+Deliberately as much about what Claude does *not* do as about what it does.
+
+Exports: `metadata`, `dynamic`, `AiWorkspacePage`
 
 ### `src/app/(app)/dashboard/loading.tsx`
 
@@ -130,6 +136,12 @@ Exports: `metadata`, `dynamic`, `TasksPage`
 403.
 
 Exports: `metadata`, `ForbiddenPage`
+
+### `src/app/api/ai/analyse/route.ts`
+
+A plain form POST answered with a 303, like every other consequential action in this product (ADR-0006).
+
+Exports: `POST`
 
 ### `src/app/api/documents/route.ts`
 
@@ -205,6 +217,12 @@ Exports: `dynamic`, `HomePage`
 
 ## `src/components/`
 
+### `src/components/analysis-ui.tsx`
+
+Every rule the analyst obeys has to survive being rendered, and most of the ways an honest analysis becomes a dishonest screen happen here: * A source shown as a filen…
+
+Exports: `SourceList`, `AnalysisWarnings`, `ContradictionCard`, `KeyFactRow`, `TimelineList`, `ReviewPanel`, `QuestionList`, `AnalysisStatus`
+
 ### `src/components/app-shell.tsx`
 
 The sidebar always names the product and, underneath, the firm currently open.
@@ -260,6 +278,42 @@ Drag a file in, or choose one.
 Exports: `UploadPanel`
 
 ## `src/lib/`
+
+### `src/lib/ai/analyst.ts`
+
+## What this is, honestly This is not a language model and it does not pretend to be one.
+
+Exports: `analyseMatter`, `STANDING_WARNINGS`, `analystInternals`
+
+### `src/lib/ai/dates.ts`
+
+A contradiction in a legal file is very often two dates that should be the same and are not.
+
+Exports: `parseIsoDate`, `parseWrittenDate`, `isoDateWithin`, `readDate`, `formatWritten`
+
+### `src/lib/ai/provider.ts`
+
+One interface, two roles, and exactly one place where the implementation is chosen.
+
+Exports: `aiProvider`, `MockAIProvider`, `UnavailableAIProvider`
+
+### `src/lib/ai/reviewer.ts`
+
+The Reviewer's job is to be unimpressed by the Analyst.
+
+Exports: `reviewAnalysis`
+
+### `src/lib/ai/run.ts`
+
+This is the only place an analysis is produced, and it is deliberately dull: gather the matter, open a record, ask the provider, write down what came back.
+
+Exports: `runAnalysis`, `buildInput`, `ANALYSIS_FAILURE_MESSAGE`, `RunOutcome`
+
+### `src/lib/ai/types.ts`
+
+These types are the contract between whatever produces an analysis and every screen that shows one.
+
+Exports: `supportLabel`, `supportCaveat`, `reviewIssueLabel`, `reviewStatusLabel`, `SOURCE_KINDS`, `SUPPORT_LEVELS`, `SUFFICIENCY`, `REVIEW_ISSUE_CATEGORIES`, `REVIEW_STATUSES`, `CONFIDENCE_BY_SUPPORT`, `SourceKind`, `FactSource`, `SupportLevel`, `KeyFact`, `TimelineEvent`, `MissingDocument`, `Contradiction`, `Question`, `Sufficiency`, `MatterAnalysisResult`, `AnalysisDocument`, `MatterAnalysisInput`, `ReviewIssueCategory`, `ReviewIssue`, `ReviewStatus`, `ReviewCheck`, `AnalysisReviewResult`, `AnalysisReviewInput`
 
 ### `src/lib/app-config.ts`
 
@@ -349,7 +403,7 @@ Exports: `listActivity`, `countActivity`, `activityActions`, `listTasks`, `listI
 
 Analyses hold extracted facts about a client's situation, so they are among the most sensitive records in the product.
 
-Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getReview`, `countAnalyses`
+Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getReview`, `countAnalyses`, `latestAnalysisForMatter`, `beginAnalysis`, `completeAnalysis`, `failAnalysis`, `recordReview`, `setMatterAiStatus`
 
 ### `src/lib/data/catalogues.ts`
 
@@ -401,7 +455,7 @@ Exports: `searchFirm`, `SearchResult`
 
 ### `src/lib/data/statistics.ts`
 
-These are the numbers the dashboard puts in large type, which makes them the numbers a user trusts without checking.
+Matter types whose subject is discrimination or retaliation.
 
 Exports: `firmStatistics`, `practiceAreaCounts`, `FirmStatistics`
 
@@ -489,6 +543,10 @@ Exports: `getDatabaseStatus`, `getSystemStatus`, `listFirms`, `DatabaseStatus`, 
 
 ## `tests/e2e/`
 
+### `tests/e2e/analysis.spec.ts`
+
+Phase 6 acceptance, in a real browser.
+
 ### `tests/e2e/auth.spec.ts`
 
 Phase 2 acceptance.
@@ -510,6 +568,10 @@ Phase 5 acceptance, in a real browser.
 Phase 4 acceptance, in a real browser.
 
 ## `tests/integration/`
+
+### `tests/integration/analyses.test.ts`
+
+The rules are tested in `tests/unit/ai-analyst.test.ts`.
 
 ### `tests/integration/data-access.test.ts`
 
@@ -536,6 +598,18 @@ The sibling suites prove that *reads* stay inside one firm.
 Stand-in for the `server-only` package during tests.
 
 ## `tests/unit/`
+
+### `tests/unit/ai-analyst.test.ts`
+
+These are the phase's acceptance criteria, run against the same data the seed writes rather than against fixtures invented for the test.
+
+### `tests/unit/ai-dates.test.ts`
+
+A date parser that guesses turns a clean file into a false contradiction, which wastes more of a lawyer's time than finding nothing would have.
+
+### `tests/unit/ai-reviewer.test.ts`
+
+A reviewer that always agrees is worse than no reviewer: it makes an unchecked analysis look checked.
 
 ### `tests/unit/app-identity.test.ts`
 

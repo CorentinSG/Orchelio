@@ -306,11 +306,17 @@ Two consequences worth knowing:
 
 ## 5. The AI layer
 
-> Status: Phase 6. The interface below is the contract the rest of the product will be written
-> against; no implementation exists yet.
+> Status: delivered in Phase 6. `src/lib/ai/` holds the types, the interface, the simulation and
+> the runner; every screen reads the interface and none of them knows which implementation answered.
 
 ```ts
 interface AIProvider {
+  readonly name: AiProviderName;
+  readonly model: string;
+  readonly promptVersion: string;
+  /** True when no real model is involved. Screens say so when it is. */
+  readonly simulated: boolean;
+
   analyseMatter(input: MatterAnalysisInput): Promise<MatterAnalysisResult>;
   reviewAnalysis(input: AnalysisReviewInput): Promise<AnalysisReviewResult>;
 }
@@ -328,8 +334,18 @@ Implementations:
 
 | Implementation | Status | Behaviour |
 | -------------- | ------ | --------- |
-| `MockAIProvider` | Phase 6 | Pre-written results for the fictional matters. No network call. |
-| `AnthropicAIProvider` | Prepared, not activated | Calls the Anthropic API, server-side only. |
+| `MockAIProvider` | Delivered | Deterministic rules over each matter's fields, intake answers and document *names*. No network call. |
+| `AnthropicAIProvider` | Prepared, not implemented | Would call the Anthropic API, server-side only. Selecting it throws with the reason. |
+
+`MockAIProvider` derives its output rather than looking it up — see
+[ADR-0012](decisions/ADR-0012-the-simulation-derives-rather-than-looks-up.md) for why, and for
+what that forced the confidence model to admit. **It never opens a document**: there is no upload
+and no OCR, so every fact sourced to a document comes from that document's name and kind, and
+every analysis carries that as a standing warning.
+
+An analysis has no field for a conclusion, a recommendation, an eligibility finding or advice —
+absent from the type, not merely left empty. See
+[ADR-0013](decisions/ADR-0013-a-conclusion-has-nowhere-to-live.md).
 
 Selection is by environment variable only:
 
@@ -447,10 +463,19 @@ settings and — optionally — sample data. No code change, no deployment. (Pha
 
 1. `npm install @anthropic-ai/sdk`.
 2. Create `src/lib/ai/anthropic-provider.ts` implementing `AIProvider`. Server-side only.
-3. Write the prompts under `prompts/`.
+3. Send [`prompts/analyst.v1.md`](../prompts/analyst.v1.md) and
+   [`prompts/reviewer.v1.md`](../prompts/reviewer.v1.md), already written. Record the version on
+   every row, as the mock does, so a past output can still be explained.
 4. Set `ANTHROPIC_API_KEY` in `.env` (never in any `NEXT_PUBLIC_*` variable).
-5. Set `AI_PROVIDER=anthropic`.
-6. Add prompt-injection tests before enabling it against anything that matters.
+5. Replace the `throw` in `aiProvider()` — it exists so that asking for a provider that is not
+   implemented fails loudly instead of quietly behaving like the mock.
+6. Set `AI_PROVIDER=anthropic`.
+7. Add prompt-injection tests before enabling it against anything that matters. The rule that a
+   document is evidence and never an instruction is stated in both prompts and tested nowhere,
+   because nothing is sent anywhere yet.
+8. Run `tests/unit/ai-reviewer.test.ts` against the new provider's output. Those checks are what
+   stop an analysis overstating what a file supports, and they are written to be
+   implementation-independent.
 
 No page and no query changes: the interface is the seam.
 

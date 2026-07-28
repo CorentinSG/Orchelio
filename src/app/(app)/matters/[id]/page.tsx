@@ -10,6 +10,15 @@ import {
   relativeDays,
 } from "@/components/matter-ui";
 import { UploadPanel } from "@/components/upload-panel";
+import {
+  AnalysisStatus,
+  AnalysisWarnings,
+  ContradictionCard,
+  KeyFactRow,
+  QuestionList,
+  ReviewPanel,
+  TimelineList,
+} from "@/components/analysis-ui";
 import { recordViewEvent } from "@/lib/audit";
 import { AUDIT_ACTIONS } from "@/lib/constants";
 import { can } from "@/lib/auth/permissions";
@@ -17,9 +26,13 @@ import { actorFor } from "@/lib/auth/session";
 import { requireMatterAccess } from "@/lib/auth/workspace";
 import { requestNow } from "@/lib/clock";
 import { matterDetail } from "@/lib/data/matters";
+import { latestAnalysisForMatter } from "@/lib/data/analyses";
+import { firmConfiguration } from "@/lib/data/firms";
+import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
 import { categoriesFor, categoryLabel, expectedButMissing } from "@/lib/matters/documents";
 import { displayValue, sectionsFor } from "@/lib/matters/fields";
-import { parseJsonObject } from "@/lib/json-field";
+import { parseJsonObject, parseStringArray } from "@/lib/json-field";
+import type { AnalysisReviewResult, MatterAnalysisResult } from "@/lib/ai/types";
 
 export const metadata = { title: "Matter" };
 export const dynamic = "force-dynamic";
@@ -29,12 +42,12 @@ const TABS = [
   { key: "intake", label: "Intake" },
   { key: "documents", label: "Documents" },
   { key: "tasks", label: "Tasks" },
+  { key: "timeline", label: "Timeline" },
+  { key: "analysis", label: "AI Analysis" },
 ] as const;
 
 /** Tabs the specification requires that later phases fill. */
 const PLANNED_TABS = [
-  { label: "Timeline", phase: 6 },
-  { label: "AI Analysis", phase: 6 },
   { label: "Communications", phase: 7 },
   { label: "Approvals", phase: 7 },
   { label: "Activity", phase: 7 },
@@ -97,6 +110,37 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
   );
   const intake = parseJsonObject(matter.intakeResponses[0]?.payload);
   const openTasks = matter.tasks.filter((task) => task.status !== "done");
+
+  const [analysis, configuration] = await Promise.all([
+    latestAnalysisForMatter({ firmId: firm.id }, matter.id),
+    firmConfiguration({ firmId: firm.id }),
+  ]);
+  const enabledAiFeatures = parseStringArray(configuration?.aiFeatures);
+  // The catalogue's own list, minus what this firm chose. Practice-area
+  // variants count as the same feature: an employment firm enabling
+  // `employment_timeline` has asked for "Create a factual timeline".
+  const unusedAiFeatures = AI_FEATURE_OPTIONS.filter(
+    (option) =>
+      !enabledAiFeatures.some(
+        (key) =>
+          key === option.key.default ||
+          Object.values(option.key.byPracticeArea ?? {}).includes(key),
+      ),
+  ).map((option) => option.key.default);
+  const canRunAnalysis = can(actor, "ai.analysis.run") && enabledAiFeatures.length > 0;
+  const canSeeResults = can(actor, "ai.result.view");
+
+  // Parsed once here rather than in each tab: both the Timeline and the AI
+  // Analysis tab read the same stored result.
+  const result =
+    analysis?.status === "completed" && analysis.result
+      ? (JSON.parse(analysis.result) as MatterAnalysisResult)
+      : null;
+  const review = analysis?.reviews[0]?.result
+    ? (JSON.parse(analysis.reviews[0].result) as AnalysisReviewResult)
+    : null;
+
+  const analysisProblem = typeof query["problem"] === "string" ? query["problem"] : null;
 
   return (
     <div className="space-y-6">
@@ -186,9 +230,15 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                 </ul>
               )}
               <p className="mt-4 text-sm text-ink-subtle">
-                This compares what is on file against what this type of matter usually needs. The
-                AI&apos;s own view — with reasons and priorities — arrives in Phase 6 and is
-                reviewed by a person.
+                This compares what is on file against what this type of matter usually needs.{" "}
+                <Link
+                  href={`/matters/${matter.id}?tab=analysis`}
+                  className="font-medium text-brand underline underline-offset-4"
+                >
+                  The analysis
+                </Link>{" "}
+                says why each one matters — and, like everything else it produces, is read by a
+                person before it is used.
               </p>
             </Card>
           </div>
@@ -336,6 +386,247 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           )}
         </Card>
       ) : null}
+
+      {tab === "timeline" ? (
+        <Card
+          title="Timeline"
+          description="Every date on this matter, in order, with where each one came from."
+        >
+          {!canSeeResults ? (
+            <Callout tone="neutral" title="Not available to your role">
+              Your role does not include viewing analysis results.
+            </Callout>
+          ) : !result ? (
+            <Callout tone="neutral" title="No timeline yet">
+              <p>
+                The timeline is built when an analysis runs. Nothing has been run on this matter
+                yet.
+              </p>
+              <p className="mt-2">
+                <Link
+                  href={`/matters/${matter.id}?tab=analysis`}
+                  className="font-medium text-brand underline underline-offset-4"
+                >
+                  Go to AI Analysis
+                </Link>
+              </p>
+            </Callout>
+          ) : result.timeline.length === 0 ? (
+            <p className="text-sm text-ink-muted">
+              No date on this matter could be read from the record or from a document&apos;s name.
+            </p>
+          ) : (
+            <>
+              <Callout tone="warning" title="No date here is confirmed">
+                A date somebody remembered and a date printed on a notice are different evidence.
+                Each entry says which it is, and Orchelio confirms neither.
+              </Callout>
+              <div className="mt-5">
+                <TimelineList events={result.timeline} />
+              </div>
+            </>
+          )}
+        </Card>
+      ) : null}
+
+      {tab === "analysis" ? (
+        <div className="space-y-6">
+          {analysisProblem === "no_features" ? (
+            <Callout tone="warning" title="No AI features are switched on" assertive>
+              <p>
+                This firm has not enabled any Claude features, so there is nothing for an analysis
+                to produce. Running one anyway would fill the page with empty sections.
+              </p>
+              <p className="mt-2">
+                <Link
+                  href="/onboarding/5"
+                  className="font-medium text-brand underline underline-offset-4"
+                >
+                  Choose the features this firm wants
+                </Link>
+              </p>
+            </Callout>
+          ) : null}
+
+          {!canSeeResults ? (
+            <Callout tone="neutral" title="Not available to your role">
+              Your role does not include viewing analysis results.
+            </Callout>
+          ) : (
+            <>
+              <Card
+                title="Claude Analyst"
+                description="Simulated in this build. No API call is made and no charge is incurred."
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {analysis ? (
+                    <AnalysisStatus
+                      status={analysis.status}
+                      startedAt={analysis.startedAt}
+                      completedAt={analysis.completedAt}
+                      errorMessage={analysis.errorMessage}
+                    />
+                  ) : (
+                    <p className="text-sm text-ink-muted">
+                      No analysis has been run on this matter.
+                    </p>
+                  )}
+
+                  {canRunAnalysis ? (
+                    <form method="post" action="/api/ai/analyse">
+                      <input type="hidden" name="matterId" value={matter.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
+                      >
+                        {analysis ? "Run again" : "Run analysis"}
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+
+                {enabledAiFeatures.length > 0 ? (
+                  <p className="mt-4 text-sm text-ink-subtle">
+                    This firm asked Claude for:{" "}
+                    {enabledAiFeatures.map(aiFeatureLabel).join(", ")}. An analysis produces only
+                    those.
+                  </p>
+                ) : null}
+
+                {/* What the firm did *not* ask for.
+                    A dashboard tile for a disabled feature is omitted, because
+                    "0 missing documents" reads as reassurance. This is the
+                    opposite case: somebody looking at an analysis and wondering
+                    why a section is absent is asking a configuration question,
+                    and the honest answer is that nobody asked for it. */}
+                {unusedAiFeatures.length > 0 ? (
+                  <p className="mt-2 text-sm text-ink-subtle">
+                    Not asked for, and so not produced:{" "}
+                    {unusedAiFeatures.map(aiFeatureLabel).join(", ")}.{" "}
+                    <Link
+                      href="/onboarding/5"
+                      className="font-medium text-brand underline underline-offset-4"
+                    >
+                      Change what this firm asks for
+                    </Link>
+                  </p>
+                ) : null}
+              </Card>
+
+              {result ? (
+                <>
+                  <AnalysisWarnings warnings={result.warnings} />
+
+                  <Card title="Summary" description="Factual. It reaches no conclusion.">
+                    <p className="text-ink">{result.summary}</p>
+                    {result.sufficiency === "more_information_required" ? (
+                      <Callout tone="warning" title="More information required">
+                        Too little is on file for this to describe the matter rather than the gaps
+                        in it. That is a statement about the file, not about the client.
+                      </Callout>
+                    ) : null}
+                  </Card>
+
+                  {result.contradictions.length > 0 ? (
+                    <Card
+                      title={`Disagreements on the record (${result.contradictions.length})`}
+                      description="Both accounts are shown. Orchelio does not choose between them."
+                    >
+                      <div className="space-y-4">
+                        {result.contradictions.map((contradiction) => (
+                          <ContradictionCard key={contradiction.key} contradiction={contradiction} />
+                        ))}
+                      </div>
+                    </Card>
+                  ) : null}
+
+                  {result.keyFacts.length > 0 ? (
+                    <Card
+                      title={`Key facts (${result.keyFacts.length})`}
+                      description="Each with where it came from and how well it is supported."
+                    >
+                      <ul className="divide-y divide-line">
+                        {result.keyFacts.map((fact) => (
+                          <KeyFactRow key={fact.key} fact={fact} />
+                        ))}
+                      </ul>
+                    </Card>
+                  ) : null}
+
+                  {result.missingDocuments.length > 0 ? (
+                    <Card
+                      title={`Documents not on file (${result.missingDocuments.length})`}
+                      description="What this kind of matter usually holds, and why."
+                    >
+                      <ul className="divide-y divide-line">
+                        {result.missingDocuments.map((document) => (
+                          <li key={document.key} className="py-2.5">
+                            <p className="font-medium text-ink">{document.label}</p>
+                            <p className="text-sm text-ink-muted">{document.whyItMatters}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  ) : null}
+
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    {result.attorneyQuestions.length > 0 ? (
+                      <Card
+                        title="For the attorney"
+                        description="Judgements Orchelio must not make."
+                      >
+                        <QuestionList questions={result.attorneyQuestions} />
+                      </Card>
+                    ) : null}
+                    {result.clientQuestions.length > 0 ? (
+                      <Card title="To ask the client" description="Draft questions, not a script.">
+                        <QuestionList questions={result.clientQuestions} />
+                      </Card>
+                    ) : null}
+                  </div>
+
+                  {review ? <ReviewPanel review={review} /> : null}
+
+                  {result.featuresQuiet.length > 0 ? (
+                    <Card
+                      title="Features that found nothing"
+                      description="Enabled by this firm, and silent on this matter."
+                    >
+                      <ul className="divide-y divide-line">
+                        {result.featuresQuiet.map((quiet) => (
+                          <li key={quiet.feature} className="py-2">
+                            <p className="text-sm font-medium text-ink">
+                              {aiFeatureLabel(quiet.feature)}
+                            </p>
+                            <p className="text-sm text-ink-muted">{quiet.because}</p>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-4 text-sm text-ink-subtle">
+                        Listed rather than hidden: &quot;nothing disagreed&quot; and &quot;it never
+                        ran&quot; are different answers.
+                      </p>
+                    </Card>
+                  ) : null}
+                </>
+              ) : null}
+            </>
+          )}
+        </div>
+      ) : null}
     </div>
   );
+}
+
+/** The firm's own words for a feature, from the onboarding catalogue. */
+function aiFeatureLabel(key: string): string {
+  const option = AI_FEATURE_OPTIONS.find(
+    (candidate) => candidate.key.default === key || candidate.id === key,
+  );
+  if (option) return option.label;
+  // A practice-area variant, e.g. `employment_timeline`.
+  const variant = AI_FEATURE_OPTIONS.find((candidate) =>
+    Object.values(candidate.key.byPracticeArea ?? {}).includes(key),
+  );
+  return variant?.label ?? key.split("_").join(" ");
 }

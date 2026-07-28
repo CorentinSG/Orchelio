@@ -10,6 +10,13 @@ import {
 } from "@/lib/matters/documents";
 import { parseJsonObject } from "@/lib/json-field";
 
+/** Matter types whose subject is discrimination or retaliation. */
+const DISCRIMINATION_TYPES: readonly string[] = [
+  "workplace_discrimination",
+  "retaliation",
+  "workplace_harassment",
+];
+
 /**
  * Orchelio — firm statistics.
  *
@@ -77,7 +84,7 @@ export async function practiceAreaCounts(
 
   // One read of the matters with just their documents' categories: the
   // checklist needs the categories present, not the documents themselves.
-  const [matters, intakes, unreviewedTerminationLetters] = await Promise.all([
+  const [matters, intakes, unreviewedTerminationLetters, tokens] = await Promise.all([
     prisma.matter.findMany({
       where,
       select: {
@@ -87,6 +94,7 @@ export async function practiceAreaCounts(
         representationSide: true,
         nextDeadlineAt: true,
         closedAt: true,
+        aiStatus: true,
         fields: true,
         documents: { select: { category: true } },
       },
@@ -95,6 +103,7 @@ export async function practiceAreaCounts(
     prisma.document.count({
       where: { ...where, category: "termination_letter", verified: false },
     }),
+    prisma.usageRecord.aggregate({ where, _sum: { inputTokens: true, outputTokens: true } }),
   ]);
 
   const open = matters.filter((matter) => matter.closedAt === null);
@@ -121,6 +130,13 @@ export async function practiceAreaCounts(
       return difference >= 0 && difference <= days * 86_400_000;
     }).length;
 
+  // Counts every practice area shows. Tokens rather than cost, because the
+  // cost tile beside it already shows money and two money figures invite the
+  // reader to add them up.
+  const shared = {
+    monthly_usage: (tokens._sum.inputTokens ?? 0) + (tokens._sum.outputTokens ?? 0),
+  };
+
   if (primaryPracticeArea === "immigration") {
     // A status expiring soon is read from what the firm recorded at intake. It
     // is a date somebody typed, not a date Orchelio has confirmed — which is
@@ -142,6 +158,7 @@ export async function practiceAreaCounts(
       missing_identity_documents: missingFrom(IDENTITY_CATEGORIES),
       missing_immigration_documents: missingOutside(IDENTITY_CATEGORIES),
       upcoming_deadlines: withinDays(30),
+      ...shared,
     };
   }
 
@@ -157,8 +174,15 @@ export async function practiceAreaCounts(
       settlement_deadlines: open.filter(
         (matter) => matter.status === "settlement_discussions" && matter.nextDeadlineAt !== null,
       ).length,
+      // "Not yet analysed" is a fact about the matter's own aiStatus, not a
+      // judgement about the claim.
+      discrimination_awaiting_assessment: open.filter(
+        (matter) =>
+          DISCRIMINATION_TYPES.includes(matter.matterTypeKey) && matter.aiStatus === "none",
+      ).length,
+      ...shared,
     };
   }
 
-  return {};
+  return shared;
 }

@@ -430,9 +430,12 @@ describe("the dashboard's practice-area counts", () => {
     );
     const own = await matters.listMatters({ firmId: fixture.immigration.firmId });
 
-    // Every count is bounded by this firm's own matters. A figure above that
-    // would mean the other firm had been included.
+    // Every count *of matters* is bounded by this firm's own matters. A figure
+    // above that would mean the other firm had been included. `monthly_usage`
+    // counts tokens rather than matters, so it is excluded rather than being
+    // compared against the wrong thing.
     for (const [key, value] of Object.entries(counts)) {
+      if (key === "monthly_usage") continue;
       expect(value, key).toBeLessThanOrEqual(own.length);
     }
     expect(counts["new_leads"]).toBe(
@@ -564,15 +567,25 @@ describe("the dashboard's practice-area counts", () => {
     );
   });
 
-  it("returns nothing at all for a practice area it has no questions for", async () => {
+  it("answers no practice-area question it has no template for", async () => {
     const counts = await statistics.practiceAreaCounts(
       { firmId: fixture.immigration.firmId },
       "family_law",
       NOW,
     );
 
-    // An empty map, so every widget shows a dash rather than a zero.
-    expect(counts).toEqual({});
+    // Token usage is a fact about the firm, not about its practice area, so it
+    // is still counted. Every area-specific key is absent, which is what makes
+    // those widgets show a dash rather than a zero.
+    expect(Object.keys(counts)).toEqual(["monthly_usage"]);
+    for (const areaSpecific of [
+      "new_leads",
+      "missing_identity_documents",
+      "employee_side_matters",
+      "wage_records_missing",
+    ]) {
+      expect(counts[areaSpecific]).toBeUndefined();
+    }
   });
 });
 

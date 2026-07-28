@@ -35,10 +35,10 @@ const FIRM_NAV: readonly NavItem[] = [
   { href: "/intake", label: "Intake", permission: "matter.view" },
   { href: "/documents", label: "Documents", permission: "document.view" },
   { href: "/tasks", label: "Tasks", permission: "matter.view" },
+  { href: "/ai", label: "AI Workspace", permission: "ai.result.view" },
 ];
 
 const FIRM_PLANNED: readonly PlannedItem[] = [
-  { label: "AI Workspace", phase: 6 },
   { label: "Approvals", phase: 7 },
   { label: "Activity Log", phase: 7 },
 ];
