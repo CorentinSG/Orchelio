@@ -1,3 +1,8 @@
+---
+title: Phase 1 — analysis and plan
+tags: [reference, planning]
+---
+
 # Orchelio — Analyse et plan de la Phase 1
 
 Ce document répond aux six points demandés dans le cahier des charges avant l'écriture du code

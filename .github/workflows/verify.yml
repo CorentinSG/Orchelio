@@ -43,6 +43,9 @@ jobs:
       - name: Code map is current
         run: node scripts/codemap.mjs --check
 
+      - name: Documentation links resolve, and nothing is orphaned
+        run: npm run docs:check
+
   # The browser tests build the application, so they are slower and run
   # separately. Splitting them means a typo fails in a minute, not in five.
   browser:

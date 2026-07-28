@@ -1,3 +1,8 @@
+---
+title: Architecture
+tags: [reference, architecture]
+---
+
 # Orchelio — Architecture
 
 This document describes how Orchelio is put together and how to extend it. It is written to stay

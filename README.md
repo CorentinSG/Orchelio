@@ -327,8 +327,16 @@ could ever be considered for real use.
 
 ## Documentation
 
+Start at **[`docs/INDEX.md`](docs/INDEX.md)**. That folder is also an
+[Obsidian](https://obsidian.md) vault — open `docs/` as a vault for linked
+navigation, backlinks and a graph of how the notes relate. Nothing is
+duplicated: the vault *is* the folder, and every file renders normally on
+GitHub too.
+
 | Document | Contents |
 | -------- | -------- |
+| [`docs/INDEX.md`](docs/INDEX.md) | The map of everything below. |
+| [`docs/decisions/`](docs/INDEX.md) | Why things are the way they are — ten decision records. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How Orchelio is put together, and the procedures for extending it. |
 | [`docs/HARNESS.md`](docs/HARNESS.md) | The development tooling: verification, navigation, caching, CI. |
 | [`docs/CODEMAP.md`](docs/CODEMAP.md) | Generated index of every module and what it exports. |

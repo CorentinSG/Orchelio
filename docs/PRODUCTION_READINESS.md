@@ -1,3 +1,8 @@
+---
+title: Production readiness
+tags: [reference, security]
+---
+
 # Orchelio — Production readiness
 
 **Orchelio Demo is a demonstration environment. It has not undergone a production security audit
@@ -24,7 +29,7 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | Secrets never reachable from the browser | ✅ | Enforced by `src/lib/env.ts` and `server-only`. |
 | Password storage | ✅ | scrypt, per-password salt, constant-time comparison, self-describing cost parameters. |
 | Session management, expiry, revocation | ✅ | Server-side sessions; only the token hash is stored; revalidated on every request. |
-| CSRF protection on state-changing requests | ✅ | All writes go through Server Actions, which Next.js protects with an origin check. Re-verify if any raw route handler is added. |
+| CSRF protection on state-changing requests | ✅ | Two mechanisms, because there are two kinds of write. Server Actions are protected by Next's own origin check. The route handlers that answer consequential forms (`/api/onboarding`, `/api/firms/switch`) compare `Origin` against the request's `Host` themselves, and the session cookie is `SameSite=Lax`, which is the primary defence. Any new route handler must call `isSameOrigin` — see `src/lib/http/form-post.ts`. |
 | Rate limiting and abuse protection | 🟡 | Sign-in throttling is in-memory and per-process: it resets on restart and is not shared across instances. Needs a shared store and per-IP limits. |
 | Dependency advisories | 🟡 | `npm audit` reports advisories in transitive dependencies of Next.js itself (`sharp`, `postcss`). They cannot be resolved without downgrading Next.js to an unsupported release. Re-check on each Next.js update. |
 

@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "verify": "npm run lint && npm run typecheck && npm run test",
+    "verify": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
     "verify:full": "npm run verify && npm run build && npm run test:e2e",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -34,8 +34,9 @@
     "graph:query": "graphify query",
     "queries": "ORCHELIO_LOG_QUERIES=1 next dev",
     "harness:doctor": "node scripts/doctor.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test",
-    "postinstall": "prisma generate"
+    "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
+    "postinstall": "prisma generate",
+    "docs:check": "node scripts/docs-check.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",

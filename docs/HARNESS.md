@@ -1,3 +1,8 @@
+---
+title: Development harness
+tags: [reference, tooling]
+---
+
 # Orchelio — the development harness
 
 Tooling around the project: how to verify a change, how to navigate the code
@@ -94,7 +99,7 @@ commit: the graph is rebuilt before a commit, so it names the commit before
 that. That is a one-commit lag, not staleness — rebuild when the doctor says the
 gap is wider.
 
-Three limitations, stated so they are not rediscovered:
+Two limitations, stated so they are not rediscovered:
 
 - Orchelio runs Graphify in `--code-only` mode. Full mode sends semantic
   extraction of Markdown and PDFs to an LLM and needs an API key; the project's
@@ -107,6 +112,34 @@ Three limitations, stated so they are not rediscovered:
 
 An exact string or regex, or a file too new to be indexed. Scope it to the
 directory the code map named rather than the whole repository.
+
+### `docs/decisions/` — why things are the way they are
+
+Neither index answers "why". Ten decision records do, and several of them exist
+because a reasonable person would otherwise change something back: the 303
+redirects, the caching rule, the practice-area vocabulary, the middleware that
+is deliberately not a security boundary.
+
+Each note says what the problem was, what was decided, and what it cost —
+including the limitations. [`docs/INDEX.md`](INDEX.md) lists them.
+
+### Obsidian
+
+`docs/` is also an [Obsidian](https://obsidian.md) vault: open the folder as a
+vault and you get linked navigation, backlinks, tag filtering and a graph of how
+the notes relate. `docs/INDEX.md` is the entry point.
+
+Deliberately *not* done: nothing is duplicated (the vault is the folder), and no
+`[[wikilink]]` syntax is used. Wikilinks would break rendering on GitHub, which
+is where these documents are mostly read. Ordinary relative links work in both.
+
+`npm run docs:check` is what keeps it honest: every internal link must resolve,
+and every note must be reachable from the index. A note nothing links to is a
+note nobody finds — the exact failure a knowledge base is meant to prevent. It
+runs in `npm run verify` and in CI.
+
+Obsidian is a convenience for reading, not a dependency. Nothing in the project
+needs it installed.
 
 ---
 
@@ -186,6 +219,9 @@ repeated `npm run test:e2e` runs skip the build.
 | `.claude/hooks/session-start.sh` | Makes a fresh checkout workable, unattended |
 | `scripts/doctor.mjs` | The environment check |
 | `scripts/codemap.mjs` | Generates `docs/CODEMAP.md` |
+| `scripts/docs-check.mjs` | Verifies every internal link and finds orphaned notes |
+| `docs/INDEX.md` | Entry point of the documentation, and of the Obsidian vault |
+| `docs/decisions/` | Why things are the way they are |
 | `.github/workflows/verify.yml` | CI |
 | `src/lib/cache.ts` | The caching rule, and the two caches it permits |
 

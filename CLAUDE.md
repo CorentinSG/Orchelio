@@ -29,9 +29,14 @@ Do not start by grepping. In order of cost:
 | "How does X reach Y? What calls this?" | `npm run graph:explain -- "currentSession()"` | ~300 tokens |
 | "What are the hubs of this codebase?" | `graphify-out/GRAPH_REPORT.md` | one file |
 | "Exact string or regex in source" | `Grep` — but scope it to the directory the map named | small |
+| "**Why** is it like this?" | `docs/decisions/` — ten ADRs, linked from `docs/INDEX.md` | one note |
 
 Both indexes are generated and can go stale. Refresh with `npm run codemap` and
 `npm run graph:update` (neither needs an API key or a network).
+
+Before changing something that looks odd, check `docs/decisions/` — several
+oddities in this codebase are deliberate, measured, and were paid for once
+already.
 
 ---
 
@@ -125,6 +130,7 @@ npm run verify:full     # the above, plus build and browser tests
 npm run dev             # http://localhost:3000
 npm run seed            # fictional data, safe to re-run
 npm run codemap         # regenerate docs/CODEMAP.md
+npm run docs:check      # every internal link resolves, no orphaned note
 npm run graph:update    # refresh the knowledge graph (local, no API key)
 ```
 

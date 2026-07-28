@@ -63,3 +63,10 @@ prisma/*.db-shm
 /skills-lock.json
 /.windsurf
 /.agents
+
+# Orchelio — Obsidian. The vault configuration is committed so opening docs/
+# just works; per-machine workspace state is not.
+docs/.obsidian/workspace.json
+docs/.obsidian/workspace-mobile.json
+docs/.obsidian/cache
+docs/.obsidian/plugins
