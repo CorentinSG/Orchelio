@@ -94,13 +94,26 @@ submitted by nothing, and are written in by the server whatever arrived. No
 automatic filing, no permanent deletion, no settlement or opposing-counsel
 communication, no final deadline or eligibility conclusion without a person.
 
-### 5. The product is named Orchelio, everywhere
+`requiresApproval` (`src/lib/approvals/actions.ts`) checks the lock **first** and
+never reads the firm's configuration for a locked rule — there is no ordering of
+checks and no configuration value that changes the answer.
+
+### 5. A sensitive action has no function of its own
+
+There is no `closeMatter()` to call. A sensitive action calls `raiseApproval`,
+which either creates a request — and the effect is applied later by
+`decideApproval` and by nothing else — or, for a configurable rule the firm
+switched off, applies it immediately through the *same* `applySensitiveEffect`.
+One implementation, two callers, so the approved and unapproved routes cannot
+drift. See ADR-0014.
+
+### 6. The product is named Orchelio, everywhere
 
 `src/lib/app-config.ts` is the only place the name appears. A unit test fails if
 a generic name ("Legal AI Platform", "JurisFlow", …) ever appears in a
 user-visible surface.
 
-### 6. An analysis may describe, never conclude
+### 7. An analysis may describe, never conclude
 
 `src/lib/ai/reviewer.ts` scans Orchelio's own prose for eligibility findings,
 recommendations, predictions and confirmed deadlines, and fails the analysis if
@@ -110,7 +123,7 @@ regression guard, and `tests/unit/ai-reviewer.test.ts` proves it can fail.
 It scans only text Orchelio wrote. A recorded field's *value* is what the firm
 wrote down about the client; flagging it would be flagging the client.
 
-### 7. Say less than you know, not more
+### 8. Say less than you know, not more
 
 A widget whose data does not exist yet shows a dash, not a zero — a zero is a
 claim ("there is nothing to do"). A widget depending on an AI feature the firm
@@ -131,8 +144,10 @@ whether a record is missing or forbidden, so a refusal never confirms existence.
   document, and every analysis says so. An analysis has no field for a
   conclusion, a recommendation or an eligibility finding: absent from the type,
   not left empty. See ADR-0012 and ADR-0013.
-- **Orchelio never sends anything.** `DraftCommunication` has no "sent" status
-  and there is no transport.
+- **Orchelio never sends anything.** `DraftCommunication` is `"draft"` or
+  `"approved_for_use"` — there is no "sent" status and no transport. Approving a
+  draft means a person has read the exact words and is content for them to leave
+  the firm; somebody then copies them out and sends them themselves.
 
 ---
 

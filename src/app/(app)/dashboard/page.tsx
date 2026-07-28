@@ -21,7 +21,7 @@ export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
 
 /** Widgets whose data arrives later show a dash rather than a misleading zero. */
-const CURRENT_PHASE = 6;
+const CURRENT_PHASE = 7;
 
 /**
  * Firm dashboard.
@@ -104,11 +104,11 @@ export default async function DashboardPage() {
           </p>
         </Callout>
       ) : (
-        <Callout tone="brand" title="Phase 6 of 9">
+        <Callout tone="brand" title="Phase 7 of 9">
           This dashboard is assembled from this firm&apos;s configuration — the cards below are
           the ones an {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about
-          each morning. Matters, documents and the simulated analyses are live; the approvals
-          (Phase 7) still show a dash, because a zero would claim there is nothing to do.
+          each morning. Every figure here is now counted from real records; nothing shows a dash
+          because nothing is waiting on a later phase.
         </Callout>
       )}
 

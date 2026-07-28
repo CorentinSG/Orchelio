@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 120.
+Modules: 134.
 
 ## `prisma/`
 
@@ -57,6 +57,12 @@ Exports: `middleware`, `config`
 
 ## `src/app/`
 
+### `src/app/(app)/activity/page.tsx`
+
+Append-only, and only by application discipline: `src/lib/audit.ts` exposes one write function and there is no update or delete path anywhere in the codebase.
+
+Exports: `metadata`, `dynamic`, `ActivityPage`
+
 ### `src/app/(app)/admin/firms/loading.tsx`
 
 ### `src/app/(app)/admin/firms/page.tsx`
@@ -70,6 +76,12 @@ Exports: `metadata`, `dynamic`, `AdminFirmsPage`
 Deliberately as much about what Claude does *not* do as about what it does.
 
 Exports: `metadata`, `dynamic`, `AiWorkspacePage`
+
+### `src/app/(app)/approvals/page.tsx`
+
+Everything waiting for a person, and everything a person has decided.
+
+Exports: `metadata`, `dynamic`, `ApprovalsPage`
 
 ### `src/app/(app)/dashboard/loading.tsx`
 
@@ -98,8 +110,6 @@ Layout for every signed-in page.
 Exports: `dynamic`, `AppLayout`
 
 ### `src/app/(app)/matters/[id]/page.tsx`
-
-Tabs the specification requires that later phases fill.
 
 Exports: `metadata`, `dynamic`, `MatterPage`
 
@@ -143,6 +153,18 @@ A plain form POST answered with a 303, like every other consequential action in 
 
 Exports: `POST`
 
+### `src/app/api/approvals/decide/route.ts`
+
+The one endpoint through which a sensitive action takes effect.
+
+Exports: `POST`
+
+### `src/app/api/communications/route.ts`
+
+Preparing is not sending, and Orchelio has no sending.
+
+Exports: `POST`
+
 ### `src/app/api/documents/route.ts`
 
 The file never reaches this handler.
@@ -158,6 +180,12 @@ Exports: `POST`
 ### `src/app/api/firms/switch/route.ts`
 
 A plain form POST answered with a 303 — see src/lib/http/form-post.ts for why Orchelio does not use a Server Action here.
+
+Exports: `POST`
+
+### `src/app/api/matters/action/route.ts`
+
+Closing it, and confirming the date recorded on it.
 
 Exports: `POST`
 
@@ -217,6 +245,12 @@ Exports: `dynamic`, `HomePage`
 
 ## `src/components/`
 
+### `src/components/activity-ui.tsx`
+
+A log is only useful if a person can tell what happened without knowing the schema.
+
+Exports: `activityLabel`, `ActivityStatusBadge`, `ActivityDetail`
+
 ### `src/components/analysis-ui.tsx`
 
 Every rule the analyst obeys has to survive being rendered, and most of the ways an honest analysis becomes a dishonest screen happen here: * A source shown as a filen…
@@ -228,6 +262,12 @@ Exports: `SourceList`, `AnalysisWarnings`, `ContradictionCard`, `KeyFactRow`, `T
 The sidebar always names the product and, underneath, the firm currently open.
 
 Exports: `AppShell`
+
+### `src/components/approval-ui.tsx`
+
+The screen a person uses to take responsibility for something.
+
+Exports: `RiskBadge`, `ApprovalStatusBadge`, `resourceHref`, `ApprovalCard`, `ApprovalCardData`
 
 ### `src/components/brand.tsx`
 
@@ -321,6 +361,18 @@ Product naming lives in exactly one place so that the sidebar, the login page, t
 
 Exports: `APP_NAME`, `APP_ENV`, `IS_DEMO`, `APP_EDITION`, `APP_FULL_NAME`, `APP_TAGLINE`, `APP_DESCRIPTION`, `POWERED_BY`, `DEMO_NOTICE_SHORT`, `DEMO_NOTICE_LONG`, `FICTIONAL_DATA_NOTICE`
 
+### `src/lib/approvals/actions.ts`
+
+This module is the bridge between two lists that until now had nothing joining them: the approval rules a firm switches on during onboarding, and the things the produc…
+
+Exports: `approvableAction`, `actionLabel`, `requiresApproval`, `approvalReason`, `requiresNote`, `isApprovalDecision`, `decisionLabel`, `decisionApproves`, `rulesWithoutActions`, `APPROVABLE_ACTIONS`, `APPROVAL_DECISIONS`, `DECISIONS_REQUIRING_NOTE`, `ApprovableAction`, `ApprovalDecision`
+
+### `src/lib/approvals/raise.ts`
+
+Two functions, and between them the answer to the phase's acceptance criterion: no sensitive action completes without an explicit human decision, and every decision ap…
+
+Exports: `raiseApproval`, `recordDecision`, `RaiseOutcome`, `DecisionResult`
+
 ### `src/lib/audit.ts`
 
 Append-only: this module exposes exactly one write function, and no update or delete path for `AuditEvent` exists anywhere in the codebase.
@@ -397,7 +449,7 @@ Exports: `widgetsFor`, `widgetValue`, `WidgetTone`, `DashboardWidget`
 
 Writing is in `src/lib/audit.ts`; this module only reads, and only ever for one firm.
 
-Exports: `listActivity`, `countActivity`, `activityActions`, `listTasks`, `listIntakes`, `ActivityFilters`
+Exports: `listActivity`, `countActivity`, `listMatterActivity`, `activityUsers`, `activityActions`, `listTasks`, `listIntakes`, `ActivityFilters`
 
 ### `src/lib/data/analyses.ts`
 
@@ -405,11 +457,23 @@ Analyses hold extracted facts about a client's situation, so they are among the 
 
 Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getReview`, `countAnalyses`, `latestAnalysisForMatter`, `beginAnalysis`, `completeAnalysis`, `failAnalysis`, `recordReview`, `setMatterAiStatus`
 
+### `src/lib/data/approvals.ts`
+
+The important function here is `decideApproval`, and the important thing about it is that it is the only way a sensitive action takes effect.
+
+Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
+
 ### `src/lib/data/catalogues.ts`
 
 Practice areas, matter types and workflow templates are identical for every firm on the instance.
 
 Exports: `matterTypesForPracticeAreas`, `workflowTemplatesFor`, `allPracticeAreas`, `allMatterTypes`, `allWorkflowTemplates`
+
+### `src/lib/data/communications.ts`
+
+Read the schema before reading this: `DraftCommunication.status` is `"draft" | "approved_for_use"`.
+
+Exports: `listDrafts`, `getDraft`, `createDraft`, `countDrafts`, `DraftFilters`, `NewDraft`
 
 ### `src/lib/data/documents.ts`
 
@@ -547,6 +611,10 @@ Exports: `getDatabaseStatus`, `getSystemStatus`, `listFirms`, `DatabaseStatus`, 
 
 Phase 6 acceptance, in a real browser.
 
+### `tests/e2e/approvals.spec.ts`
+
+Phase 7 acceptance, in a real browser.
+
 ### `tests/e2e/auth.spec.ts`
 
 Phase 2 acceptance.
@@ -572,6 +640,10 @@ Phase 4 acceptance, in a real browser.
 ### `tests/integration/analyses.test.ts`
 
 The rules are tested in `tests/unit/ai-analyst.test.ts`.
+
+### `tests/integration/approvals.test.ts`
+
+The phase's acceptance criterion, in two halves: 1.
 
 ### `tests/integration/data-access.test.ts`
 
@@ -614,6 +686,10 @@ A reviewer that always agrees is worse than no reviewer: it makes an unchecked a
 ### `tests/unit/app-identity.test.ts`
 
 Product naming is a requirement of the specification, not a cosmetic detail: the demonstration must never present itself under a generic name.
+
+### `tests/unit/approval-rules.test.ts`
+
+The single most important property in this phase is that a locked rule cannot be switched off.
 
 ### `tests/unit/cache.test.ts`
 

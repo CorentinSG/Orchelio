@@ -177,8 +177,13 @@ test.describe("The timeline", () => {
   });
 
   test("is empty, and says so, before anything has been run", async ({ page }) => {
-    await signIn(page, "employment.attorney@demo.local");
-    await openMatter(page, "EMP-2026-003");
+    // A matter no other spec analyses, so it has no timeline of its own.
+    await signIn(page, "immigration.attorney@demo.local");
+    await page.goto("/matters/new");
+    await page.getByLabel("Matter title").fill("Untouched, for the timeline test");
+    await page.getByLabel("Client name").fill("Timeline Fixture");
+    await page.getByRole("button", { name: "Create matter" }).click();
+    await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
     await page
       .getByRole("navigation", { name: "Matter sections" })
       .getByRole("link", { name: "Timeline" })
@@ -324,11 +329,11 @@ test.describe("The dashboard", () => {
     await expect(tile).toContainText(/still needs a person/i);
   });
 
-  test("still shows a dash for approvals, which arrive in Phase 7", async ({ page }) => {
+  test("counts what is waiting for a person, now that Phase 7 has landed", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
 
     const tile = page.locator("p", { hasText: /^Pending approvals$/ }).locator("..");
-    await expect(tile.locator("p").first()).toHaveText("—");
-    await expect(tile).toContainText("Phase 7");
+    await expect(tile.locator("p").first()).toHaveText(/^\d+$/);
+    await expect(tile).not.toContainText(/Phase \d/);
   });
 });

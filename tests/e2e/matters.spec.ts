@@ -160,17 +160,18 @@ test.describe("A matter record", () => {
     expect(body).not.toContain("I-94 available");
   });
 
-  test("moves between the tabs that exist and names the ones that do not", async ({
+  test("moves between the tabs, all of which now exist", async ({
     page,
   }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-001");
 
     const tabs = page.getByRole("navigation", { name: "Matter sections" });
-    // Timeline and AI Analysis landed in Phase 6; Approvals has not.
-    await expect(tabs).toContainText("Timeline");
-    await expect(tabs).toContainText("Approvals");
-    await expect(tabs).toContainText("Phase 7");
+    // All nine exist as of Phase 7. None is a placeholder any more.
+    for (const label of ["Overview", "Timeline", "AI Analysis", "Communications", "Approvals"]) {
+      await expect(tabs.getByRole("link", { name: label, exact: true })).toBeVisible();
+    }
+    await expect(tabs).not.toContainText(/Phase \d/);
 
     await tabs.getByRole("link", { name: "Documents" }).click();
     await expect(page.getByRole("region", { name: /^Documents \(/ })).toBeVisible();
@@ -526,16 +527,19 @@ test.describe("The firm workspace pages", () => {
     }
   });
 
-  test("still shows a dash for the phases that have not landed", async ({ page }) => {
+  test("shows a number for every tile, now that every phase behind them has landed", async ({
+    page,
+  }) => {
     await signIn(page, "immigration.attorney@demo.local");
 
-    // Approvals arrive in Phase 7. The analyses tile is filled from Phase 6, so
-    // it is no longer part of this assertion.
-    for (const label of ["Pending approvals"]) {
+    // Through Phase 6 this asserted the opposite — a dash for the tiles waiting
+    // on a later phase. Phase 7 filled the last of them. The rule it was
+    // protecting (a dash, never a zero, for a figure that is not known) is
+    // asserted directly in tests/unit/dashboard-widgets.test.ts.
+    for (const label of ["Pending approvals", "Claude analyses run", "Active matters"]) {
       const tile = page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
-      // A zero would claim there is nothing to do. See ADR-0009.
-      await expect(tile.locator("p").first(), label).toHaveText("—");
-      await expect(tile, label).toContainText("Phase 7");
+      await expect(tile.locator("p").first(), label).toHaveText(/^\d+$/);
+      await expect(tile, label).not.toContainText(/Phase \d/);
     }
   });
 

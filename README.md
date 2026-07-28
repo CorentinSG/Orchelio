@@ -15,14 +15,14 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 to 6 of 9 complete
+## Current status: Phases 1 to 7 of 9 complete
 
-Orchelio is built in nine phases. **Phases 1 to 6** are finished: you can sign in, land in the
+Orchelio is built in nine phases. **Phases 1 to 7** are finished: you can sign in, land in the
 right firm workspace, switch between firms, answer a seven-step questionnaire that configures the
-firm, see a dashboard assembled from that configuration, work through matters — a filtered list, a
-matter record with practice-area fields, simulated document upload — and run a simulated Claude
-analysis that is independently reviewed. It does **not** yet deliver the approval centre, the
-activity log screen or the cost screens.
+firm, see a dashboard assembled from that configuration, work through matters, run a simulated
+Claude analysis that is independently reviewed, and take — or refuse — the human decisions that
+let anything sensitive happen, with every one of them recorded. It does **not** yet deliver the
+cost screens, firm creation from the interface, or the guided demonstration.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
@@ -32,7 +32,7 @@ activity log screen or the cost screens.
 | 4 | Seven-step onboarding questionnaire and generated configuration | ✅ Delivered |
 | 5 | Matters, practice-area fields, simulated document upload | ✅ Delivered |
 | 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | ✅ Delivered |
-| 7 | Approval centre, human decisions, append-only audit log | Planned |
+| 7 | Approval centre, human decisions, append-only audit log | ✅ Delivered |
 | 8 | Simulated AI costs, firm creation, settings, guided demo | Planned |
 | 9 | Unit, integration and end-to-end tests, accessibility, final documentation | Planned |
 
@@ -261,18 +261,20 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 to 6 only.** The approval centre, the activity log screen and the cost screens are
-   not built yet. The dashboard is assembled from each firm's configuration; matters, documents
-   and analyses now fill their figures, while the widgets waiting on Phase 7 show a dash rather
-   than a zero — a zero would be a claim ("there is nothing to do") the product cannot yet
-   support.
-2. **The sign-in is a demonstration, not a production authentication system.** The passwords are
+1. **Phases 1 to 7 only.** The cost screens, firm creation from the interface and the guided
+   demonstration are not built yet. Every dashboard figure is now counted from real records.
+2. **Four approval rules of eighteen are raised.** The onboarding questionnaire offers nine
+   configurable rules and nine locked ones; this build raises approvals for four of them. The
+   approval centre lists the rest by name and says plainly that nothing currently triggers them —
+   several are unreachable rather than unimplemented, because Orchelio has no transport and never
+   deletes anything, but a firm that switched one on should be told rather than left to assume.
+3. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
    account lockout. It exists to demonstrate roles and access control.
-3. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
+4. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
    and is not shared between instances. It raises the cost of guessing on one machine; it is not
    abuse protection.
-4. **Simulated AI, and not a language model.** Nothing in this build calls Anthropic; there is no
+5. **Simulated AI, and not a language model.** Nothing in this build calls Anthropic; there is no
    API key and no request leaves the machine. What produces an analysis is a set of deterministic
    rules over each matter's recorded fields, its intake answers and its document *names* — a
    different mechanism producing the same kind of result, so that every screen could be built and
@@ -280,18 +282,18 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
    there is no OCR, so nothing in an analysis comes from inside a file. Every analysis says so in
    its own warnings. The prompts a real provider would be given are in
    [`prompts/`](prompts/README.md).
-5. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
+6. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
    protect it — required arguments, a database client that refuses an unscoped query, and
    membership guards — and 62 integration tests prove it against a real database holding two firms
    with deliberately similar records. But all three run inside the application, so they protect
    against a programming mistake, not against a compromised process or a mistaken database
    administrator. Production needs row-level security or separate schemas.
-6. **The activity log is append-only by application discipline**, not by the database. Nothing in
+7. **The activity log is append-only by application discipline**, not by the database. Nothing in
    the codebase updates or deletes an audit event, but a database administrator could. Production
    needs write-once storage.
-7. **SQLite, single machine.** Fine for a demonstration, not for concurrent real-world use.
-8. **No production security audit.** See the warning below.
-9. **`npm audit` reports advisories** in transitive dependencies of Next.js itself (`sharp`,
+8. **SQLite, single machine.** Fine for a demonstration, not for concurrent real-world use.
+9. **No production security audit.** See the warning below.
+10. **`npm audit` reports advisories** in transitive dependencies of Next.js itself (`sharp`,
    `postcss`). They cannot be fixed without downgrading Next.js to an unsupported version. They
    are tracked in [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 

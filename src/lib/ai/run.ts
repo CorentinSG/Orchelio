@@ -14,6 +14,7 @@ import { matterDetail } from "@/lib/data/matters";
 import { prisma } from "@/lib/prisma";
 import { parseJsonObject } from "@/lib/json-field";
 import { aiProvider, type AIProvider } from "@/lib/ai/provider";
+import { raiseApproval } from "@/lib/approvals/raise";
 import type { MatterAnalysisInput, MatterAnalysisResult } from "@/lib/ai/types";
 import { serverEnv } from "@/lib/env";
 
@@ -118,6 +119,20 @@ export async function runAnalysis(
     await recordUsage(scope, matter.id, provider, "claude_reviewer");
 
     await setMatterAiStatus(scope, matter.id, "completed");
+
+    // An analysis is a work product, not a finding. Whether relying on it needs
+    // a person's signature is the firm's choice ("Generate legal analysis" in
+    // the onboarding questionnaire); raising it here is what connects that
+    // choice to anything. The analysis is shown either way — what the approval
+    // governs is whether anyone has taken responsibility for it.
+    await raiseApproval(scope, {
+      actionKey: "legal_analysis",
+      resourceId: analysis.id,
+      matterId: matter.id,
+      summary: summariseForApproval(matter.reference, result, review.status),
+      requestedById: options.userId,
+    });
+
     await recordAuditEvent({
       action: AUDIT_ACTIONS.analysisCompleted,
       firmId: scope.firmId,
@@ -189,6 +204,37 @@ export function buildInput(
     enabledFeatures,
     now,
   };
+}
+
+/**
+ * What the approver sees before opening the analysis.
+ *
+ * Deliberately the parts that bear on whether to trust it — how much
+ * disagrees, how much is absent, and what the reviewer said — rather than the
+ * summary, which reads as a finding when quoted out of its warnings.
+ */
+function summariseForApproval(
+  reference: string,
+  result: MatterAnalysisResult,
+  reviewStatus: string,
+): string {
+  const parts = [`Analysis of ${reference}.`];
+
+  parts.push(
+    result.contradictions.length === 0
+      ? "Nothing on the record disagrees with anything else."
+      : `${result.contradictions.length} disagreement${result.contradictions.length === 1 ? "" : "s"} on the record, unresolved.`,
+  );
+
+  if (result.missingDocuments.length > 0) {
+    parts.push(`${result.missingDocuments.length} expected document(s) not on file.`);
+  }
+  if (result.sufficiency === "more_information_required") {
+    parts.push("The reviewer found too little on file for the analysis to say much.");
+  }
+
+  parts.push(`Independent review: ${reviewStatus.split("_").join(" ")}.`);
+  return parts.join(" ");
 }
 
 async function recordUsage(

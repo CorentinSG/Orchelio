@@ -27,6 +27,12 @@ import { requireMatterAccess } from "@/lib/auth/workspace";
 import { requestNow } from "@/lib/clock";
 import { matterDetail } from "@/lib/data/matters";
 import { latestAnalysisForMatter } from "@/lib/data/analyses";
+import { listApprovals } from "@/lib/data/approvals";
+import { listDrafts } from "@/lib/data/communications";
+import { listMatterActivity } from "@/lib/data/activity";
+import { ApprovalCard } from "@/components/approval-ui";
+import { ActivityDetail, ActivityStatusBadge, activityLabel } from "@/components/activity-ui";
+import { decisionLabel } from "@/lib/approvals/actions";
 import { firmConfiguration } from "@/lib/data/firms";
 import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
 import { categoriesFor, categoryLabel, expectedButMissing } from "@/lib/matters/documents";
@@ -44,13 +50,9 @@ const TABS = [
   { key: "tasks", label: "Tasks" },
   { key: "timeline", label: "Timeline" },
   { key: "analysis", label: "AI Analysis" },
-] as const;
-
-/** Tabs the specification requires that later phases fill. */
-const PLANNED_TABS = [
-  { label: "Communications", phase: 7 },
-  { label: "Approvals", phase: 7 },
-  { label: "Activity", phase: 7 },
+  { key: "communications", label: "Communications" },
+  { key: "approvals", label: "Approvals" },
+  { key: "activity", label: "Activity" },
 ] as const;
 
 type PageProps = {
@@ -142,6 +144,44 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
   const analysisProblem = typeof query["problem"] === "string" ? query["problem"] : null;
 
+  // --- Phase 7: approvals, drafts and this matter's own log ----------------
+  const [approvals, drafts] = await Promise.all([
+    listApprovals({ firmId: firm.id }, { matterId: matter.id }),
+    listDrafts({ firmId: firm.id }, { matterId: matter.id }),
+  ]);
+
+  // An approval or a draft names *itself* as its resource, with the matter in
+  // the payload, so the matter's own log has to ask for those identifiers too.
+  const relatedIds = [
+    ...approvals.map((approval) => approval.id),
+    ...drafts.map((draft) => draft.id),
+    ...matter.documents.map((document) => document.id),
+    ...(analysis ? [analysis.id] : []),
+  ];
+  const matterActivity = can(actor, "firm.audit.view")
+    ? await listMatterActivity({ firmId: firm.id }, matter.id, relatedIds)
+    : [];
+
+  const canDecide = can(actor, "approval.decide");
+  const canDraft = can(actor, "communication.draft");
+  const pendingForAnalysis = analysis
+    ? approvals.find(
+        (approval) =>
+          approval.resourceId === analysis.id &&
+          approval.action === "legal_analysis" &&
+          approval.status === "pending",
+      )
+    : undefined;
+  const decidedForAnalysis = analysis
+    ? approvals.find(
+        (approval) => approval.resourceId === analysis.id && approval.status !== "pending",
+      )
+    : undefined;
+
+  const raisedId = typeof query["raised"] === "string" ? query["raised"] : null;
+  const communicationProblem =
+    tab === "communications" && typeof query["problem"] === "string" ? query["problem"] : null;
+
   return (
     <div className="space-y-6">
       <header>
@@ -175,15 +215,6 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
               >
                 {candidate.label}
               </Link>
-            </li>
-          ))}
-          {PLANNED_TABS.map((planned) => (
-            <li
-              key={planned.label}
-              className="inline-flex items-center gap-1.5 border-b-2 border-transparent px-4 py-2 text-sm text-ink-subtle"
-            >
-              {planned.label}
-              <span className="text-xs">Phase {planned.phase}</span>
             </li>
           ))}
         </ul>
@@ -515,6 +546,38 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
               {result ? (
                 <>
+                  {/* Whether anybody has taken responsibility for this, said
+                      before the analysis rather than after it. */}
+                  {pendingForAnalysis ? (
+                    <Callout tone="warning" title="Nobody has approved this yet">
+                      <p>
+                        A decision is waiting. Until somebody takes responsibility for this
+                        analysis, it is a draft nobody has stood behind.
+                      </p>
+                      <p className="mt-2">
+                        <Link
+                          href={`/matters/${matter.id}?tab=approvals`}
+                          className="font-medium text-brand underline underline-offset-4"
+                        >
+                          Go to the decision
+                        </Link>
+                      </p>
+                    </Callout>
+                  ) : decidedForAnalysis ? (
+                    <Callout
+                      tone={
+                        decidedForAnalysis.status === "rejected" ||
+                        decidedForAnalysis.status === "new_analysis_requested"
+                          ? "danger"
+                          : "success"
+                      }
+                      title={`${decisionLabel(decidedForAnalysis.status)} by ${decidedForAnalysis.decidedBy?.name ?? "a person"}`}
+                    >
+                      {decidedForAnalysis.decisionNote ??
+                        "Approved without a note — a plain approval needs none."}
+                    </Callout>
+                  ) : null}
+
                   <AnalysisWarnings warnings={result.warnings} />
 
                   <Card title="Summary" description="Factual. It reaches no conclusion.">
@@ -613,6 +676,247 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
             </>
           )}
         </div>
+      ) : null}
+
+      {tab === "communications" ? (
+        <div className="space-y-6">
+          <Callout tone="warning" title="Orchelio sends nothing">
+            A draft is text somebody copies out and sends themselves, from their own system, under
+            their own name. There is no recipient field, no &quot;sent&quot; status and no
+            transport anywhere in this product — and approving a draft does not add one.
+          </Callout>
+
+          {communicationProblem ? (
+            <Callout tone="danger" title="That draft was not prepared" assertive>
+              {communicationProblem}
+            </Callout>
+          ) : null}
+          {query["prepared"] === "1" ? (
+            <Callout tone="success" title="Draft prepared, and waiting for a decision">
+              Nobody may use these words until an attorney has read them and approved them. That
+              rule cannot be switched off.
+            </Callout>
+          ) : null}
+
+          {canDraft ? (
+            <Card
+              title="Prepare a draft"
+              description="Fictional recipients only. This is a demonstration environment."
+            >
+              <form method="post" action="/api/communications" className="space-y-4">
+                <input type="hidden" name="matterId" value={matter.id} />
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label htmlFor="channel" className="block text-sm font-medium text-ink">
+                      Kind
+                    </label>
+                    <select
+                      id="channel"
+                      name="channel"
+                      className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
+                    >
+                      <option value="email">Email</option>
+                      <option value="letter">Letter</option>
+                      <option value="note">Internal note</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="subject" className="block text-sm font-medium text-ink">
+                      Subject
+                    </label>
+                    <input
+                      id="subject"
+                      name="subject"
+                      required
+                      className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="body" className="block text-sm font-medium text-ink">
+                    Text
+                  </label>
+                  {result && result.clientQuestions.length > 0 ? (
+                    <p className="text-xs text-ink-subtle">
+                      The analysis prepared {result.clientQuestions.length} question
+                      {result.clientQuestions.length === 1 ? "" : "s"} for the client. They are
+                      below to copy from — edit them into your own words rather than sending them
+                      as they are.
+                    </p>
+                  ) : null}
+                  <textarea
+                    id="body"
+                    name="body"
+                    rows={8}
+                    required
+                    defaultValue={
+                      result && result.clientQuestions.length > 0
+                        ? result.clientQuestions
+                            .map((question) => `- ${question.question}`)
+                            .join("\n")
+                        : ""
+                    }
+                    className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
+                >
+                  Prepare draft
+                </button>
+              </form>
+            </Card>
+          ) : (
+            <Callout tone="neutral" title="Read only">
+              Your role does not allow preparing a draft.
+            </Callout>
+          )}
+
+          <Card title={`Drafts (${drafts.length})`}>
+            {drafts.length === 0 ? (
+              <p className="text-sm text-ink-muted">No draft has been prepared on this matter.</p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {drafts.map((draft) => (
+                  <li key={draft.id} className="py-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium text-ink">{draft.subject}</p>
+                        <p className="text-sm text-ink-muted">
+                          {draft.channel} · prepared by {draft.createdBy?.name ?? "Orchelio"} on{" "}
+                          {formatDate(draft.createdAt)}
+                        </p>
+                      </div>
+                      <Badge tone={draft.status === "approved_for_use" ? "success" : "warning"}>
+                        {draft.status === "approved_for_use"
+                          ? "Approved for use"
+                          : "Not approved — do not use"}
+                      </Badge>
+                    </div>
+                    <pre className="mt-2 whitespace-pre-wrap rounded-md border border-line bg-surface-muted px-3 py-2 font-sans text-sm text-ink">
+                      {draft.body}
+                    </pre>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+      ) : null}
+
+      {tab === "approvals" ? (
+        <div className="space-y-6">
+          {raisedId ? (
+            <Callout tone="success" title="Raised, and waiting for a person">
+              Nothing has happened yet. It will not, until somebody decides.
+            </Callout>
+          ) : null}
+
+          <Card
+            title="What can be asked for on this matter"
+            description="Each goes to a person. Two of them cannot be switched off by any firm."
+          >
+            <div className="flex flex-wrap gap-3">
+              {can(actor, "matter.close") && !matter.closedAt ? (
+                <form method="post" action="/api/matters/action">
+                  <input type="hidden" name="matterId" value={matter.id} />
+                  <input type="hidden" name="action" value="close_matter" />
+                  <button
+                    type="submit"
+                    className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
+                  >
+                    Ask to close this matter
+                  </button>
+                </form>
+              ) : null}
+
+              {can(actor, "deadline.confirm") && matter.nextDeadlineAt ? (
+                <form method="post" action="/api/matters/action">
+                  <input type="hidden" name="matterId" value={matter.id} />
+                  <input type="hidden" name="action" value="deadline_confirmation" />
+                  <button
+                    type="submit"
+                    className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
+                  >
+                    Ask a person to confirm {formatDate(matter.nextDeadlineAt)}
+                  </button>
+                </form>
+              ) : null}
+            </div>
+
+            {matter.closedAt ? (
+              <p className="mt-3 text-sm text-ink-muted">
+                This matter was closed on {formatDate(matter.closedAt)}.
+              </p>
+            ) : null}
+            {!matter.nextDeadlineAt ? (
+              <p className="mt-3 text-sm text-ink-subtle">
+                No date is recorded on this matter, so there is nothing to confirm. Orchelio never
+                calculates one.
+              </p>
+            ) : null}
+          </Card>
+
+          <Card title={`Approvals on this matter (${approvals.length})`}>
+            {approvals.length === 0 ? (
+              <Callout tone="neutral" title="Nothing has been asked for">
+                No decision has been requested on this matter.
+              </Callout>
+            ) : (
+              <ul className="space-y-4">
+                {approvals.map((approval) => (
+                  <ApprovalCard
+                    key={approval.id}
+                    approval={approval}
+                    canDecide={canDecide && approval.status === "pending"}
+                    returnTo={`/matters/${matter.id}?tab=approvals`}
+                    focused={raisedId === approval.id}
+                  />
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+      ) : null}
+
+      {tab === "activity" ? (
+        <Card
+          title="Activity"
+          description="Everything recorded about this matter, most recent first."
+        >
+          {!can(actor, "firm.audit.view") ? (
+            <Callout tone="neutral" title="Not available to your role">
+              The activity log is held by firm administrators.
+            </Callout>
+          ) : matterActivity.length === 0 ? (
+            <p className="text-sm text-ink-muted">Nothing recorded about this matter yet.</p>
+          ) : (
+            <ul className="divide-y divide-line">
+              {matterActivity.map((event) => (
+                <li key={event.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-ink">{activityLabel(event.action)}</p>
+                      <ActivityStatusBadge status={event.status} />
+                    </div>
+                    <p className="text-sm text-ink-muted">{event.user?.name ?? "Orchelio"}</p>
+                    <ActivityDetail oldValue={event.oldValue} newValue={event.newValue} />
+                  </div>
+                  <time
+                    dateTime={event.createdAt.toISOString()}
+                    className="whitespace-nowrap text-xs text-ink-subtle"
+                  >
+                    {event.createdAt.toISOString().replace("T", " ").slice(0, 19)} UTC
+                  </time>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       ) : null}
     </div>
   );

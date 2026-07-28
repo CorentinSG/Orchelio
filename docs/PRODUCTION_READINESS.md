@@ -87,11 +87,12 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 
 | Item | Status | Notes |
 | ---- | ------ | ----- |
-| Prompt-injection testing (documents are untrusted input) | ⛔ | Mandatory before any real document reaches a model. |
-| Output validation against the expected schema | ⛔ | Phase 6. |
-| Human approval before any consequential action | ⛔ | Phase 7. Locked rules must be server-enforced. |
-| Provenance shown on every AI statement | ⛔ | Phase 6: "AI-generated — Human review required". |
-| Model and prompt version recorded with each analysis | ⛔ | Needed to explain a past output. |
+| Prompt-injection testing (documents are untrusted input) | ⛔ | Mandatory before any real document reaches a model. The rule is stated in both prompts under `prompts/` and tested nowhere, because nothing is sent anywhere yet. |
+| Output validation against the expected schema | 🟡 | The simulated provider fills the types directly, so nothing is parsed. A real provider must be given the schema as a tool definition and its result validated before storage. |
+| Human approval before any consequential action | 🟡 | Delivered for the four actions this build raises. The effect is applied only by `decideApproval`, and locked rules ignore the firm's configuration entirely (see ADR-0014). Fourteen of the eighteen offered rules raise nothing yet — the approval centre says which. |
+| Separation of duties: the requester may not decide | ⛔ | Nothing prevents the person who asked from being the person who approves. Acceptable for a demonstration with five accounts; not for a real file. |
+| Provenance shown on every AI statement | ✅ | Every fact carries its sources and a support band; every analysis carries "AI-generated — a person must read this", and that no document was opened. The reviewer fails an analysis that has lost those cautions. |
+| Model and prompt version recorded with each analysis | ✅ | `provider`, `model` and `promptVersion` on every `AIAnalysis` and `AIReview` row. |
 | Real cost tracking and per-firm caps | ⛔ | Phase 8 simulates this. |
 | Vendor agreement covering confidentiality and training exclusion | ⛔ | |
 

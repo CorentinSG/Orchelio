@@ -19,6 +19,9 @@ export type ActivityFilters = {
   userId?: string;
   status?: string;
   since?: Date;
+  /** Events about one matter — its own id, and anything raised against it. */
+  resourceId?: string;
+  resourceType?: string;
 };
 
 export async function listActivity(scope: FirmScope, filters: ActivityFilters = {}, take = 50) {
@@ -29,6 +32,8 @@ export async function listActivity(scope: FirmScope, filters: ActivityFilters = 
       ...(filters.userId ? { userId: filters.userId } : {}),
       ...(filters.status ? { status: filters.status } : {}),
       ...(filters.since ? { createdAt: { gte: filters.since } } : {}),
+      ...(filters.resourceId ? { resourceId: filters.resourceId } : {}),
+      ...(filters.resourceType ? { resourceType: filters.resourceType } : {}),
     },
     orderBy: { createdAt: "desc" },
     take,
@@ -36,8 +41,58 @@ export async function listActivity(scope: FirmScope, filters: ActivityFilters = 
   });
 }
 
-export async function countActivity(scope: FirmScope): Promise<number> {
-  return prisma.auditEvent.count({ where: { firmId: scope.firmId } });
+export async function countActivity(
+  scope: FirmScope,
+  filters: ActivityFilters = {},
+): Promise<number> {
+  return prisma.auditEvent.count({
+    where: {
+      firmId: scope.firmId,
+      ...(filters.action ? { action: filters.action } : {}),
+      ...(filters.userId ? { userId: filters.userId } : {}),
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.since ? { createdAt: { gte: filters.since } } : {}),
+    },
+  });
+}
+
+/**
+ * Everything recorded about one matter.
+ *
+ * A matter's own events name it as the resource; an approval or a draft raised
+ * against it names *itself*, with the matter in the payload. Both are wanted on
+ * a matter's activity tab, so the identifiers of its own records are collected
+ * and matched as well.
+ */
+export async function listMatterActivity(
+  scope: FirmScope,
+  matterId: string,
+  relatedIds: readonly string[],
+  take = 100,
+) {
+  return prisma.auditEvent.findMany({
+    where: {
+      firmId: scope.firmId,
+      resourceId: { in: [matterId, ...relatedIds] },
+    },
+    orderBy: { createdAt: "desc" },
+    take,
+    include: { user: { select: { id: true, name: true } } },
+  });
+}
+
+/** The people who appear in this firm's log, for a filter menu. */
+export async function activityUsers(scope: FirmScope) {
+  const rows = await prisma.auditEvent.findMany({
+    where: { firmId: scope.firmId, userId: { not: null } },
+    select: { userId: true, user: { select: { id: true, name: true } } },
+    distinct: ["userId"],
+  });
+
+  return rows
+    .map((row) => row.user)
+    .filter((user): user is { id: string; name: string } => user !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** The distinct action names present in this firm's log, for a filter menu. */

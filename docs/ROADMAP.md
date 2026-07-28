@@ -280,16 +280,72 @@ and the Reviewer against deliberately damaged analyses; **14 integration tests**
 
 ---
 
-## Phase 7 — Approvals and audit
+## Phase 7 — Approvals and audit ✅ Delivered
 
-- Approval centre listing every pending action with firm, matter, action, user, date, risk and
-  summary.
-- Decisions: Approve, Approve with edits, Request new analysis, Reject — with a mandatory note on
-  the last three.
-- Append-only audit log with filters, recording every decision, access and refusal.
+Delivered:
 
-**Acceptance:** no sensitive action can complete without an explicit human decision, and every
-decision appears in the log.
+- **The approval centre** (`/approvals`): everything waiting for a person, with the matter, the
+  action, who asked, when, the risk and a summary — and, below it, everything already decided.
+  Filters by status, action and risk, applied on the server.
+- **Four decisions** — Approve, Approve with edits, Request new analysis, Reject — with a note
+  required for the last three, checked on the server as well as in the browser. Asking for a new
+  analysis creates a task on the matter, so the request lands somewhere rather than being a
+  message nobody receives.
+- **The activity log** (`/activity`): every recorded event for this firm, filtered by action,
+  person, outcome and time, with the stored payload rendered in words.
+- **Three new matter tabs**: Communications, Approvals and Activity. All nine tabs the
+  specification names now exist.
+- **Draft communications**: prepare an email, letter or note — pre-filled from the analysis's
+  client questions where there are any — which is then unusable until a person approves the exact
+  words.
+
+**Acceptance met:** the two effects that change anything (closing a matter, approving a draft for
+use) are applied by `decideApproval` and by nothing else, and
+`tests/integration/approvals.test.ts` asserts the state *before* each decision as well as after
+it. Every decision is written to the log with its note, its decider and whether anything took
+effect — including decisions that changed nothing.
+
+### The rule that had to be structural
+
+There is no `closeMatter()` to call by accident. A sensitive action calls `raiseApproval`, which
+either creates a request or — for a configurable rule the firm switched off — applies the effect
+through `applySensitiveEffect`, the same function the approval path uses. One implementation, two
+callers, so the approved and unapproved routes cannot drift apart.
+
+`requiresApproval` checks the lock **first** and never consults the configuration for a locked
+rule. `tests/unit/approval-rules.test.ts` attacks that from every angle it can reach: every
+configurable rule off, an empty configuration, the locked rule named in the configuration and set
+to `false`, and set to `0`, `null`, `"no"` and `undefined`. All still require a decision.
+
+### What the log records that it did not have to
+
+Two things, both because an audit that only records the interesting cases is not an audit.
+
+A decision that changed nothing — a rejection, or an approval of something with no effect to
+apply — is logged exactly as loudly as one that did, with `effectApplied: false`.
+
+And when a firm has *not* switched a configurable rule on, the action proceeds without a decision
+and that fact is written down: `required: "not_required"`, with the rule named. "Nobody had to
+approve this" is precisely what somebody reading a log six months later needs to be able to find.
+
+### Said plainly rather than left implied
+
+The onboarding questionnaire offers eighteen approval rules; this build raises four of them. The
+approval centre lists the rest by name, under a heading that says a rule nobody raises protects
+nobody. Several are unreachable rather than unimplemented — Orchelio has no transport, so nothing
+can be submitted, shared or sent, and nothing is ever permanently deleted — but a firm that
+switched one on should be told, not left to assume.
+
+### A defect found and fixed
+
+Pressing "Ask a person to confirm this date" on a matter's Approvals tab returned to the
+Overview tab. The request had been raised correctly and the confirmation was on a screen the user
+was no longer looking at, which reads as nothing having happened — the same failure the Phase 4
+redirect bug produced by a different route. The handler now returns to the tab the request came
+from.
+
+Tested by **31 unit tests** on the rules, **20 integration tests** on the effects and the
+boundary, and **23 browser tests**.
 
 ---
 

@@ -58,7 +58,7 @@ export const PHASES: readonly Phase[] = [
     number: 7,
     title: "Approvals & audit",
     summary: "Human approval centre, decisions, append-only activity log.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 8,

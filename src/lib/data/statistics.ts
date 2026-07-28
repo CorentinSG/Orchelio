@@ -84,7 +84,8 @@ export async function practiceAreaCounts(
 
   // One read of the matters with just their documents' categories: the
   // checklist needs the categories present, not the documents themselves.
-  const [matters, intakes, unreviewedTerminationLetters, tokens] = await Promise.all([
+  const [matters, intakes, unreviewedTerminationLetters, tokens, pendingApprovals] =
+    await Promise.all([
     prisma.matter.findMany({
       where,
       select: {
@@ -104,6 +105,10 @@ export async function practiceAreaCounts(
       where: { ...where, category: "termination_letter", verified: false },
     }),
     prisma.usageRecord.aggregate({ where, _sum: { inputTokens: true, outputTokens: true } }),
+    prisma.approvalRequest.findMany({
+      where: { ...where, status: "pending" },
+      select: { action: true, matterId: true },
+    }),
   ]);
 
   const open = matters.filter((matter) => matter.closedAt === null);
@@ -137,6 +142,15 @@ export async function practiceAreaCounts(
     monthly_usage: (tokens._sum.inputTokens ?? 0) + (tokens._sum.outputTokens ?? 0),
   };
 
+  // Matters whose latest analysis nobody has decided on yet. Counted from the
+  // approval rows rather than a flag on the analysis, because the approval is
+  // the record of who took responsibility. See src/lib/data/approvals.ts.
+  const awaitingApproval = new Set(
+    pendingApprovals
+      .filter((approval) => approval.action === "legal_analysis" && approval.matterId !== null)
+      .map((approval) => approval.matterId as string),
+  ).size;
+
   if (primaryPracticeArea === "immigration") {
     // A status expiring soon is read from what the firm recorded at intake. It
     // is a date somebody typed, not a date Orchelio has confirmed — which is
@@ -158,6 +172,7 @@ export async function practiceAreaCounts(
       missing_identity_documents: missingFrom(IDENTITY_CATEGORIES),
       missing_immigration_documents: missingOutside(IDENTITY_CATEGORIES),
       upcoming_deadlines: withinDays(30),
+      awaiting_attorney_approval: awaitingApproval,
       ...shared,
     };
   }
