@@ -88,7 +88,13 @@ npm run graph:query -- "how does auth reach the database?" --budget 1500
 hubs and communities for free. The heavy artefacts (`graph.json`, `graph.html`)
 are rebuilt on demand and are not in Git.
 
-Two limitations, stated so they are not rediscovered:
+The report records the commit it was built from, which is how `harness:doctor`
+tells whether it is current without rebuilding it. Expect it to lag by one
+commit: the graph is rebuilt before a commit, so it names the commit before
+that. That is a one-commit lag, not staleness — rebuild when the doctor says the
+gap is wider.
+
+Three limitations, stated so they are not rediscovered:
 
 - Orchelio runs Graphify in `--code-only` mode. Full mode sends semantic
   extraction of Markdown and PDFs to an LLM and needs an API key; the project's
@@ -192,5 +198,9 @@ Two things to keep true, because they are what makes it worth having:
 1. **It must work with no API key and no network.** Everything above runs
    locally. A tool that needs credentials is optional at best.
 2. **An index that can go stale must be checkable.** The code map is verified in
-   CI and the doctor compares both indexes against the source they describe. An
-   index nobody can tell is wrong is worse than none.
+   CI (`node scripts/codemap.mjs --check`) and the doctor checks both. An index
+   nobody can tell is wrong is worse than none.
+
+   Check *content or commit*, never modification times. The first version of the
+   doctor compared mtimes and reported a perfectly current index as stale on
+   every fresh clone, because `git clone` stamps every file with the same time.

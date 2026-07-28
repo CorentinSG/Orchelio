@@ -13,7 +13,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
@@ -90,9 +90,8 @@ if (!existsSync(databaseFile)) {
   // page lists accounts that do not exist.
   try {
     const count = run("node", [
-      "--input-type=module",
       "-e",
-      `import Database from "${join(ROOT, "node_modules", "better-sqlite3", "lib", "index.js")}";
+      `const Database = require("better-sqlite3");
        const db = new Database(${JSON.stringify(databaseFile)}, { readonly: true });
        process.stdout.write(String(db.prepare("select count(*) as n from users").get().n));`,
     ]);
@@ -107,33 +106,42 @@ if (!existsSync(databaseFile)) {
 }
 
 // --- Indexes ---------------------------------------------------------------
+//
+// Both checks compare *content or commit*, never modification times. A fresh
+// `git clone` stamps every file with the same mtime, which made a perfectly
+// current index look stale — the first thing this doctor got wrong.
 
-function newestSourceChange() {
-  const files = run("git", ["ls-files", "src", "prisma", "tests", "scripts"]).split("\n");
-  let newest = 0;
-  for (const file of files) {
-    if (!file) continue;
-    try {
-      newest = Math.max(newest, statSync(join(ROOT, file)).mtimeMs);
-    } catch {
-      // Deleted but still tracked; ignore.
-    }
+if (!existsSync(join(ROOT, "docs", "CODEMAP.md"))) {
+  report("warn", "Code map", "not generated yet", "npm run codemap");
+} else {
+  try {
+    run("node", ["scripts/codemap.mjs", "--check"]);
+    report("ok", "Code map", "matches the source");
+  } catch {
+    report("warn", "Code map", "does not match the source", "npm run codemap");
   }
-  return newest;
 }
 
-const newestSource = newestSourceChange();
+const graphReport = join(ROOT, "graphify-out", "GRAPH_REPORT.md");
+if (!existsSync(graphReport)) {
+  report("warn", "Knowledge graph", "not built yet", "npm run graph");
+} else {
+  // The report records the commit it was built from; Graphify puts it there
+  // precisely so staleness can be checked without rebuilding.
+  const built = readFileSync(graphReport, "utf8").match(/Built from commit:\s*`?([0-9a-f]+)`?/i);
+  let head = "";
+  try {
+    head = run("git", ["rev-parse", "HEAD"]);
+  } catch {
+    head = "";
+  }
 
-for (const [name, path, remedy] of [
-  ["Code map", join(ROOT, "docs", "CODEMAP.md"), "npm run codemap"],
-  ["Knowledge graph", join(ROOT, "graphify-out", "GRAPH_REPORT.md"), "npm run graph:update"],
-]) {
-  if (!existsSync(path)) {
-    report("warn", name, "not generated yet", remedy);
-  } else if (statSync(path).mtimeMs < newestSource) {
-    report("warn", name, "older than the source it describes", remedy);
+  if (!built) {
+    report("ok", "Knowledge graph", "built (no commit recorded)");
+  } else if (head && !head.startsWith(built[1])) {
+    report("warn", "Knowledge graph", `built at ${built[1]}, HEAD is ${head.slice(0, 8)}`, "npm run graph:update");
   } else {
-    report("ok", name, "up to date");
+    report("ok", "Knowledge graph", "current with HEAD");
   }
 }
 

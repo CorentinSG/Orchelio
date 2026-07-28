@@ -35,7 +35,22 @@ fi
 # which is what makes it safe to run unattended.
 npx prisma migrate deploy >/dev/null 2>&1 || log "could not apply migrations"
 
-if [ ! -s prisma/orchelio-demo.db ]; then
+# Seed only when there is nothing there.
+#
+# Two mistakes to avoid, both made before this comment existed: testing whether
+# the database *file* is non-empty is wrong, because `migrate deploy` creates a
+# populated-but-unseeded file; and seeding unconditionally is worse, because the
+# seed upserts each firm's configuration and would silently undo whatever the
+# user had just set up through the onboarding questionnaire.
+users=$(node -e '
+  const Database = require("better-sqlite3");
+  try {
+    const db = new Database("prisma/orchelio-demo.db", { readonly: true });
+    process.stdout.write(String(db.prepare("select count(*) as n from users").get().n));
+  } catch { process.stdout.write("0"); }
+' 2>/dev/null || echo 0)
+
+if [ "${users:-0}" = "0" ]; then
   log "seeding fictional demonstration data"
   npm run seed >/dev/null 2>&1 || log "seed failed — run npm run seed by hand"
 fi

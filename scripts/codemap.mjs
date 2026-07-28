@@ -21,7 +21,7 @@
  * whole picture rather than a keyword match.
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 const ROOT = process.cwd();
@@ -146,5 +146,26 @@ for (const [group, entries] of [...grouped.entries()].sort()) {
   }
 }
 
-writeFileSync(join(ROOT, "docs", "CODEMAP.md"), `${lines.join("\n").trimEnd()}\n`);
+const target = join(ROOT, "docs", "CODEMAP.md");
+const contents = `${lines.join("\n").trimEnd()}\n`;
+
+/**
+ * `--check` writes nothing and reports whether the committed map still matches
+ * the source.
+ *
+ * Comparing content rather than timestamps is the point: a fresh `git clone`
+ * gives every file the same modification time, so a mtime comparison calls a
+ * perfectly current map stale. Content cannot lie about that.
+ */
+if (process.argv.includes("--check")) {
+  const current = existsSync(target) ? readFileSync(target, "utf8") : "";
+  if (current === contents) {
+    console.log(`docs/CODEMAP.md is up to date — ${files.length} modules.`);
+    process.exit(0);
+  }
+  console.error("docs/CODEMAP.md is stale. Run `npm run codemap` and commit the result.");
+  process.exit(1);
+}
+
+writeFileSync(target, contents);
 console.log(`docs/CODEMAP.md written — ${files.length} modules indexed.`);

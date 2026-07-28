@@ -41,10 +41,7 @@ jobs:
       # The generated indexes are committed, so a stale one is a review
       # comment rather than a surprise for the next reader.
       - name: Code map is current
-        run: |
-          npm run codemap
-          git diff --exit-code docs/CODEMAP.md \
-            || (echo "::error::docs/CODEMAP.md is stale — run 'npm run codemap' and commit it" && exit 1)
+        run: node scripts/codemap.mjs --check
 
   # The browser tests build the application, so they are slower and run
   # separately. Splitting them means a typo fails in a minute, not in five.
