@@ -4,6 +4,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 
 import { prisma } from "@/lib/prisma";
+import { requestScoped } from "@/lib/cache";
 import { type Actor, type FirmRole, isFirmRole } from "@/lib/auth/permissions";
 
 /**
@@ -81,10 +82,18 @@ export async function createSession(userId: string, userAgent?: string): Promise
 /**
  * Reads the current session, or null.
  *
- * Every call revalidates against the database: an expired or revoked session
- * stops working immediately, rather than at the cookie's own expiry.
+ * Memoised for the lifetime of one request. Rendering a single page asks for
+ * the session from the layout, from the page and from each access guard, and
+ * each ask meant a session lookup plus its user, memberships and firms. The
+ * memoisation collapses them to one.
+ *
+ * It changes nothing about validity: React's `cache()` cannot outlive the
+ * request that created it, so an expired or revoked session still stops working
+ * on the very next request rather than at the cookie's own expiry. See
+ * src/lib/cache.ts for why this is the only kind of caching applied to
+ * firm-scoped data.
  */
-export async function currentSession(): Promise<Session | null> {
+export const currentSession = requestScoped(async function currentSession(): Promise<Session | null> {
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
   if (!token) {
@@ -137,7 +146,7 @@ export async function currentSession(): Promise<Session | null> {
     },
     expiresAt: record.expiresAt,
   };
-}
+});
 
 /** Revokes the current session and clears the cookie. Safe to call when signed out. */
 export async function destroySession(): Promise<void> {

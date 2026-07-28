@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { matterTypesForPracticeAreas, workflowTemplatesFor } from "@/lib/data/catalogues";
 import type { FirmScope } from "@/lib/data/scope";
 import { parseJsonObject, parseStringArray } from "@/lib/json-field";
 import {
@@ -197,11 +198,7 @@ export async function completeOnboarding(scope: FirmScope): Promise<void> {
   });
   if (!configuration) return;
 
-  const templates = await prisma.workflowTemplate.findMany({
-    where: {
-      OR: [{ practiceAreaKey: null }, { practiceAreaKey: configuration.primaryPracticeArea }],
-    },
-  });
+  const templates = await workflowTemplatesFor(configuration.primaryPracticeArea);
 
   for (const template of templates) {
     await prisma.firmWorkflow.upsert({
@@ -227,12 +224,13 @@ export async function restartOnboarding(scope: FirmScope): Promise<void> {
   });
 }
 
-/** The matter types on offer, for the practice areas the firm selected. */
+/**
+ * The matter types on offer, for the practice areas the firm selected.
+ *
+ * Read from the platform catalogue cache rather than the database: the answer
+ * is the same for every firm, and the questionnaire asks for it on every step-3
+ * render.
+ */
 export async function matterTypeOptions(practiceAreas: readonly string[]) {
-  if (practiceAreas.length === 0) return [];
-
-  return prisma.matterType.findMany({
-    where: { practiceAreaKey: { in: [...practiceAreas] } },
-    orderBy: [{ practiceAreaKey: "asc" }, { sortOrder: "asc" }],
-  });
+  return matterTypesForPracticeAreas(practiceAreas);
 }

@@ -22,20 +22,36 @@ export type UsageSummary = {
   includesRealCharges: boolean;
 };
 
+/**
+ * One firm's usage.
+ *
+ * Two queries rather than four: the per-operation counts and the real-charge
+ * flag come from a single `groupBy` instead of three separate `count` calls.
+ * The dashboard reads this on every load, so the difference is paid on every
+ * page view, not once.
+ */
 export async function usageSummary(scope: FirmScope): Promise<UsageSummary> {
-  const [totals, analyses, reviews, realCharges] = await Promise.all([
+  const [totals, byOperation] = await Promise.all([
     prisma.usageRecord.aggregate({
       where: { firmId: scope.firmId },
       _sum: { inputTokens: true, outputTokens: true, costCents: true },
     }),
-    prisma.usageRecord.count({
-      where: { firmId: scope.firmId, operation: "claude_analyst" },
+    prisma.usageRecord.groupBy({
+      by: ["operation", "isRealCharge"],
+      where: { firmId: scope.firmId },
+      _count: { _all: true },
     }),
-    prisma.usageRecord.count({
-      where: { firmId: scope.firmId, operation: "claude_reviewer" },
-    }),
-    prisma.usageRecord.count({ where: { firmId: scope.firmId, isRealCharge: true } }),
   ]);
+
+  let analyses = 0;
+  let reviews = 0;
+  let realCharges = 0;
+
+  for (const row of byOperation) {
+    if (row.operation === "claude_analyst") analyses += row._count._all;
+    if (row.operation === "claude_reviewer") reviews += row._count._all;
+    if (row.isRealCharge) realCharges += row._count._all;
+  }
 
   return {
     analyses,

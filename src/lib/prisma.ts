@@ -26,13 +26,26 @@ import { type GuardedPrismaClient, withFirmScopeGuard } from "@/lib/data/firm-sc
  * PostgreSQL later means swapping this adapter for `@prisma/adapter-pg` and
  * changing the datasource provider; no query in the application changes.
  */
+/**
+ * Set ORCHELIO_LOG_QUERIES=1 to print every SQL statement.
+ *
+ * This is how the caching work in `src/lib/cache.ts` was measured rather than
+ * guessed: start the server with it on, load a page, count the statements.
+ * See docs/HARNESS.md.
+ */
+const logQueries = process.env["ORCHELIO_LOG_QUERIES"] === "1";
+
 function createPrismaClient(): GuardedPrismaClient {
   const { databaseUrl } = serverEnv();
   const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
 
   const client = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    log: logQueries
+      ? ["query", "warn", "error"]
+      : process.env.NODE_ENV === "development"
+        ? ["warn", "error"]
+        : ["error"],
   });
 
   return withFirmScopeGuard(client);

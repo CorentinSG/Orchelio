@@ -53,3 +53,13 @@ prisma/*.db-shm
 
 # Orchelio — Prisma client is generated from prisma/schema.prisma, never edited by hand.
 /src/generated
+
+# Orchelio — knowledge graph. The report is committed so a fresh session gets
+# the map for free; the heavy artefacts are rebuilt with `npm run graph`.
+/graphify-out/*
+!/graphify-out/GRAPH_REPORT.md
+
+# Graphify agent scaffolding, not part of this project.
+/skills-lock.json
+/.windsurf
+/.agents

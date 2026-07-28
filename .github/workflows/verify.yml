@@ -1,0 +1,95 @@
+name: Verify
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# A new push supersedes the previous run on the same branch.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+  DATABASE_URL: "file:./prisma/orchelio-demo.db"
+
+jobs:
+  # Lint, types and the fast tests. Nothing here needs a browser or a build, so
+  # it fails in about a minute when something is wrong.
+  checks:
+    name: Lint, types, tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: cp .env.example .env
+      - run: npx prisma migrate deploy
+      - run: npm run seed
+
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+
+      # The generated indexes are committed, so a stale one is a review
+      # comment rather than a surprise for the next reader.
+      - name: Code map is current
+        run: |
+          npm run codemap
+          git diff --exit-code docs/CODEMAP.md \
+            || (echo "::error::docs/CODEMAP.md is stale — run 'npm run codemap' and commit it" && exit 1)
+
+  # The browser tests build the application, so they are slower and run
+  # separately. Splitting them means a typo fails in a minute, not in five.
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Next.js reuses this between runs; a warm cache roughly halves the build.
+      - name: Cache the Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'prisma/schema.prisma') }}
+          restore-keys: |
+            next-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            next-${{ runner.os }}-
+
+      - name: Cache the Playwright browser
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - run: cp .env.example .env
+      - run: npx prisma migrate deploy
+      - run: npm run seed
+
+      - run: npm run test:e2e
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

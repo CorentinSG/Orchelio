@@ -171,6 +171,9 @@ on the real internet.
 
 | Command | What it does |
 | ------- | ------------ |
+| `npm run harness:doctor` | Checks that this checkout is ready, and prints the fix for anything that is not. **Start here if something looks wrong.** |
+| `npm run verify` | Style, types and tests in one command — run before committing. |
+| `npm run verify:full` | The above, plus the production build and the browser tests. |
 | `npm run dev` | Starts the application for development on <http://localhost:3000>. |
 | `npm run build` | Builds the optimised production version. |
 | `npm run start` | Runs the built version (requires `npm run build` first). |
@@ -327,6 +330,9 @@ could ever be considered for real use.
 | Document | Contents |
 | -------- | -------- |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How Orchelio is put together, and the procedures for extending it. |
+| [`docs/HARNESS.md`](docs/HARNESS.md) | The development tooling: verification, navigation, caching, CI. |
+| [`docs/CODEMAP.md`](docs/CODEMAP.md) | Generated index of every module and what it exports. |
+| [`CLAUDE.md`](CLAUDE.md) | The rules and shortcuts a coding assistant needs before touching this code. |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | The nine phases, in detail. |
 | [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md) | What must happen before production. |
 | [`docs/PLAN_PHASE_1.md`](docs/PLAN_PHASE_1.md) | The analysis and plan that produced this phase. |
