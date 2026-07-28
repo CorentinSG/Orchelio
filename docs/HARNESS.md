@@ -94,10 +94,19 @@ hubs and communities for free. The heavy artefacts (`graph.json`, `graph.html`)
 are rebuilt on demand and are not in Git.
 
 The report records the commit it was built from, which is how `harness:doctor`
-tells whether it is current without rebuilding it. Expect it to lag by one
-commit: the graph is rebuilt before a commit, so it names the commit before
-that. That is a one-commit lag, not staleness — rebuild when the doctor says the
-gap is wider.
+tells whether it is current without rebuilding it.
+
+That check used to compare the recorded commit against `HEAD`, and so reported
+a perfectly current graph as stale after every commit — including the commit
+that added the graph itself. The advice in this file was to expect a one-commit
+lag and ignore it, which is the wrong shape of answer: a check nobody believes
+is a check nobody reads.
+
+It now asks the question that was meant all along — *has anything the graph
+indexes changed since it was built?* — by diffing the recorded commit against
+the **working tree** and keeping only `src/`, `prisma/`, `scripts/` and `tests/`
+source files. So an uncommitted edit counts, a documentation change does not,
+and a warning means rebuild.
 
 Two limitations, stated so they are not rediscovered:
 

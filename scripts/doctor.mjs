@@ -122,6 +122,28 @@ if (!existsSync(join(ROOT, "docs", "CODEMAP.md"))) {
   }
 }
 
+/**
+ * Files the knowledge graph is built from, changed since a commit.
+ *
+ * Returns `null` when the commit is not in this history — a shallow clone, or
+ * a graph carried over from a rebased branch — because "cannot tell" and
+ * "nothing changed" are different answers.
+ */
+function sourceFilesChangedSince(commit) {
+  try {
+    // Against the *working tree*, not `commit..HEAD`. The graph is built from
+    // the files on disk, so an uncommitted edit makes it stale exactly as a
+    // committed one does.
+    const changed = run("git", ["diff", "--name-only", commit]);
+    return changed
+      .split("\n")
+      .filter(Boolean)
+      .filter((path) => /^(src|prisma|scripts|tests)\/.*\.(ts|tsx|mjs|js|prisma)$/.test(path));
+  } catch {
+    return null;
+  }
+}
+
 const graphReport = join(ROOT, "graphify-out", "GRAPH_REPORT.md");
 if (!existsSync(graphReport)) {
   report("warn", "Knowledge graph", "not built yet", "npm run graph");
@@ -139,7 +161,29 @@ if (!existsSync(graphReport)) {
   if (!built) {
     report("ok", "Knowledge graph", "built (no commit recorded)");
   } else if (head && !head.startsWith(built[1])) {
-    report("warn", "Knowledge graph", `built at ${built[1]}, HEAD is ${head.slice(0, 8)}`, "npm run graph:update");
+    // HEAD having moved is not the question — the graph's *own* commit moves
+    // it, so committing a fresh graph made it instantly stale. Three phases
+    // running. What matters is whether any file the graph indexes has changed
+    // since it was built.
+    const changed = sourceFilesChangedSince(built[1]);
+
+    if (changed === null) {
+      report(
+        "warn",
+        "Knowledge graph",
+        `built at ${built[1]}, which is not in this history`,
+        "npm run graph:update",
+      );
+    } else if (changed.length === 0) {
+      report("ok", "Knowledge graph", `current (built at ${built[1]}, no source changed since)`);
+    } else {
+      report(
+        "warn",
+        "Knowledge graph",
+        `${changed.length} source file(s) changed since ${built[1]}`,
+        "npm run graph:update",
+      );
+    }
   } else {
     report("ok", "Knowledge graph", "current with HEAD");
   }
