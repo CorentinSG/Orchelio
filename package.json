@@ -2,7 +2,7 @@
   "name": "orchelio-demo",
   "version": "0.1.0",
   "private": true,
-  "description": "Orchelio Demo — a configurable AI operating system for law firms.",
+  "description": "Orchelio Demo \u2014 a configurable AI operating system for law firms.",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "verify": "npm run lint && npm run typecheck && npm run docs:check && npm run skills:check && npm run test",
+    "verify": "npm run lint && npm run typecheck && npm run docs:check && npm run acceptance:check && npm run skills:check && npm run test",
     "verify:full": "npm run verify && npm run build && npm run test:e2e",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -34,11 +34,13 @@
     "graph:query": "graphify query",
     "queries": "ORCHELIO_LOG_QUERIES=1 next dev",
     "harness:doctor": "node scripts/doctor.mjs",
-    "check": "npm run lint && npm run typecheck && npm run docs:check && npm run skills:check && npm run test",
+    "check": "npm run lint && npm run typecheck && npm run docs:check && npm run acceptance:check && npm run skills:check && npm run test",
     "postinstall": "prisma generate",
     "docs:check": "node scripts/docs-check.mjs",
     "skills:check": "node scripts/skills-check.mjs",
-    "skills:firm-scope": "node .claude/skills/orchelio-firm-scope/scripts/audit.mjs"
+    "skills:firm-scope": "node .claude/skills/orchelio-firm-scope/scripts/audit.mjs",
+    "acceptance:check": "node scripts/acceptance-check.mjs",
+    "test:a11y": "playwright test tests/e2e/accessibility.spec.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",
@@ -49,6 +51,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.0",
@@ -57,6 +60,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.4",
+    "axe-core": "^4.12.1",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",

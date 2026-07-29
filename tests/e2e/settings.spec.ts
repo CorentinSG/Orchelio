@@ -161,7 +161,7 @@ test.describe("firm settings", () => {
     await page.getByRole("button", { name: "Save changes" }).click();
     await page.waitForURL(/saved=1/);
 
-    const sidebar = page.getByRole("complementary").or(page.locator("aside")).first();
+    const sidebar = page.getByRole("complementary", { name: "Firm workspace" });
     await expect(sidebar.getByText("Carter Law")).toBeVisible();
     // The product's own name is untouched by anything a firm can type.
     await expect(sidebar.getByText("Orchelio", { exact: true })).toBeVisible();

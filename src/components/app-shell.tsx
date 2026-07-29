@@ -136,7 +136,10 @@ export function AppShell({
       <DemoBanner variant="long" />
 
       <div className="flex flex-1 flex-col lg:flex-row">
-        <aside className="border-b border-line bg-surface lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
+        <aside
+          aria-label="Firm workspace"
+          className="border-b border-line bg-surface lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r"
+        >
           <div className="border-b border-line px-4 py-4">
             {/* The wordmark is the product's and never a firm's: a firm brands
                 itself here, not the software it is using. */}
@@ -202,7 +205,7 @@ export function AppShell({
           </div>
         </aside>
 
-        <main id="main" className="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-5xl">{children}</div>
         </main>
       </div>

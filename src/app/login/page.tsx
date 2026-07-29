@@ -36,7 +36,7 @@ export default async function LoginPage({
     <div className="flex min-h-dvh flex-col">
       <DemoBanner variant="long" />
 
-      <main id="main" className="flex flex-1 items-center justify-center px-4 py-10">
+      <main id="main" tabIndex={-1} className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
           <OrchelioWordmark size="lg" />
           <p className="mt-2 text-sm text-ink-muted">{APP_TAGLINE}</p>

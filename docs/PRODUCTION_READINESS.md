@@ -120,12 +120,38 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 
 ---
 
+## 9. Accessibility
+
+| Item | Status | Notes |
+| ---- | ------ | ----- |
+| Automated audit on every principal page | ✅ | axe-core against WCAG 2.1 A and AA plus best-practice, in **both** themes, in `tests/e2e/accessibility.spec.ts`. Runs in CI. No violation on any page. |
+| Keyboard operation | 🟡 | The skip link moves focus, focus is visible on every element it lands on, and sign-in completes by keyboard alone — all asserted. Not every screen has been walked end to end by hand. |
+| Contrast | ✅ | Every text token measured against every surface in both palettes. `--color-ink-subtle` was 3.18:1 and is now above 4.5:1 everywhere. |
+| Landmarks, headings and announcements | ✅ | One `<main>` and one `<h1>` per page, the demonstration banner is a named region rather than an alert, refusals use `role="alert"`, the open tab carries `aria-current`. |
+| Tested with a real screen reader | ⛔ | **Not done.** Automated rules detect roughly a third of WCAG, and not the hard third. |
+| Tested by a keyboard-only user or a user with a disability | ⛔ | **Not done.** This is the gap that matters most in this section. |
+| Formal WCAG 2.1 AA conformance statement | ⛔ | Would require the two rows above first. Orchelio claims no conformance level. |
+| Reduced motion, text resizing, zoom to 200% | 🟡 | `prefers-reduced-motion` is respected; resizing and zoom have not been tested. |
+
+## Also not done, and worth naming
+
+| Item | Status | Notes |
+| ---- | ------ | ----- |
+| Workflow editing by a firm | ⛔ | A firm's workflows follow from its practice area. Changing what one contains is an edit to the seed, for every firm at once. |
+| Any outbound integration | ⛔ | Deliberate and structural: Orchelio has no transport. Adding one reopens every question in sections 1, 4 and 7. |
+| Invitation or self-service user creation | ⛔ | An invitation is an email. See section 3. |
+| Internationalisation | ⛔ | The interface is English only. The configuration carries a `language` field that nothing reads. |
+
 ## The short version
 
-Orchelio Demo demonstrates a product idea. It now has sign-in, roles, server-side access control
-and firm isolation enforced in three layers and proved by tests, and those are built the way a
-real system would build them — but the passwords are published, there is no multi-factor
-authentication, isolation is enforced by the application rather than by the database, no real AI
-call is made, and none of it has been audited.
+Orchelio Demo demonstrates a product idea, and all nine of its build phases are delivered. It has
+sign-in, roles, server-side access control and firm isolation enforced in three layers and proved
+by tests; every acceptance criterion is mapped to named tests that are checked rather than
+asserted; and every principal page passes an automated accessibility audit in both themes. Those
+parts are built the way a real system would build them.
+
+But the passwords are published, there is no multi-factor authentication, isolation is enforced by
+the application rather than by the database, no real AI call is made, nobody who uses a screen
+reader has tried it, and none of it has been audited by anybody but its author.
 
 Treat every screen as a demonstration of intent, and keep real client information out of it.

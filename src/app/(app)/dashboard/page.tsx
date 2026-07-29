@@ -104,11 +104,12 @@ export default async function DashboardPage() {
           </p>
         </Callout>
       ) : (
-        <Callout tone="brand" title="Phase 8 of 9">
-          This dashboard is assembled from this firm&apos;s configuration — the cards below are
-          the ones an {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about
-          each morning. Every figure here is now counted from real records; nothing shows a dash
-          because nothing is waiting on a later phase.
+        <Callout tone="brand" title="Assembled from this firm's configuration">
+          The cards below are the ones an{" "}
+          {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about each
+          morning — a firm in another practice area sees different ones, from the same code.
+          Every figure is counted from real records, and a card whose AI feature this firm
+          switched off is absent rather than showing a zero.
         </Callout>
       )}
 

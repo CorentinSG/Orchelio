@@ -5,7 +5,12 @@ import { ApprovalCard } from "@/components/approval-ui";
 import { requireWorkspacePermission } from "@/lib/auth/workspace";
 import { can } from "@/lib/auth/permissions";
 import { actorFor } from "@/lib/auth/session";
-import { approvalActions, listApprovals } from "@/lib/data/approvals";
+import {
+  approvalActions,
+  approvalCounts,
+  listDecidedApprovals,
+  listPendingApprovals,
+} from "@/lib/data/approvals";
 import { firmConfiguration } from "@/lib/data/firms";
 import { parseJsonObject } from "@/lib/json-field";
 import {
@@ -18,6 +23,17 @@ import { LOCKED_APPROVAL_OPTIONS } from "@/lib/onboarding/catalogue";
 
 export const metadata = { title: "Approvals" };
 export const dynamic = "force-dynamic";
+
+/**
+ * How many cards the page renders.
+ *
+ * The counts beside the headings come from their own queries, so a bound here
+ * shortens the page without changing what it claims. Both are stated on screen
+ * whenever there is more than fits — a silent truncation reads as "that is all
+ * of them".
+ */
+const PENDING_SHOWN = 50;
+const DECIDED_SHOWN = 25;
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -48,17 +64,19 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
   const problem = one(query["problem"]) ?? null;
   const focus = one(query["focus"]) ?? one(query["decided"]) ?? null;
 
-  const [approvals, actionsPresent, configuration] = await Promise.all([
-    listApprovals(scope, filters),
+  const showPending = !filters.status || filters.status === "pending";
+  const showDecided = !filters.status || filters.status !== "pending";
+
+  const [pending, decided, counts, actionsPresent, configuration] = await Promise.all([
+    showPending ? listPendingApprovals(scope, filters, PENDING_SHOWN) : [],
+    showDecided ? listDecidedApprovals(scope, filters, DECIDED_SHOWN) : [],
+    approvalCounts(scope, filters),
     approvalActions(scope),
     firmConfiguration(scope),
   ]);
 
   const firmApprovals = parseJsonObject(configuration?.approvals);
   const canDecide = can(actorFor(session.user, firm.id), "approval.decide");
-
-  const pending = approvals.filter((approval) => approval.status === "pending");
-  const decided = approvals.filter((approval) => approval.status !== "pending");
   const uncovered = rulesWithoutActions();
 
   return (
@@ -67,7 +85,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Approvals</h1>
         <p className="mt-1 text-ink-muted">
-          {pending.length} waiting for a decision. Nothing here has taken effect.
+          {counts.pending} waiting for a decision. Nothing here has taken effect.
         </p>
       </header>
 
@@ -154,7 +172,14 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
         </form>
       </Card>
 
-      <Card title={`Waiting for a decision (${pending.length})`}>
+      <Card
+        title={`Waiting for a decision (${counts.pending})`}
+        description={
+          counts.pending > pending.length
+            ? `Showing the ${pending.length} most recent. Narrow the filters above to reach the rest.`
+            : undefined
+        }
+      >
         {pending.length === 0 ? (
           <Callout tone="neutral" title="Nothing is waiting">
             Nothing in this firm currently needs a person&apos;s decision.
@@ -182,8 +207,12 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
 
       {decided.length > 0 ? (
         <Card
-          title={`Decided (${decided.length})`}
-          description="Kept, not cleared. A decision is a record of who took responsibility."
+          title={`Decided (${counts.decided})`}
+          description={
+            counts.decided > decided.length
+              ? `Kept, not cleared. Showing the ${decided.length} most recent.`
+              : "Kept, not cleared. A decision is a record of who took responsibility."
+          }
         >
           <ul className="space-y-4">
             {decided.map((approval) => (

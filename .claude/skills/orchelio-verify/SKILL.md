@@ -24,28 +24,32 @@ the defect.
 | Lint is clean | `npm run lint` | Only the changed file checked |
 | Unit and integration tests pass | `npm run test` | A single file passing |
 | Documentation links resolve | `npm run docs:check` | The file exists |
+| Every acceptance criterion still names a real test | `npm run acceptance:check` | The document looks complete |
+| No page has a detectable accessibility violation | `npm run test:a11y` | It looked fine |
 | No new firm-scope bypass | `npm run skills:firm-scope` | Reading the diff |
 | The interface behaves | `npx playwright test --retries=0` | Unit tests passing |
 | It builds | `npm run build` | `next dev` running |
 | A clean checkout works | the fresh-clone check below | Your working directory works |
 | The environment is sound | `node scripts/doctor.mjs` | It ran yesterday |
 
-`npm run verify` chains lint, typecheck, docs:check, skills:check and the test
-suite. It does **not** run the browser tests or the build — `npm run verify:full`
-does.
+`npm run verify` chains lint, typecheck, docs:check, acceptance:check,
+skills:check and the test suite. It does **not** run the browser tests or the
+build — `npm run verify:full` does.
 
 ## The gate, in order
 
 ```
-1. npm run verify                     ← lint, types, docs, skills, 380 tests
+1. npm run verify                     ← lint, types, docs, acceptance, skills, tests
 2. npm run skills:firm-scope          ← no new route to Prisma
 3. PLAYWRIGHT_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium \
-     npx playwright test --retries=0  ← the browser suite
-4. node scripts/doctor.mjs            ← code map and graph current?
+     npx playwright test --retries=0  ← the browser suite, accessibility included
+4. node scripts/doctor.mjs            ← code map, graph and acceptance map current?
 ```
 
-Read the output. Count the failures. A suite that says `112 passed` and a suite
+Read the output. Count the failures. A suite that says `174 passed` and a suite
 you assume passed are different things.
+
+Test counts move every phase. Take them from the run, never from this file.
 
 ## `--retries=0`, deliberately
 
@@ -58,6 +62,11 @@ on the second attempt:
 - approvals being consumed by whichever parallel test reached them first.
 
 A retry would have hidden all three. See the `orchelio-flaky-test` skill.
+
+A timeout is in the same family. When the accessibility audit of `/approvals`
+exceeded thirty seconds, the cause was a page rendering a hundred cards — and
+the same investigation turned up a count on that screen that was simply wrong.
+Raising the timeout would have hidden both.
 
 ## The fresh-clone check
 

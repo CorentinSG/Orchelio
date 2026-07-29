@@ -15,7 +15,7 @@ export const metadata = { title: "Access denied" };
  */
 export default function ForbiddenPage() {
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-16">
+    <main id="main" tabIndex={-1} className="flex min-h-dvh items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         <OrchelioWordmark size="lg" />
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-ink">Access denied</h1>
@@ -35,6 +35,6 @@ export default function ForbiddenPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

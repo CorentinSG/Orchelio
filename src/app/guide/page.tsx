@@ -29,7 +29,7 @@ export default function GuidePage() {
     <div className="flex min-h-dvh flex-col">
       <DemoBanner variant="long" />
 
-      <main id="main" className="flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <main id="main" tabIndex={-1} className="flex-1 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl space-y-6">
           <header>
             <OrchelioWordmark subtitle="Guided demonstration" />

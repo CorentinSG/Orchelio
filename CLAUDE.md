@@ -29,7 +29,7 @@ Do not start by grepping. In order of cost:
 | "How does X reach Y? What calls this?" | `npm run graph:explain -- "currentSession()"` | ~300 tokens |
 | "What are the hubs of this codebase?" | `graphify-out/GRAPH_REPORT.md` | one file |
 | "Exact string or regex in source" | `Grep` — but scope it to the directory the map named | small |
-| "**Why** is it like this?" | `docs/decisions/` — fourteen ADRs, linked from `docs/INDEX.md` | one note |
+| "**Why** is it like this?" | `docs/decisions/` — seventeen ADRs, linked from `docs/INDEX.md` | one note |
 
 Both indexes are generated and can go stale. Refresh with `npm run codemap` and
 `npm run graph:update` (neither needs an API key or a network).
@@ -152,6 +152,25 @@ a test rather than shipping. See ADR-0016.
 A firm also cannot demote or suspend its **last** administrator: a platform
 administrator holds no membership, so nobody would be left able to undo it.
 
+### 11. A claim about a test is checked, not written down
+
+`docs/ACCEPTANCE.md` names, for every phase, the tests that prove its acceptance
+criterion. `npm run acceptance:check` verifies each one still exists, by file and
+by title, and runs inside `npm run verify`. Rename a test and the build fails —
+which is the point, because a document full of claims about tests that no longer
+exist goes on reading like evidence.
+
+### 12. Accessibility is audited in both themes, and the claim is bounded
+
+`npm run test:a11y` runs axe-core over every principal page in light *and* dark.
+A contrast token can pass in one palette and fail in the other, so testing the
+default only would report the product as fine while half its users saw the
+failure.
+
+Say what it does not cover, every time: automated rules catch roughly a third of
+WCAG, and nothing here has been tested with a screen reader or by anybody with a
+disability. See ADR-0017.
+
 ---
 
 ## Constraints from the specification
@@ -176,12 +195,14 @@ administrator holds no membership, so nobody would be left able to undo it.
 ## Commands
 
 ```bash
-npm run verify          # lint + typecheck + docs + skills + tests — run before every commit
+npm run verify          # lint + typecheck + docs + acceptance + skills + tests — before every commit
 npm run verify:full     # the above, plus build and browser tests
 npm run dev             # http://localhost:3000
 npm run seed            # fictional data, safe to re-run
 npm run codemap         # regenerate docs/CODEMAP.md
 npm run docs:check      # every internal link resolves, no orphaned note
+npm run acceptance:check    # every test named in docs/ACCEPTANCE.md still exists
+npm run test:a11y       # axe-core over every page, both themes
 npm run skills:check    # .claude/skills frontmatter, and everything they point at
 npm run skills:firm-scope   # no new route to Prisma outside the data layer
 npm run graph:update    # refresh the knowledge graph (local, no API key)

@@ -15,17 +15,21 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 to 8 of 9 complete
+## Current status: all nine phases complete
 
-Orchelio is built in nine phases. **Phases 1 to 8** are finished: you can sign in, land in the
-right firm workspace, switch between firms, answer a seven-step questionnaire that configures the
-firm, see a dashboard assembled from that configuration, work through matters, run a simulated
-Claude analysis that is independently reviewed, take — or refuse — the human decisions that let
-anything sensitive happen, read what the assistant would have cost, change any of the firm's
-settings afterwards, and create a **third firm entirely through the interface**. A twenty-one step
+Orchelio is built in nine phases, and all nine are finished: you can sign in, land in the right
+firm workspace, switch between firms, answer a seven-step questionnaire that configures the firm,
+see a dashboard assembled from that configuration, work through matters, run a simulated Claude
+analysis that is independently reviewed, take — or refuse — the human decisions that let anything
+sensitive happen, read what the assistant would have cost, change any of the firm's settings
+afterwards, and create a **third firm entirely through the interface**. A twenty-one step
 [guided demonstration](http://localhost:3000/guide) walks through the whole of it.
 
-What remains is Phase 9: the accessibility pass and the final documentation.
+Finished means the specification's nine phases are delivered and their acceptance criteria are
+covered by named tests ([`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md)). It does **not** mean
+production-ready — see [Known limitations](#known-limitations) and
+[`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md), which are written to be honest
+rather than reassuring.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
@@ -37,7 +41,7 @@ What remains is Phase 9: the accessibility pass and the final documentation.
 | 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | ✅ Delivered |
 | 7 | Approval centre, human decisions, append-only audit log | ✅ Delivered |
 | 8 | Simulated AI costs, firm creation, settings, guided demo | ✅ Delivered |
-| 9 | Unit, integration and end-to-end tests, accessibility, final documentation | Planned |
+| 9 | Unit, integration and end-to-end tests, accessibility, final documentation | ✅ Delivered |
 
 The running application shows this same table, so a screen never claims more than it does.
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the detail of each phase.
@@ -188,9 +192,11 @@ on the real internet.
 | `npm run db:studio` | Opens Prisma Studio, a visual browser for the database. |
 | `npm run lint` | Checks code style. |
 | `npm run typecheck` | Checks TypeScript types. |
-| `npm run test` | Runs the unit and component tests. |
-| `npm run test:e2e` | Runs the browser tests (see the note below). |
-| `npm run check` | Runs lint + typecheck + tests in one go. |
+| `npm run test` | Runs the unit and integration tests — 447 of them. |
+| `npm run test:e2e` | Runs the browser tests — 174 of them (see the note below). |
+| `npm run test:a11y` | Runs the accessibility audit over every page, in both themes. |
+| `npm run acceptance:check` | Verifies that every test named in `docs/ACCEPTANCE.md` still exists. |
+| `npm run check` | The same as `npm run verify`. |
 
 **`npm run reset-demo` erases the local database.** It only ever touches
 `prisma/orchelio-demo.db`, which contains fictional data only, but it cannot be undone. Prisma
@@ -264,19 +270,25 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 to 8 only.** What remains is Phase 9 — the accessibility pass and the final
-   documentation. Every dashboard figure is counted from real records.
-   Two things a reader might look for are absent by decision rather than by omission:
-   **workflow management**, because a firm's workflows are derived from its practice area, and
-   **integrations**, because an integration means sending something somewhere and Orchelio has no
-   transport at all. Both were listed in the sidebar as "Phase 8" until this phase, and have been
-   removed rather than deferred.
-2. **Four approval rules of eighteen are raised.** The onboarding questionnaire offers nine
+1. **Complete as a demonstration, not as a product.** All nine phases are delivered and every
+   dashboard figure is counted from real records. Three things a reader might look for are absent
+   by decision rather than by omission: **workflow management**, because a firm's workflows are
+   derived from its practice area; **integrations**, because an integration means sending
+   something somewhere and Orchelio has no transport at all; and **hosting**, because the
+   specification's constraint was that it costs nothing to run.
+
+2. **The accessibility work is bounded, and the bound matters.** Every principal page is audited
+   with axe-core in both light and dark themes, against WCAG 2.1 A and AA, and passes with no
+   violation — plus browser tests for the skip link, focus visibility, keyboard-only sign-in and
+   how refusals are announced. But automated rules detect roughly **a third** of WCAG, and not the
+   hard third. **Nothing here has been tested with a real screen reader, by a keyboard-only user,
+   or by anybody with a disability.** Run it yourself with `npm run test:a11y`.
+3. **Four approval rules of eighteen are raised.** The onboarding questionnaire offers nine
    configurable rules and nine locked ones; this build raises approvals for four of them. The
    approval centre lists the rest by name and says plainly that nothing currently triggers them —
    several are unreachable rather than unimplemented, because Orchelio has no transport and never
    deletes anything, but a firm that switched one on should be told rather than left to assume.
-3. **The sign-in is a demonstration, not a production authentication system.** The passwords are
+4. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
    account lockout. It exists to demonstrate roles and access control.
 
@@ -284,10 +296,10 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
    with the same published password. There is no invitation flow, because an invitation is an
    email and Orchelio has no way to send one. Outside the demonstration build the creation form
    refuses to invent an account at all and requires an administrator who already has one.
-4. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
+5. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
    and is not shared between instances. It raises the cost of guessing on one machine; it is not
    abuse protection.
-5. **Simulated AI, and not a language model.** Nothing in this build calls Anthropic; there is no
+6. **Simulated AI, and not a language model.** Nothing in this build calls Anthropic; there is no
    API key and no request leaves the machine. What produces an analysis is a set of deterministic
    rules over each matter's recorded fields, its intake answers and its document *names* — a
    different mechanism producing the same kind of result, so that every screen could be built and
@@ -295,18 +307,19 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
    there is no OCR, so nothing in an analysis comes from inside a file. Every analysis says so in
    its own warnings. The prompts a real provider would be given are in
    [`prompts/`](prompts/README.md).
-6. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
+7. **Multi-tenant isolation is enforced in the application, not by the database.** Three layers
    protect it — required arguments, a database client that refuses an unscoped query, and
-   membership guards — and 62 integration tests prove it against a real database holding two firms
-   with deliberately similar records. But all three run inside the application, so they protect
+   membership guards — and the integration suite proves it against a real database holding two
+   firms with deliberately similar records: the same client name, the same document filename, the
+   same matter title. But all three run inside the application, so they protect
    against a programming mistake, not against a compromised process or a mistaken database
    administrator. Production needs row-level security or separate schemas.
-7. **The activity log is append-only by application discipline**, not by the database. Nothing in
+8. **The activity log is append-only by application discipline**, not by the database. Nothing in
    the codebase updates or deletes an audit event, but a database administrator could. Production
    needs write-once storage.
-8. **SQLite, single machine.** Fine for a demonstration, not for concurrent real-world use.
-9. **No production security audit.** See the warning below.
-10. **`npm audit` reports advisories** in transitive dependencies of Next.js itself (`sharp`,
+9. **SQLite, single machine.** Fine for a demonstration, not for concurrent real-world use.
+10. **No production security audit.** See the warning below.
+11. **`npm audit` reports advisories** in transitive dependencies of Next.js itself (`sharp`,
    `postcss`). They cannot be fixed without downgrading Next.js to an unsupported version. They
    are tracked in [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 
@@ -360,7 +373,9 @@ GitHub too.
 | Document | Contents |
 | -------- | -------- |
 | [`docs/INDEX.md`](docs/INDEX.md) | The map of everything below. |
-| [`docs/decisions/`](docs/INDEX.md) | Why things are the way they are — ten decision records. |
+| [`docs/decisions/`](docs/INDEX.md) | Why things are the way they are — seventeen decision records. |
+| [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) | Every phase's acceptance criterion and the tests that prove it. Checked, not asserted. |
+| [`docs/DEMONSTRATION.md`](docs/DEMONSTRATION.md) | How to give a demonstration, and what to say about the limits before being asked. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How Orchelio is put together, and the procedures for extending it. |
 | [`docs/HARNESS.md`](docs/HARNESS.md) | The development tooling: verification, navigation, caching, CI. |
 | [`docs/CODEMAP.md`](docs/CODEMAP.md) | Generated index of every module and what it exports. |

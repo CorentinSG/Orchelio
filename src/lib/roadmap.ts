@@ -70,7 +70,7 @@ export const PHASES: readonly Phase[] = [
     number: 9,
     title: "Tests & documentation",
     summary: "Unit, integration and end-to-end tests, accessibility, final documentation.",
-    status: "planned",
+    status: "done",
   },
 ] as const;
 

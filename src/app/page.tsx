@@ -78,7 +78,7 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
         <div className="max-w-2xl">
           <p className="text-sm font-medium uppercase tracking-wide text-brand">{APP_FULL_NAME}</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
@@ -178,8 +178,11 @@ export default async function HomePage() {
               <Link href="/login" className="font-medium text-brand underline underline-offset-4">
                 Sign in
               </Link>{" "}
-              with a demonstration account to open a firm workspace. The onboarding questionnaire
-              that configures a firm arrives in Phase 4.
+              with a demonstration account to open a firm workspace, or read the{" "}
+              <Link href="/guide" className="font-medium text-brand underline underline-offset-4">
+                guided demonstration
+              </Link>{" "}
+              first — twenty-one steps, no account needed to read them.
             </p>
           </Card>
         </div>

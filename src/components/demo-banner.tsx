@@ -13,7 +13,17 @@ export function DemoBanner({ variant = "short" }: { variant?: "short" | "long" }
   }
 
   return (
-    <div className="border-b border-warning/30 bg-warning-soft">
+    // A named landmark, not a bare div. The banner sits above every landmark on
+    // the page, so its text belonged to none of them — a screen-reader user
+    // navigating by landmark skipped the one notice the specification requires
+    // on every screen. `role="region"` with a name puts it back on the map;
+    // `role="alert"` would be wrong, because a standing notice that interrupts
+    // every page is a notice people learn to ignore.
+    <div
+      role="region"
+      aria-label="Demonstration notice"
+      className="border-b border-warning/30 bg-warning-soft"
+    >
       <p className="mx-auto flex max-w-6xl items-start gap-2.5 px-4 py-2 text-sm text-ink sm:px-6">
         <svg
           aria-hidden

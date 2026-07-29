@@ -189,6 +189,25 @@ if (!existsSync(graphReport)) {
   }
 }
 
+// --- Acceptance coverage ---------------------------------------------------
+
+if (!existsSync(join(ROOT, "docs", "ACCEPTANCE.md"))) {
+  report("warn", "Acceptance map", "not written yet", "See docs/INDEX.md");
+} else {
+  try {
+    const output = run("node", ["scripts/acceptance-check.mjs"]);
+    const named = /(\d+) named test\(s\)/.exec(output);
+    report("ok", "Acceptance map", `${named ? named[1] : "?"} named test(s) present`);
+  } catch {
+    report(
+      "warn",
+      "Acceptance map",
+      "names a test that has moved or been renamed",
+      "npm run acceptance:check",
+    );
+  }
+}
+
 // --- Skills ----------------------------------------------------------------
 
 if (!existsSync(join(ROOT, ".claude", "skills"))) {

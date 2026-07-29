@@ -66,6 +66,79 @@ export async function countPendingApprovals(scope: FirmScope): Promise<number> {
   return prisma.approvalRequest.count({ where: { firmId: scope.firmId, status: "pending" } });
 }
 
+/**
+ * How many requests there really are, waiting and decided.
+ *
+ * Separate from `listApprovals` on purpose. The approvals screen used to derive
+ * both numbers from the rows it had fetched, which meant that a firm with 172
+ * requests waiting was told 100 were — the size of the window, reported as the
+ * size of the queue. A number on a screen is a claim, and that one was false.
+ */
+export async function approvalCounts(
+  scope: FirmScope,
+  filters: ApprovalFilters = {},
+): Promise<{ pending: number; decided: number }> {
+  const rows = await prisma.approvalRequest.groupBy({
+    by: ["status"],
+    where: {
+      firmId: scope.firmId,
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.action ? { action: filters.action } : {}),
+      ...(filters.matterId ? { matterId: filters.matterId } : {}),
+      ...(filters.riskLevel ? { riskLevel: filters.riskLevel } : {}),
+    },
+    _count: { _all: true },
+  });
+
+  let pending = 0;
+  let decided = 0;
+  for (const row of rows) {
+    if (row.status === "pending") pending += row._count._all;
+    else decided += row._count._all;
+  }
+
+  return { pending, decided };
+}
+
+/** Requests still waiting for a person, newest first. */
+export async function listPendingApprovals(
+  scope: FirmScope,
+  filters: ApprovalFilters = {},
+  take = 50,
+) {
+  return listApprovals(scope, { ...filters, status: "pending" }, take);
+}
+
+/**
+ * Requests already decided, most recently decided first.
+ *
+ * `status: { not: "pending" }` rather than one status at a time: there are four
+ * decisions, and a screen that listed only "approved" would quietly hide the
+ * rejections — which are the ones somebody is most likely to be looking for.
+ */
+export async function listDecidedApprovals(
+  scope: FirmScope,
+  filters: ApprovalFilters = {},
+  take = 25,
+) {
+  return prisma.approvalRequest.findMany({
+    where: {
+      firmId: scope.firmId,
+      status: filters.status && filters.status !== "pending" ? filters.status : { not: "pending" },
+      ...(filters.action ? { action: filters.action } : {}),
+      ...(filters.matterId ? { matterId: filters.matterId } : {}),
+      ...(filters.riskLevel ? { riskLevel: filters.riskLevel } : {}),
+    },
+    orderBy: [{ decidedAt: "desc" }, { createdAt: "desc" }],
+    take,
+    include: {
+      matter: { select: { id: true, reference: true, title: true } },
+      requestedBy: { select: { id: true, name: true } },
+      decidedBy: { select: { id: true, name: true } },
+    },
+  });
+}
+
 /** Every approval raised about one resource, newest first. */
 export async function approvalsForResource(
   scope: FirmScope,

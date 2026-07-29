@@ -459,21 +459,46 @@ label painted on a screen, so a real charge can never be mistaken for a simulate
 
 ### 8.1 Adding a practice area
 
-1. Add an entry to `PRACTICE_AREAS` in `src/lib/practice-areas.ts` with `status: "planned"`.
-2. Add its matter types, document categories and intake fields as template data (Phase 4/5).
-3. Add its workflow templates (Phase 4).
-4. Add its Analyst and Reviewer prompts under `prompts/<area>/` (Phase 6).
-5. Flip `status` to `"available"`.
+Every step below is an edit to a table of data. No screen is rewritten, no route is added, and
+no query changes.
 
-No screen is rewritten. No route is added. Everything is data.
+1. **`src/lib/practice-areas.ts`** — add an entry to `PRACTICE_AREAS` with `status: "planned"`.
+   It appears in the questionnaire immediately, marked "template coming soon", and step 2 refuses
+   to let a firm finish onboarding into it. That refusal is the reason to start here: a firm that
+   reached an empty template would meet a dead end two screens later.
+2. **`prisma/seed.ts`** — add the area to `PRACTICE_AREAS` and its kinds of matter to
+   `MATTER_TYPES`. These become the platform catalogue every firm chooses from; a `Matter` row
+   has a foreign key to it.
+3. **`src/lib/matters/fields.ts`** — add the area's field table and register it in
+   `FIELDS_BY_AREA`. This is what a matter shows and what a matter form asks for.
+4. **`src/lib/matters/documents.ts`** — add its document categories and register them in
+   `CATEGORIES_BY_AREA`, with what each matter type is expected to have on file.
+5. **`src/lib/dashboard/widgets.ts`** — add the questions a firm in that area asks each morning,
+   and register them in `WIDGETS_BY_AREA`. A widget that depends on an AI feature names it in
+   `requiresAiFeature`, so a firm that switched the feature off does not see the card at all.
+6. **`src/lib/data/statistics.ts`** — count whatever those widgets claim. A widget with no count
+   behind it renders a dash, which is correct but not useful for long.
+7. **`src/lib/onboarding/catalogue.ts`** — only if the area needs different *words* for the same
+   question. See §4bis; most areas do not.
+8. **`prisma/seed.ts`** again — its workflow templates, in `WORKFLOW_TEMPLATES`.
+9. Flip `status` to `"available"` in step 1's entry, and re-run `npm run seed`.
+
+Then run `npm run verify`. `tests/unit/matter-fields.test.ts` asserts that no area's fields leak
+into another's, and `tests/unit/dashboard-widgets.test.ts` that each area gets its own questions —
+both will exercise the new area as soon as it exists.
 
 ### 8.2 Adding a workflow
 
-1. Add a `WorkflowTemplate` row with its ordered steps, required approvals, AI features and
-   permitted roles (Phase 4).
-2. It becomes selectable in onboarding step 4 and in Firm Settings → Workflows.
+1. Add a `WorkflowTemplate` row in `prisma/seed.ts` with its ordered steps, required approvals,
+   AI features and permitted roles, then `npm run seed`.
+2. Templates for a firm's practice area — plus those that apply to any area — are enabled for it
+   when it confirms its configuration (`completeOnboarding`).
 
-Orchelio deliberately does **not** ship a full no-code workflow editor in the first version.
+**A firm cannot edit its workflows.** There is no workflow screen, and no
+no-code workflow editor: which templates a firm has follows from its practice area, and the
+settings page says so rather than offering a tab that does nothing. Changing what a workflow
+contains is an edit to the seed and a re-run, for everybody. That is a real limitation and it is
+listed in [Production readiness](PRODUCTION_READINESS.md) rather than left to be discovered.
 
 ### 8.3 Creating a firm
 
@@ -540,3 +565,22 @@ Principles:
 - Keyboard focus is always visible; `prefers-reduced-motion` is respected.
 - Provenance is always visible: **AI-generated — Human review required**, **Attorney approved**,
   **Not verified**. A user must never have to guess where a statement came from.
+
+### Contrast is measured, not judged
+
+Every text token is checked against every surface it can appear on, in both palettes. The three
+text levels — `ink`, `ink-muted`, `ink-subtle` — must all clear 4.5:1, because all three are used
+at ordinary text sizes.
+
+`ink-subtle` did not. In the light palette it measured 3.18:1 against the AI panel's background
+and 3.75:1 against white, and it is the token used for hints, counts, timestamps and captions on
+nearly every screen. It was darkened in Phase 9 until it cleared 4.5 on all seven light surfaces.
+The visible cost is that `ink-muted` and `ink-subtle` are now closer together than the hierarchy
+was designed to be; the alternative was a level nobody could read.
+
+A firm's accent colour is a **fixed palette of five**, not a picker, for the same reason: the
+value reaches a `style` attribute, and an arbitrary colour can clear contrast in one theme and
+fail in the other. Each entry carries a light and a dark value. See
+[ADR-0015](decisions/ADR-0015-branding-names-the-firm-not-the-product.md).
+
+`npm run test:a11y` re-checks all of this on every principal page, in both themes.

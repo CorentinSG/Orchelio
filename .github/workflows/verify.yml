@@ -46,6 +46,12 @@ jobs:
       - name: Documentation links resolve, and nothing is orphaned
         run: npm run docs:check
 
+      # docs/ACCEPTANCE.md names, for every phase, the tests that prove its
+      # acceptance criterion. A renamed test turns that document into a list of
+      # claims about nothing, while it goes on reading like evidence.
+      - name: Every acceptance criterion still names a test that exists
+        run: npm run acceptance:check
+
       # A skill pointing at a renamed script is worse than no skill: it sends
       # a reader somewhere that does not exist.
       - name: Skills are well formed and their references resolve

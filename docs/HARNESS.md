@@ -35,8 +35,8 @@ migrations and seeds if needed. It never resets or drops anything.
 ## 2. Verifying a change
 
 ```bash
-npm run verify        # lint + typecheck + docs + skills + unit and integration tests  (~20 s)
-npm run verify:full   # the above, plus the production build and browser tests (~2 min)
+npm run verify        # lint + typecheck + docs + acceptance + skills + unit and integration tests  (~25 s)
+npm run verify:full   # the above, plus the production build and browser tests (~3 min)
 ```
 
 Run `verify` before every commit and `verify:full` before every push. CI
@@ -50,7 +50,43 @@ npm run test:unit           # pure logic and components
 npm run test:integration    # firm isolation, against a throwaway database
 npm run test:e2e            # a real browser
 npm run test:e2e:ui         # the same, with Playwright's inspector
+npm run test:a11y           # axe-core over every page, in both themes
 ```
+
+## 2a. Acceptance coverage
+
+```bash
+npm run acceptance:check
+```
+
+`docs/ACCEPTANCE.md` names, for every phase, the tests that prove its acceptance
+criterion — by file and by title. This verifies that each one still exists.
+
+It is the same failure mode the documentation check exists for, one level up: a
+renamed test turns that document into a list of claims about nothing, while it
+goes on reading like evidence. It runs inside `npm run verify`, in CI, and is
+reported by the doctor.
+
+Proved to fail before being trusted, on a renamed test, a moved file, and a
+phase whose criterion had no test beneath it.
+
+## 2b. Accessibility
+
+```bash
+npm run test:a11y
+```
+
+axe-core against every principal page, in **both** themes, over WCAG 2.1 A and
+AA plus best-practice — and alongside it, ordinary browser tests for what an
+automated audit cannot judge: the skip link, focus visibility, keyboard-only
+sign-in, `aria-current` on the open tab, and which announcements are alerts.
+
+Both themes is not a formality. The palettes are separate, and a colour token
+can clear 4.5:1 in one and fail in the other.
+
+**Passing means no machine-detectable violation.** Automated rules cover roughly
+a third of WCAG, and not the hard third — see
+[ADR-0017](decisions/ADR-0017-the-accessibility-claim-is-bounded.md).
 
 **A test that passes on retry is a bug you have not understood yet.** Two real
 defects in this codebase were first seen as flakiness. When one appears, run the
@@ -58,7 +94,7 @@ suite with `--retries=0` and reproduce it deliberately before changing anything.
 
 ---
 
-## 2b. Skills
+## 2c. Skills
 
 `.claude/skills/` holds five skills — instructions an assistant loads when it
 recognises the situation they describe, rather than re-deriving a rule that was
@@ -183,7 +219,7 @@ directory the code map named rather than the whole repository.
 
 ### `docs/decisions/` — why things are the way they are
 
-Neither index answers "why". Ten decision records do, and several of them exist
+Neither index answers "why". Seventeen decision records do, and several of them exist
 because a reasonable person would otherwise change something back: the 303
 redirects, the caching rule, the practice-area vocabulary, the middleware that
 is deliberately not a security boundary.
@@ -288,6 +324,10 @@ repeated `npm run test:e2e` runs skip the build.
 | `scripts/doctor.mjs` | The environment check |
 | `scripts/codemap.mjs` | Generates `docs/CODEMAP.md` |
 | `scripts/docs-check.mjs` | Verifies every internal link and finds orphaned notes |
+| `scripts/acceptance-check.mjs` | Verifies every test named in `docs/ACCEPTANCE.md` still exists |
+| `scripts/skills-check.mjs` | Verifies the skills' frontmatter and everything they point at |
+| `docs/ACCEPTANCE.md` | Every acceptance criterion, and the tests that prove it |
+| `docs/DEMONSTRATION.md` | How to give a demonstration, and what to say about the limits |
 | `docs/INDEX.md` | Entry point of the documentation, and of the Obsidian vault |
 | `docs/decisions/` | Why things are the way they are |
 | `.github/workflows/verify.yml` | CI |

@@ -57,7 +57,7 @@ test.describe("usage and costs", () => {
 
   test("the sidebar offers it only to those who may open it", async ({ page }) => {
     await signIn(page, "immigration.paralegal@demo.local");
-    const sidebar = page.locator("aside").first();
+    const sidebar = page.getByRole("complementary", { name: "Firm workspace" });
     await expect(sidebar.getByRole("link", { name: "Usage and Costs" })).toHaveCount(0);
 
     await page.getByRole("button", { name: "Sign out" }).click();
@@ -65,7 +65,7 @@ test.describe("usage and costs", () => {
 
     await signIn(page, "immigration.attorney@demo.local");
     await expect(
-      page.locator("aside").first().getByRole("link", { name: "Usage and Costs" }),
+      page.getByRole("complementary", { name: "Firm workspace" }).getByRole("link", { name: "Usage and Costs" }),
     ).toBeVisible();
   });
 });

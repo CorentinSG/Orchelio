@@ -430,12 +430,76 @@ practice area, and the settings page says so rather than showing a tab that does
 
 ---
 
-## Phase 9 — Tests and documentation
+## Phase 9 — Tests and documentation ✅ Delivered
 
-- Unit, integration and end-to-end coverage of the acceptance criteria.
-- Accessibility pass: keyboard, contrast, screen-reader labels, focus order.
-- Final documentation: limitations, pre-production work, demonstration procedure, and the
-  procedures for adding a practice area, a workflow, a firm and the Anthropic API.
+Delivered:
+
+- **[`docs/ACCEPTANCE.md`](ACCEPTANCE.md)** — every phase's acceptance criterion with the tests
+  that prove it, named individually. Eighty-five named tests across thirty-one files.
+- **`npm run acceptance:check`** — verifies that every test named there still exists, in the file
+  named beside it. A renamed test fails the build rather than turning the document into a list of
+  claims about nothing. It runs inside `npm run verify`, in CI, and is reported by the doctor.
+- **The accessibility pass** — axe-core against every principal page in **both themes**, plus
+  browser tests for what an automated audit cannot judge: the skip link, focus visibility,
+  keyboard-only sign-in, `aria-current` on the open tab, and which announcements are alerts.
+- **[`docs/DEMONSTRATION.md`](DEMONSTRATION.md)** — how to give a demonstration: the setup, the
+  ten-minute version, what to say about the limits *before* being asked, and honest answers to
+  the five questions that come up.
+- **Rewritten procedures** in [Architecture §8](ARCHITECTURE.md) for adding a practice area and a
+  workflow, naming the actual files rather than the phase that built them.
+
+**Acceptance met:** `npm run acceptance:check` reports nine phases and eighty-five named tests,
+all present; `npm run test:a11y` reports no machine-detectable violation on any page in either
+theme; and every procedure the specification asks for is written down.
+
+Both checks were proved to fail before being trusted. The acceptance check was given a renamed
+test, a moved file and a phase whose criterion had no test beneath it; each produced a finding
+and exit code 1.
+
+### The audit found four rules failing, on twenty-two pages
+
+Every one was a real defect. None was a false positive.
+
+**Contrast.** `--color-ink-subtle` measured 3.18:1 against the AI panel's background and 3.75:1
+against white, where 4.5:1 is required for text that size — and it is the token used for hints,
+counts, timestamps and captions on nearly every screen. Darkened to `#61697c`, which clears 4.5
+on all seven light surfaces. The dark palette already passed. The cost is that the three-level
+text hierarchy is now compressed; unreadable is not a hierarchy.
+
+**The demonstration banner belonged to no landmark.** It sits above every landmark on the page,
+so a screen-reader user navigating by landmark skipped the one notice the specification requires
+on every screen. It is now a named region — not an alert, because a standing notice that
+interrupts every page is a notice people learn to ignore.
+
+**The skip link pointed at nothing.** The root layout renders "Skip to main content" on every
+page, and four screens had no `<main>` at all: the refusal, the 404, the error screen and the
+loading screen — exactly the screens where somebody is most likely to be lost. All four now carry
+one, and every `<main>` gained `tabIndex={-1}`, because a fragment link moves the reading position
+but not focus unless the target can hold it.
+
+**A definition row outside a definition list.** One `<dt>`/`<dd>` pair on the branding tab was
+read as ordinary text.
+
+### And a false count, found by an audit timing out
+
+The dark-theme audit of `/approvals` exceeded thirty seconds. The cause was not the theme: the
+page fetched a hundred requests and rendered all of them. Investigating it turned up something
+worse than slowness — the page derived both its numbers from that hundred-row window, so a firm
+with 172 requests waiting was told that 100 were.
+
+A number on a screen is a claim, and that one was false. The counts now come from their own
+query, the lists are bounded at fifty and twenty-five, and the page says "showing the N most
+recent" whenever there is more than fits. `tests/integration/approvals.test.ts` asserts the count
+against a window deliberately smaller than the queue.
+
+The timeout was not raised. An audit that gets slower as the data grows is a useful alarm.
+
+### What the accessibility claim does not cover — ADR-0017
+
+Automated rules detect roughly a third of WCAG, and not the hard third. Nothing in this build has
+been tested with a real screen reader, by a keyboard-only user, or by anybody with a disability.
+That sentence is in the README, in `docs/ACCEPTANCE.md` and at the top of the test file, because
+a bounded claim stated once is a bounded claim nobody reads.
 
 ---
 

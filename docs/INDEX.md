@@ -39,7 +39,7 @@ the code — is what makes one firm's Orchelio different from another's. Each
 firm's data is isolated from every other firm's, enforced in three independent
 layers and proved by tests.
 
-Built in nine phases. Eight are delivered; see [Roadmap](ROADMAP.md).
+Built in nine phases, all delivered; see [Roadmap](ROADMAP.md).
 
 ---
 
@@ -67,6 +67,7 @@ decided, and what it cost.
 | 14 | [The effect lives behind the decision](decisions/ADR-0014-the-effect-lives-behind-the-decision.md) | 7 |
 | 15 | [Branding names the firm, not the product](decisions/ADR-0015-branding-names-the-firm-not-the-product.md) | 8 |
 | 16 | [Destructive demonstration controls are commands, not buttons](decisions/ADR-0016-destructive-demonstration-controls-are-commands.md) | 8 |
+| 17 | [The accessibility claim is bounded, and the bound is stated](decisions/ADR-0017-the-accessibility-claim-is-bounded.md) | 9 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)
@@ -91,6 +92,10 @@ differently without knowing what you knew. Preferences do not need a note.
   for adding a practice area, a workflow, a firm, or the Anthropic API.
 - [Roadmap](ROADMAP.md) — the nine phases, what each delivered, and the defects
   found on the way.
+- [Acceptance criteria](ACCEPTANCE.md) — every phase's criterion and the tests
+  that prove it, checked rather than asserted.
+- [Giving a demonstration](DEMONSTRATION.md) — the procedure, the ten-minute
+  version, and what to say about the limits before being asked.
 - [Harness](HARNESS.md) — verification, navigation, caching, CI.
 - [Code map](CODEMAP.md) — generated index of every module. Do not edit.
 - [Production readiness](PRODUCTION_READINESS.md) — what must happen before this

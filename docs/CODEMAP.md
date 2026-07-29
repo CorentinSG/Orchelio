@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 159.
+Modules: 163.
 
 ## `prisma/`
 
@@ -28,6 +28,10 @@ Models: `User`, `Session`, `Firm`, `FirmMembership`, `FirmConfiguration`, `Pract
 Everything created here is fictional.
 
 ## `scripts/`
+
+### `scripts/acceptance-check.mjs`
+
+`docs/ACCEPTANCE.md` names, for every phase's acceptance criterion, the tests that prove it.
 
 ### `scripts/codemap.mjs`
 
@@ -89,7 +93,7 @@ Exports: `metadata`, `dynamic`, `AiWorkspacePage`
 
 ### `src/app/(app)/approvals/page.tsx`
 
-Everything waiting for a person, and everything a person has decided.
+How many cards the page renders.
 
 Exports: `metadata`, `dynamic`, `ApprovalsPage`
 
@@ -132,6 +136,12 @@ Exports: `metadata`, `dynamic`, `NewMatterPage`
 ### `src/app/(app)/matters/page.tsx`
 
 Exports: `metadata`, `dynamic`, `MattersPage`
+
+### `src/app/(app)/not-found.tsx`
+
+404 inside the workspace.
+
+Exports: `metadata`, `WorkspaceNotFound`
 
 ### `src/app/(app)/onboarding/[step]/page.tsx`
 
@@ -283,7 +293,7 @@ Exports: `metadata`, `dynamic`, `LoginPage`
 
 ### `src/app/not-found.tsx`
 
-404.
+404, outside the workspace.
 
 Exports: `metadata`, `NotFound`
 
@@ -348,6 +358,12 @@ Exports: `LoadingScreen`
 Two rules live here so that every screen obeys them without remembering to: a value that is not known reads "Unknown" rather than being left blank, and a date is never…
 
 Exports: `statusLabel`, `StatusBadge`, `formatDate`, `relativeDays`, `UnconfirmedDate`, `MatterLink`, `fileSize`, `ALL_STATUSES`
+
+### `src/components/not-found-notice.tsx`
+
+"Page not found", without deciding where it sits.
+
+Exports: `NotFoundNotice`
 
 ### `src/components/onboarding-ui.tsx`
 
@@ -517,7 +533,7 @@ Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getRevie
 
 The important function here is `decideApproval`, and the important thing about it is that it is the only way a sensitive action takes effect.
 
-Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
+Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
 
 ### `src/lib/data/catalogues.ts`
 
@@ -704,6 +720,10 @@ Exports: `getDatabaseStatus`, `getSystemStatus`, `listFirms`, `DatabaseStatus`, 
 ### `tests/setup.ts`
 
 ## `tests/e2e/`
+
+### `tests/e2e/accessibility.spec.ts`
+
+Phase 9 — the accessibility pass.
 
 ### `tests/e2e/admin.spec.ts`
 

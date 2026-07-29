@@ -437,7 +437,14 @@ export default async function SettingsPage({ searchParams }: PageProps) {
               the firm&apos;s own software would be claiming something untrue about who wrote it.
             </Callout>
 
-            <DataRow label="Shown in the sidebar as" value={firmDisplayName(branding, firm.name)} />
+            {/* A definition row belongs inside a definition list. Loose
+                <dt>/<dd> elements are read as ordinary text. */}
+            <dl>
+              <DataRow
+                label="Shown in the sidebar as"
+                value={firmDisplayName(branding, firm.name)}
+              />
+            </dl>
 
             {canEdit ? <SaveBar /> : null}
           </form>

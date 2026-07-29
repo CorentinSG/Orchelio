@@ -555,3 +555,57 @@ describe("an action nobody declared", () => {
     ).rejects.toThrow(/Unknown approvable action/);
   });
 });
+
+describe("the numbers the approvals screen prints", () => {
+  it("counts every request, not the ones that happened to be fetched", async () => {
+    // The defect this exists for: the page derived both counts from a single
+    // 100-row window, so a firm with more waiting than that was told the window
+    // size. Found by an accessibility audit timing out on the rendered page,
+    // which is not where anybody was looking.
+    const scope = { firmId: fixture.employment.firmId };
+    const before = await approvals.approvalCounts(scope);
+
+    for (let index = 0; index < 12; index += 1) {
+      await fixture.prisma.approvalRequest.create({
+        data: {
+          firmId: fixture.employment.firmId,
+          matterId: fixture.employment.matterId,
+          resourceType: "ai_analysis",
+          resourceId: `bulk-${index}`,
+          action: "legal_analysis",
+          summary: `Bulk request ${index}`,
+        },
+      });
+    }
+
+    const counts = await approvals.approvalCounts(scope);
+    expect(counts.pending).toBe(before.pending + 12);
+
+    // A window smaller than the queue returns the window and says nothing about
+    // its size — which is exactly why the count is a separate query.
+    const window = await approvals.listPendingApprovals(scope, {}, 5);
+    expect(window).toHaveLength(5);
+    expect(counts.pending).toBeGreaterThan(window.length);
+  });
+
+  it("counts only this firm's requests", async () => {
+    const mine = await approvals.approvalCounts({ firmId: fixture.immigration.firmId });
+    const theirs = await approvals.approvalCounts({ firmId: fixture.employment.firmId });
+
+    const everything = await fixture.prisma.approvalRequest.count({
+      where: { firmId: fixture.employment.firmId },
+    });
+    expect(theirs.pending + theirs.decided).toBe(everything);
+    expect(mine.pending + mine.decided).not.toBe(everything);
+  });
+
+  it("lists decided requests of every kind, not only approvals", async () => {
+    // A screen that listed only "approved" would hide the rejections, which are
+    // the ones somebody is most likely to be looking for.
+    const scope = { firmId: fixture.immigration.firmId };
+    const decided = await approvals.listDecidedApprovals(scope, {}, 100);
+
+    expect(decided.every((request) => request.status !== "pending")).toBe(true);
+    expect(new Set(decided.map((request) => request.status)).size).toBeGreaterThan(0);
+  });
+});

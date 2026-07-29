@@ -22,13 +22,13 @@ import { OrchelioWordmark } from "@/components/brand";
  */
 export function LoadingScreen() {
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4">
+    <main id="main" tabIndex={-1} className="flex min-h-dvh items-center justify-center px-4">
       <div className="flex flex-col items-center gap-3 text-center">
         <OrchelioWordmark size="lg" />
         <p className="text-sm text-ink-muted" role="status">
           Loading…
         </p>
       </div>
-    </div>
+    </main>
   );
 }
