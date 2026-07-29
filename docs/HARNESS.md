@@ -35,7 +35,7 @@ migrations and seeds if needed. It never resets or drops anything.
 ## 2. Verifying a change
 
 ```bash
-npm run verify        # lint + typecheck + unit and integration tests  (~15 s)
+npm run verify        # lint + typecheck + docs + skills + unit and integration tests  (~20 s)
 npm run verify:full   # the above, plus the production build and browser tests (~2 min)
 ```
 
@@ -55,6 +55,65 @@ npm run test:e2e:ui         # the same, with Playwright's inspector
 **A test that passes on retry is a bug you have not understood yet.** Two real
 defects in this codebase were first seen as flakiness. When one appears, run the
 suite with `--retries=0` and reproduce it deliberately before changing anything.
+
+---
+
+## 2b. Skills
+
+`.claude/skills/` holds five skills — instructions an assistant loads when it
+recognises the situation they describe, rather than re-deriving a rule that was
+paid for once already.
+
+| Skill | Loaded when |
+| ----- | ----------- |
+| `orchelio-phase` | Starting or finishing a numbered build phase |
+| `orchelio-firm-scope` | Touching anything that reads or writes firm data |
+| `orchelio-honest-ui` | Adding or changing a user-facing surface |
+| `orchelio-verify` | About to claim something is finished or passing |
+| `orchelio-flaky-test` | A test fails intermittently or passes on a retry |
+
+They are written for this project, not copied from a catalogue: a generic
+"verify before completion" skill restates what everybody already believes,
+while one naming *this* project's commands and *this* project's three
+retry-hidden defects is worth loading. Where the shape was borrowed —
+[obra/superpowers](https://github.com/obra/superpowers) for the Iron-Law and
+gate-function form — the skill says so at the bottom.
+
+### They are checked like the documentation
+
+```bash
+npm run skills:check
+```
+
+A skill is prose that goes stale silently while continuing to look
+authoritative, which is exactly the failure `npm run docs:check` exists to
+prevent for `docs/`. So the same treatment: frontmatter present, `name`
+matching the folder, a description that says *when* to use it, no duplicate
+names, every file path and every `npm run` it mentions actually existing, every
+bundled `references/` and `scripts/` file referenced from the SKILL.md, and
+every bundled script parsing.
+
+It runs inside `npm run verify` and is reported by the doctor.
+
+### The one skill with teeth
+
+```bash
+npm run skills:firm-scope
+```
+
+`orchelio-firm-scope` bundles an audit that lists every file reaching Prisma
+from outside `src/lib/data`, and every unscoped data-layer export, each with the
+reason it is allowed. A new one fails the run.
+
+It is a **ratchet, not a proof** — and the script says so in its own output. A
+grep cannot know whether `where: { firmId }` names the *right* firm; that is
+what the runtime guard and `tests/integration/isolation.test.ts` are for. What
+the ratchet buys is that adding an exception is a deliberate act somebody has
+to justify in writing, rather than a line that slips in.
+
+The allow-list was built by measuring rather than guessing: a naive version
+flagged nine legitimate cases — platform catalogues shared by every firm, pure
+helpers that touch no database, and the guard itself.
 
 ---
 

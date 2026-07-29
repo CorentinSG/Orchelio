@@ -189,6 +189,20 @@ if (!existsSync(graphReport)) {
   }
 }
 
+// --- Skills ----------------------------------------------------------------
+
+if (!existsSync(join(ROOT, ".claude", "skills"))) {
+  report("warn", "Skills", "none installed", "See docs/HARNESS.md");
+} else {
+  try {
+    const output = run("node", ["scripts/skills-check.mjs"]);
+    const count = /(\d+) skill\(s\)/.exec(output);
+    report("ok", "Skills", `${count ? count[1] : "?"} available, references resolve`);
+  } catch {
+    report("warn", "Skills", "a skill points at something missing", "npm run skills:check");
+  }
+}
+
 // --- Browser ---------------------------------------------------------------
 
 const chromium = process.env["PLAYWRIGHT_CHROMIUM_EXECUTABLE"];

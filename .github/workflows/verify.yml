@@ -46,6 +46,16 @@ jobs:
       - name: Documentation links resolve, and nothing is orphaned
         run: npm run docs:check
 
+      # A skill pointing at a renamed script is worse than no skill: it sends
+      # a reader somewhere that does not exist.
+      - name: Skills are well formed and their references resolve
+        run: npm run skills:check
+
+      # A ratchet, not a proof — see docs/HARNESS.md. It fails on a *new*
+      # route to Prisma from outside the data layer, not on the reviewed ones.
+      - name: No new firm-scope bypass
+        run: npm run skills:firm-scope
+
   # The browser tests build the application, so they are slower and run
   # separately. Splitting them means a typo fails in a minute, not in five.
   browser:

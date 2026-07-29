@@ -29,7 +29,7 @@ Do not start by grepping. In order of cost:
 | "How does X reach Y? What calls this?" | `npm run graph:explain -- "currentSession()"` | ~300 tokens |
 | "What are the hubs of this codebase?" | `graphify-out/GRAPH_REPORT.md` | one file |
 | "Exact string or regex in source" | `Grep` — but scope it to the directory the map named | small |
-| "**Why** is it like this?" | `docs/decisions/` — ten ADRs, linked from `docs/INDEX.md` | one note |
+| "**Why** is it like this?" | `docs/decisions/` — fourteen ADRs, linked from `docs/INDEX.md` | one note |
 
 Both indexes are generated and can go stale. Refresh with `npm run codemap` and
 `npm run graph:update` (neither needs an API key or a network).
@@ -154,12 +154,14 @@ whether a record is missing or forbidden, so a refusal never confirms existence.
 ## Commands
 
 ```bash
-npm run verify          # lint + typecheck + unit/integration tests — run before every commit
+npm run verify          # lint + typecheck + docs + skills + tests — run before every commit
 npm run verify:full     # the above, plus build and browser tests
 npm run dev             # http://localhost:3000
 npm run seed            # fictional data, safe to re-run
 npm run codemap         # regenerate docs/CODEMAP.md
 npm run docs:check      # every internal link resolves, no orphaned note
+npm run skills:check    # .claude/skills frontmatter, and everything they point at
+npm run skills:firm-scope   # no new route to Prisma outside the data layer
 npm run graph:update    # refresh the knowledge graph (local, no API key)
 ```
 
@@ -168,6 +170,26 @@ AI assistant without explicit human consent — ask, do not work around it.
 
 Browser tests need `PLAYWRIGHT_CHROMIUM_EXECUTABLE` set, or a browser installed
 with `npx playwright install chromium`.
+
+---
+
+## Skills
+
+`.claude/skills/` holds five, loaded when the situation calls for them rather
+than read up front:
+
+| Skill | Loaded when |
+| ----- | ----------- |
+| `orchelio-phase` | Starting or finishing a numbered build phase |
+| `orchelio-firm-scope` | Touching anything that reads or writes firm data |
+| `orchelio-honest-ui` | Adding or changing a user-facing surface |
+| `orchelio-verify` | About to claim something is finished or passing |
+| `orchelio-flaky-test` | A test fails intermittently or passes on a retry |
+
+They restate rules from this file with the detail a rule cannot carry — the
+commands that prove a claim, the three defects a retry would have hidden, the
+audit script. `npm run skills:check` keeps them from going stale, and runs
+inside `npm run verify`.
 
 ---
 
