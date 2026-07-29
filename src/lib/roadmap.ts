@@ -64,7 +64,7 @@ export const PHASES: readonly Phase[] = [
     number: 8,
     title: "Usage & administration",
     summary: "Simulated AI costs, firm creation, settings, guided demo.",
-    status: "planned",
+    status: "done",
   },
   {
     number: 9,

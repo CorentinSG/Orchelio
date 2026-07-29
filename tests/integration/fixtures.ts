@@ -91,6 +91,22 @@ export async function createTwoFirmFixture(): Promise<TwoFirmFixture> {
     create: { key: "unpaid_wages", label: "Unpaid wages", practiceAreaKey: "employment_law" },
   });
 
+  // The rest of the catalogue the fictional matters refer to. A matter row has a
+  // foreign key to it, so a fixture missing one turns "this sample matter was
+  // skipped" into a constraint violation — which is a different test.
+  for (const type of [
+    { key: "employment_based", label: "Employment-based immigration", area: "immigration" },
+    { key: "naturalisation", label: "Naturalisation", area: "immigration" },
+    { key: "retaliation", label: "Retaliation", area: "employment_law" },
+    { key: "severance_review", label: "Severance review", area: "employment_law" },
+  ]) {
+    await client.matterType.upsert({
+      where: { key: type.key },
+      update: {},
+      create: { key: type.key, label: type.label, practiceAreaKey: type.area },
+    });
+  }
+
   const immigration = await seedFirm(client, {
     slug: "test-immigration",
     name: "Test Immigration Law",

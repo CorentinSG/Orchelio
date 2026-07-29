@@ -130,6 +130,28 @@ claim ("there is nothing to do"). A widget depending on an AI feature the firm
 switched off is omitted, not shown empty. Refusals are worded identically
 whether a record is missing or forbidden, so a refusal never confirms existence.
 
+### 9. Cross-firm reads live in one module
+
+`src/lib/data/platform.ts` is the only place allowed to look across tenants —
+the firm list, the instance counts, creating a firm. Nothing it returns names a
+matter, a client or a document, because the query does not ask.
+
+Instance totals are summed from each firm's own `_count`. Do **not** satisfy the
+scoping guard with a filter that matches every firm (`where: { firm: { is: {} } }`
+and friends): it reads as scoped and is not, which is worse than the count being
+awkward.
+
+### 10. Destructive things are commands, not buttons
+
+Adding fictional data is offered in the interface and is additive — a matter
+whose reference exists is skipped, and nothing is deleted. Erasing is
+`npm run reset-demo`, typed by a person. Two browser tests assert that no button
+matching `/delete|erase|reset|wipe/i` exists on those pages, so adding one fails
+a test rather than shipping. See ADR-0016.
+
+A firm also cannot demote or suspend its **last** administrator: a platform
+administrator holds no membership, so nobody would be left able to undo it.
+
 ---
 
 ## Constraints from the specification

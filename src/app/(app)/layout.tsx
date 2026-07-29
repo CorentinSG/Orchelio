@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { requireSession } from "@/lib/auth/guards";
-import { activeFirmFor } from "@/lib/auth/firm-context";
+import { activeFirmFor, scopeFor } from "@/lib/auth/firm-context";
+import { readBranding } from "@/lib/data/settings";
 import { actorFor } from "@/lib/auth/session";
 import { permissionsFor, roleLabel } from "@/lib/auth/permissions";
 
@@ -22,10 +23,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const firm = await activeFirmFor(session);
   const permissions = permissionsFor(actorFor(session.user, firm?.id ?? null));
 
+  // The firm's own display name and accent, read here so the sidebar shows what
+  // the branding tab says it shows. One query, request-scoped like everything
+  // else firm-specific — a firm's branding is firm data, and firm data is never
+  // cached across requests.
+  const branding = firm ? await readBranding(scopeFor(firm)) : null;
+
   return (
     <AppShell
       session={session}
       firm={firm}
+      branding={branding}
       roleLabel={roleLabel(firm?.role ?? null, session.user.isPlatformAdmin)}
       permissions={permissions}
     >

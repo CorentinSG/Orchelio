@@ -1,67 +1,63 @@
-# Graph Report - .  (2026-07-28)
+# Graph Report - .  (2026-07-29)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 977 nodes · 2154 edges · 64 communities (54 shown, 10 thin omitted)
+- 1102 nodes · 2601 edges · 63 communities (53 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.7)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `160c70a8`
+- Built from commit: `60a83873`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- analyst.ts
-- dashboard/page.tsx
 - constants.ts
-- fields.ts
+- analyst.ts
+- approvals/page.tsx
+- [step]/page.tsx
 - firm-scope.ts
+- settings.ts
+- scripts
 - allow
 - compilerOptions
 - devDependencies
-- scripts
-- env.ts
-- [id]/page.tsx
-- run.ts
-- brand.tsx
-- config.ts
-- activity/page.tsx
-- [step]/page.tsx
-- ui.tsx
 - login/actions.ts
-- app-shell.tsx
-- codemap.mjs
-- intake/page.tsx
+- Callout
 - matters/page.tsx
-- onboarding.ts
-- docs-check.mjs
-- practice-areas.ts
-- login/page.tsx
-- audit.mjs
-- dependencies
-- doctor.mjs
+- [id]/page.tsx
+- fields.ts
+- ui.tsx
+- run.ts
+- platform.ts
+- prisma.ts
+- activity/page.tsx
+- app/page.tsx
+- settings/page.tsx
+- demo-accounts.ts
+- widgets.ts
+- usage/page.tsx
 - new/page.tsx
-- scope.ts
-- catalogue.ts
+- codemap.mjs
+- ai/page.tsx
+- docs-check.mjs
+- env.ts
+- audit.mjs
+- doctor.mjs
+- data/matters.ts
 - deny
 - app.json
-- seed.ts
 - data/documents.ts
-- ai/page.tsx
 - documents/page.tsx
-- matters.ts
-- prisma.ts
 - loading-screen.tsx
-- package.json
 - skills-check.mjs
-- communications.ts
+- upload-panel.tsx
 - settings.json
-- password.ts
 - approvals.spec.ts
 - onboarding.spec.ts
+- app/layout.tsx
 - analysis.spec.ts
 - session-start.sh
 - middleware.ts
@@ -74,218 +70,202 @@
 ## God Nodes (most connected - your core abstractions)
 1. `allow` - 39 edges
 2. `scripts` - 33 edges
-3. `currentSession` - 24 edges
-4. `recordAuditEvent()` - 23 edges
-5. `compilerOptions` - 22 edges
-6. `Callout()` - 21 edges
-7. `activeFirmFor()` - 19 edges
-8. `actorFor()` - 18 edges
-9. `POST()` - 17 edges
-10. `Card()` - 17 edges
+3. `currentSession` - 28 edges
+4. `Callout()` - 27 edges
+5. `recordAuditEvent()` - 27 edges
+6. `Badge()` - 22 edges
+7. `Card()` - 22 edges
+8. `compilerOptions` - 22 edges
+9. `activeFirmFor()` - 21 edges
+10. `can()` - 21 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `damage()` --calls--> `analyseMatter()`  [EXTRACTED]
   tests/unit/ai-reviewer.test.ts → src/lib/ai/analyst.ts
+- `validateNewFirm()` --references--> `PRACTICE_AREAS`  [EXTRACTED]
+  src/lib/platform/new-firm.ts → prisma/seed.ts
+- `StepMatterTypes()` --calls--> `practiceAreaLabel()`  [EXTRACTED]
+  src/app/(app)/onboarding/[step]/page.tsx → src/lib/practice-areas.ts
 - `StepSummary()` --indirect_call--> `practiceAreaLabel()`  [INFERRED]
   src/app/(app)/onboarding/[step]/page.tsx → src/lib/practice-areas.ts
-- `LoginForm()` --indirect_call--> `signInAction()`  [INFERRED]
-  src/app/login/login-form.tsx → src/app/login/actions.ts
-- `withFirmScopeGuard()` --references--> `@prisma/client`  [EXTRACTED]
-  src/lib/data/firm-scope.ts → package.json
-- `AdminFirmsPage()` --calls--> `requirePlatformAdmin()`  [EXTRACTED]
-  src/app/(app)/admin/firms/page.tsx → src/lib/auth/guards.ts
+- `POST()` --indirect_call--> `buildApprovals()`  [INFERRED]
+  src/app/api/onboarding/route.ts → src/lib/onboarding/config.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (64 total, 10 thin omitted)
+## Communities (63 total, 10 thin omitted)
 
-### Community 0 - "analyst.ts"
+### Community 0 - "constants.ts"
+Cohesion: 0.07
+Nodes (76): ADR-0006, CHANNELS, POST(), POST(), ADR-0016, POST(), POST(), ACTIONS (+68 more)
+
+### Community 1 - "analyst.ts"
 Cohesion: 0.05
-Nodes (73): DEMO_MATTERS, DemoDocument, DemoMatter, DemoTask, analyseMatter(), analystInternals, AVAILABILITY_CLAIMS, availabilityContradictions() (+65 more)
+Nodes (73): analyseMatter(), analystInternals, AVAILABILITY_CLAIMS, availabilityContradictions(), buildAttorneyQuestions(), buildClientQuestions(), buildSummary(), buildTimeline() (+65 more)
 
-### Community 1 - "dashboard/page.tsx"
-Cohesion: 0.09
-Nodes (56): ADR-0006, CHANNELS, POST(), POST(), ACTIONS, POST(), stringList(), metadata (+48 more)
+### Community 2 - "approvals/page.tsx"
+Cohesion: 0.08
+Nodes (48): POST(), POST(), ApprovalsPage(), lockedLabel(), metadata, one(), PageProps, ApprovalCard() (+40 more)
 
-### Community 2 - "constants.ts"
-Cohesion: 0.05
-Nodes (69): POST(), POST(), ApprovalsPage(), lockedLabel(), metadata, one(), PageProps, ApprovalCard() (+61 more)
-
-### Community 3 - "fields.ts"
+### Community 3 - "[step]/page.tsx"
 Cohesion: 0.06
-Nodes (45): ADR-0002, POST(), DashboardPage(), NewMatterPage(), ACCEPT, Chosen, UploadPanel(), ALLOWED_DOCUMENT_EXTENSIONS (+37 more)
+Nodes (46): Answers, metadata, PageProps, StepMatterTypes(), StepSummary(), CheckboxOption(), LockIcon(), ProgressBar() (+38 more)
 
 ### Community 4 - "firm-scope.ts"
-Cohesion: 0.09
-Nodes (28): @prisma/client, @prisma/client, CACHEABLE_MODEL_NAMES, CACHEABLE_MODELS, catalogueCache, catalogueCacheSize(), CatalogueEntry, clearCatalogueCache() (+20 more)
+Cohesion: 0.06
+Nodes (41): next, dependencies, next, @prisma/adapter-better-sqlite3, @prisma/client, react, react-dom, server-only (+33 more)
 
-### Community 5 - "allow"
+### Community 5 - "settings.ts"
+Cohesion: 0.06
+Nodes (48): ADR-0015, back(), POST(), back(), POST(), stringList(), AppLayout(), one() (+40 more)
+
+### Community 6 - "scripts"
+Cohesion: 0.05
+Nodes (39): description, engines, node, name, private, scripts, build, check (+31 more)
+
+### Community 7 - "allow"
 Cohesion: 0.05
 Nodes (38): allow, Bash(git add:*), Bash(git branch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git status:*), Bash(graphify explain:*) (+30 more)
 
-### Community 6 - "compilerOptions"
+### Community 8 - "compilerOptions"
 Cohesion: 0.06
 Nodes (35): dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules (+27 more)
 
-### Community 7 - "devDependencies"
+### Community 9 - "devDependencies"
 Cohesion: 0.06
 Nodes (35): dotenv, eslint, eslint-config-next, jsdom, devDependencies, dotenv, eslint, eslint-config-next (+27 more)
 
-### Community 8 - "scripts"
-Cohesion: 0.06
-Nodes (33): scripts, build, check, codemap, db:generate, db:migrate, db:reset, db:studio (+25 more)
+### Community 10 - "login/actions.ts"
+Cohesion: 0.13
+Nodes (21): DEMO_FIRMS, main(), MATTER_TYPES, MEMBERSHIPS, Step, WORKFLOW_TEMPLATES, safeRedirectTarget(), signInAction() (+13 more)
 
-### Community 9 - "env.ts"
-Cohesion: 0.11
-Nodes (21): HomePage(), AI_PROVIDERS, AiProviderName, APP_ENVIRONMENTS, AppEnvironment, EnvironmentError, EnvSource, parseServerEnv() (+13 more)
-
-### Community 10 - "[id]/page.tsx"
+### Community 11 - "Callout"
 Cohesion: 0.14
-Nodes (22): aiFeatureLabel(), MatterPage(), metadata, PageProps, TABS, activityLabel(), AnalysisStatus(), AnalysisWarnings() (+14 more)
+Nodes (11): metadata, metadata, LoginPage(), metadata, safeNext(), metadata, OrchelioWordmark(), WordmarkProps (+3 more)
 
-### Community 11 - "run.ts"
+### Community 12 - "matters/page.tsx"
+Cohesion: 0.15
+Nodes (21): IntakePage(), metadata, MattersPage(), metadata, one(), PageProps, metadata, TasksPage() (+13 more)
+
+### Community 13 - "[id]/page.tsx"
+Cohesion: 0.13
+Nodes (23): aiFeatureLabel(), MatterPage(), metadata, PageProps, TABS, AnalysisStatus(), AnalysisWarnings(), ContradictionCard() (+15 more)
+
+### Community 14 - "fields.ts"
+Cohesion: 0.16
+Nodes (21): ADR-0002, NewMatterPage(), BY_PRACTICE_AREA, categoriesFor(), EMPLOYMENT_CATEGORIES, expectedButMissing(), IMMIGRATION_CATEGORIES, isKnownCategory() (+13 more)
+
+### Community 15 - "ui.tsx"
+Cohesion: 0.15
+Nodes (20): AdminDemoPage(), metadata, ADR-0016, AdminFirmsPage(), metadata, one(), PageProps, AdminSystemPage() (+12 more)
+
+### Community 16 - "run.ts"
 Cohesion: 0.14
 Nodes (14): ADR-0008, POST(), buildInput(), recordUsage(), runAnalysis(), RunOutcome, SIMULATED_USAGE, summariseForApproval() (+6 more)
 
-### Community 12 - "brand.tsx"
-Cohesion: 0.14
-Nodes (6): metadata, metadata, viewport, metadata, OrchelioWordmark(), WordmarkProps
+### Community 17 - "platform.ts"
+Cohesion: 0.20
+Nodes (15): PRACTICE_AREAS, POST(), CreatedFirm, createFirm(), CreateFirmOutcome, creatablePracticeAreas(), looksLikeRealAddress(), NewFirmInput (+7 more)
 
-### Community 13 - "config.ts"
-Cohesion: 0.21
-Nodes (16): StepSummary(), AI_FEATURE_OPTIONS, LOCKED_APPROVAL_OPTIONS, resolveKey(), WORKFLOW_STEP_OPTIONS, aiFeatureIdsFrom(), aiFeatureKeysFor(), buildConfiguration() (+8 more)
+### Community 18 - "prisma.ts"
+Cohesion: 0.13
+Nodes (9): DraftFilters, NewDraft, EMPTY_RESULT, SampleDataResult, ADR-0016, GuardedPrismaClient, FirmScope, SearchResult (+1 more)
 
-### Community 14 - "activity/page.tsx"
-Cohesion: 0.21
-Nodes (14): ActivityPage(), metadata, one(), PageProps, ActivityDetail(), ActivityStatusBadge(), safeParse(), STATUS_TONE (+6 more)
+### Community 19 - "activity/page.tsx"
+Cohesion: 0.20
+Nodes (15): ActivityPage(), metadata, one(), PageProps, ActivityDetail(), activityLabel(), ActivityStatusBadge(), safeParse() (+7 more)
 
-### Community 15 - "[step]/page.tsx"
-Cohesion: 0.15
-Nodes (9): Answers, metadata, PageProps, CheckboxOption(), LockIcon(), ProgressBar(), StepActions(), WorkflowPreview() (+1 more)
+### Community 20 - "app/page.tsx"
+Cohesion: 0.18
+Nodes (15): HomePage(), PHASE_LABEL, PHASE_TONE, practiceAreaLabel(), currentPhase(), Phase, PHASES, PhaseStatus (+7 more)
 
-### Community 16 - "ui.tsx"
-Cohesion: 0.24
-Nodes (12): metadata, PHASE_LABEL, PHASE_TONE, Badge(), badgeTone, Callout(), calloutTone, Card() (+4 more)
+### Community 21 - "settings/page.tsx"
+Cohesion: 0.20
+Nodes (14): DemonstrationSection(), metadata, PageProps, ADR-0016, AccentChoice(), LockedRules(), MemberList(), MemberRow (+6 more)
 
-### Community 17 - "login/actions.ts"
-Cohesion: 0.26
-Nodes (11): safeRedirectTarget(), signInAction(), newCorrelationId(), consumeAttempt(), RateLimitResult, resetAllAttempts(), resetAttempts(), Window (+3 more)
+### Community 22 - "demo-accounts.ts"
+Cohesion: 0.19
+Nodes (10): SignInState, INITIAL, LoginForm(), DEMO_ACCOUNTS, DemoAccount, GUIDE_STEPS, guideAccounts(), guideAccountsExist() (+2 more)
 
-### Community 18 - "app-shell.tsx"
+### Community 23 - "widgets.ts"
 Cohesion: 0.16
-Nodes (10): ADMIN_NAV, ADMIN_PLANNED, AppShell(), FIRM_NAV, FIRM_PLANNED, NavItem, PlannedItem, PLATFORM_NAV (+2 more)
+Nodes (13): BY_PRACTICE_AREA, DashboardWidget, EMPLOYMENT_WIDGETS, IMMIGRATION_WIDGETS, SHARED_WIDGETS, ADR-0009, widgetsFor(), WidgetTone (+5 more)
 
-### Community 19 - "codemap.mjs"
+### Community 24 - "usage/page.tsx"
+Cohesion: 0.27
+Nodes (11): DashboardPage(), formatTokens(), metadata, OPERATION_LABELS, operationLabel(), UsagePage(), formatCost(), listUsageRecords() (+3 more)
+
+### Community 25 - "new/page.tsx"
+Cohesion: 0.21
+Nodes (10): metadata, PageProps, GENERIC_MATTER_STATUSES, DISCRIMINATION_TYPES, practiceAreaCounts(), parseJsonObject(), parseStringArray(), toJsonColumn() (+2 more)
+
+### Community 26 - "codemap.mjs"
 Cohesion: 0.15
 Nodes (8): files, grouped, lines, ROOT, SKIP_DIRECTORIES, SOURCE_EXTENSIONS, SOURCE_ROOTS, target
 
-### Community 20 - "intake/page.tsx"
-Cohesion: 0.27
-Nodes (10): IntakePage(), metadata, metadata, TasksPage(), formatDate(), requireMatterAccess(), requestScoped, requestNow (+2 more)
+### Community 27 - "ai/page.tsx"
+Cohesion: 0.18
+Nodes (8): AiWorkspacePage(), featureLabel(), metadata, requireWorkspace(), requireWorkspacePermission(), listRecentAnalyses(), firmConfiguration(), AI_FEATURE_OPTIONS
 
-### Community 21 - "matters/page.tsx"
-Cohesion: 0.24
-Nodes (11): MattersPage(), metadata, one(), PageProps, MatterLink(), relativeDays(), STATUS_TONE, StatusBadge() (+3 more)
-
-### Community 22 - "onboarding.ts"
-Cohesion: 0.23
-Nodes (11): allMatterTypes, allPracticeAreas, allWorkflowTemplates, matterTypesForPracticeAreas(), workflowTemplatesFor(), completeOnboarding(), EMPTY_ANSWERS, ensureConfiguration() (+3 more)
-
-### Community 23 - "docs-check.mjs"
+### Community 28 - "docs-check.mjs"
 Cohesion: 0.17
 Nodes (9): allFiles, docFiles, DOCS, ENTRY, graph, linkCount, problems, ROOT (+1 more)
 
-### Community 24 - "practice-areas.ts"
-Cohesion: 0.24
-Nodes (9): AdminFirmsPage(), StepMatterTypes(), FirmSwitcher(), ROLE_LABELS, isPracticeAreaAvailable(), PRACTICE_AREAS, PracticeArea, PracticeAreaKey (+1 more)
+### Community 29 - "env.ts"
+Cohesion: 0.23
+Nodes (9): AI_PROVIDERS, AiProviderName, APP_ENVIRONMENTS, AppEnvironment, EnvironmentError, EnvSource, parseServerEnv(), readEnum() (+1 more)
 
-### Community 25 - "login/page.tsx"
-Cohesion: 0.26
-Nodes (8): SignInState, INITIAL, LoginForm(), LoginPage(), metadata, safeNext(), DemoAccount, visibleDemoAccounts()
-
-### Community 26 - "audit.mjs"
+### Community 30 - "audit.mjs"
 Cohesion: 0.18
 Nodes (8): findings, orSites, PRISMA_OUTSIDE_DATA_LAYER, prismaUsers, ROOT, seen, stale, UNSCOPED_DATA_EXPORTS
 
-### Community 27 - "dependencies"
-Cohesion: 0.18
-Nodes (11): next, dependencies, next, @prisma/adapter-better-sqlite3, react, react-dom, server-only, @prisma/adapter-better-sqlite3 (+3 more)
-
-### Community 28 - "doctor.mjs"
+### Community 31 - "doctor.mjs"
 Cohesion: 0.20
 Nodes (9): databaseFile, graphReport, [major], results, ROOT, run(), sourceFilesChangedSince(), symbol (+1 more)
 
-### Community 29 - "new/page.tsx"
-Cohesion: 0.29
-Nodes (7): metadata, PageProps, Field(), GENERIC_MATTER_STATUSES, parseJsonObject(), parseStringArray(), toJsonColumn()
+### Community 32 - "data/matters.ts"
+Cohesion: 0.22
+Nodes (8): POST(), createMatter(), getMatter(), matterCountsByStatus(), matterDetail(), MatterFilters, NewMatter, nextReference()
 
-### Community 31 - "catalogue.ts"
-Cohesion: 0.20
-Nodes (9): AiFeatureOption, ApprovalOption, CONFIGURABLE_APPROVAL_OPTIONS, CURRENCIES, JURISDICTIONS, LANGUAGES, ScopedKey, TIMEZONES (+1 more)
-
-### Community 32 - "deny"
+### Community 33 - "deny"
 Cohesion: 0.22
 Nodes (9): permissions, ask, deny, Bash(git commit:*), Bash(git push:*), Bash(npm run db:reset), Bash(npm run reset-demo), Bash(npx prisma migrate dev:*) (+1 more)
 
-### Community 33 - "app.json"
+### Community 34 - "app.json"
 Cohesion: 0.22
 Nodes (8): alwaysUpdateLinks, attachmentFolderPath, newLinkFormat, readableLineLength, showLineNumber, showUnsupportedFiles, strictLineBreaks, useMarkdownLinks
-
-### Community 34 - "seed.ts"
-Cohesion: 0.28
-Nodes (8): DEMO_FIRMS, main(), MATTER_TYPES, MEMBERSHIPS, PRACTICE_AREAS, Step, WORKFLOW_TEMPLATES, DEMO_ACCOUNTS
 
 ### Community 35 - "data/documents.ts"
 Cohesion: 0.22
 Nodes (4): POST(), addDocument(), NewDocument, touchMatter()
 
-### Community 36 - "ai/page.tsx"
-Cohesion: 0.31
-Nodes (8): AiWorkspacePage(), featureLabel(), metadata, ReviewStatus, reviewStatusLabel(), requireWorkspace(), requireWorkspacePermission(), listRecentAnalyses()
-
-### Community 37 - "documents/page.tsx"
+### Community 36 - "documents/page.tsx"
 Cohesion: 0.36
 Nodes (8): DocumentsPage(), metadata, one(), PageProps, fileSize(), listDocuments(), listMatters(), categoryLabel()
 
-### Community 38 - "matters.ts"
-Cohesion: 0.25
-Nodes (7): createMatter(), getMatter(), matterCountsByStatus(), matterDetail(), MatterFilters, NewMatter, nextReference()
-
-### Community 39 - "prisma.ts"
-Cohesion: 0.25
-Nodes (4): GuardedPrismaClient, formatCost(), UsageSummary, globalForPrisma
-
-### Community 41 - "package.json"
-Cohesion: 0.29
-Nodes (6): description, engines, node, name, private, version
-
-### Community 42 - "skills-check.mjs"
+### Community 38 - "skills-check.mjs"
 Cohesion: 0.29
 Nodes (5): names, packageScripts, problems, ROOT, SKILLS
 
-### Community 43 - "communications.ts"
+### Community 39 - "upload-panel.tsx"
 Cohesion: 0.29
-Nodes (4): POST(), createDraft(), DraftFilters, NewDraft
+Nodes (5): ACCEPT, Chosen, UploadPanel(), ALLOWED_DOCUMENT_EXTENSIONS, DocumentCategory
 
-### Community 44 - "settings.json"
+### Community 40 - "settings.json"
 Cohesion: 0.33
 Nodes (5): env, NEXT_TELEMETRY_DISABLED, hooks, SessionStart, $schema
 
-### Community 45 - "password.ts"
-Cohesion: 0.67
-Nodes (4): encode(), hashPassword(), scryptAsync, verifyPassword()
-
-### Community 46 - "approvals.spec.ts"
+### Community 42 - "approvals.spec.ts"
 Cohesion: 0.47
 Nodes (3): openMatter(), runAnalysis(), tabs()
 
-### Community 48 - "onboarding.spec.ts"
+### Community 44 - "onboarding.spec.ts"
 Cohesion: 0.60
 Nodes (5): check(), continueStep(), Page, signIn(), uncheckAll()
 
 ## Knowledge Gaps
-- **349 isolated node(s):** `eslintConfig`, `PORT`, `config`, `metadata`, `metadata` (+344 more)
+- **371 isolated node(s):** `eslintConfig`, `PORT`, `config`, `metadata`, `PageProps` (+366 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -293,16 +273,16 @@ Nodes (5): check(), continueStep(), Page, signIn(), uncheckAll()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `withFirmScopeGuard()` connect `firm-scope.ts` to `prisma.ts`?**
-  _High betweenness centrality (0.135) - this node is a cross-community bridge._
-- **Why does `@prisma/client` connect `firm-scope.ts` to `dependencies`?**
-  _High betweenness centrality (0.127) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `package.json`, `firm-scope.ts`?**
-  _High betweenness centrality (0.125) - this node is a cross-community bridge._
+  _High betweenness centrality (0.111) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `firm-scope.ts` to `scripts`?**
+  _High betweenness centrality (0.108) - this node is a cross-community bridge._
 - **What connects `eslintConfig`, `PORT`, `config` to the rest of the system?**
-  _349 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `analyst.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.051201671891327065 - nodes in this community are weakly interconnected._
-- **Should `dashboard/page.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.0921409214092141 - nodes in this community are weakly interconnected._
+  _371 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `constants.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05092592592592592 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0685946041262564 - nodes in this community are weakly interconnected._
+- **Should `analyst.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.05172413793103448 - nodes in this community are weakly interconnected._
+- **Should `approvals/page.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.07656341320864991 - nodes in this community are weakly interconnected._
+- **Should `[step]/page.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.06312098188194039 - nodes in this community are weakly interconnected._

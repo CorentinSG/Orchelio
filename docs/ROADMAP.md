@@ -349,16 +349,84 @@ boundary, and **23 browser tests**.
 
 ---
 
-## Phase 8 — Usage and administration
+## Phase 8 — Usage and administration ✅ Delivered
 
-- Simulated AI usage and costs per firm, with the "Simulated cost — No API charge was incurred."
-  notice.
-- Platform administration: firm list, firm creation, demo management, technical status.
-- Firm settings: profile, matter types, AI features, approval rules, roles, branding, demo
-  controls.
-- Guided demo: the twenty-one step walkthrough.
+Delivered:
 
-**Acceptance:** a third firm can be created entirely through the interface, with no code change.
+- **Usage and costs** (`/usage`): analyses, reviews, tokens and simulated cost for the open firm,
+  broken down by operation and by matter, with the most recent records. Behind `firm.costs.view`,
+  so a paralegal does not see it.
+- **Firm settings** (`/settings`), seven sections: profile, matter types, AI features, approval
+  rules, people and roles, branding, and demonstration data. Each saves on its own, so a stale tab
+  cannot revert what somebody changed in another one.
+- **Platform administration**: firm creation (`/admin/firms`), technical status (`/admin/system`)
+  and a demonstration-data inventory (`/admin/demo`).
+- **The guided demonstration** (`/guide`): twenty-one steps, public and readable before signing
+  in, each naming the account to use, the screen to open and what to look for once there.
+
+**Acceptance met:** `tests/e2e/admin.spec.ts` creates a third firm through the interface, signs in
+as its new administrator, answers the seven questions and lands on a working dashboard carrying
+that firm's own name — with nothing edited, seeded or run from a terminal.
+`tests/integration/platform.test.ts` then asserts what the new firm actually holds: all nine
+locked approval rules from its first second, and not one row belonging to the firms that already
+existed.
+
+### Settings and the questionnaire cannot disagree
+
+They write the same record, through the same pure builders. `buildApprovals` is used unchanged, so
+there is no code path in settings that could switch a locked rule off — a submission naming one is
+not rejected, it simply has no effect, because there is no state in which it could.
+
+One answer is deliberately absent from settings: the main practice area. Changing it re-derives
+the matter types, the workflow vocabulary, the AI feature keys and the dashboard widgets, and a
+settings tab that silently rewrote four other tabs would be the wrong shape for that. The page
+links to the questionnaire instead, which keeps every answer already given.
+
+### The platform administrator still cannot read a firm's files
+
+Every cross-tenant query now lives in one module, `src/lib/data/platform.ts`, so what can see
+across firms is one file to audit rather than queries spread through administration pages.
+`tests/integration/platform.test.ts` serialises its output and asserts that no client name, matter
+title or document filename appears in it; `tests/e2e/admin.spec.ts` does the same against the
+rendered pages.
+
+The instance totals are summed from each firm's own `_count` rather than read with a cross-firm
+query. The scoping guard refuses `prisma.matter.count()` with no firm, and the way to satisfy it —
+a filter matching every firm — would be a query that *looks* scoped and is not. Addition is
+uglier and honest.
+
+### Erasing demonstration data has no button — ADR-0016
+
+Adding fictional matters is offered, in the firm's own settings, and is additive: a matter whose
+reference already exists is skipped, and nothing is ever deleted. Erasing stays `npm run
+reset-demo`, a command a person types on purpose. One of the nine locked rules says nothing is
+permanently deleted without a person, and a button in a web page is a weaker form of consent than
+that rule deserves.
+
+### Branding names the firm, not the product — ADR-0015
+
+A firm chooses its display name and an accent colour from a fixed palette. It cannot rename
+Orchelio, remove the demonstration banner or restyle the interface, and the branding tab says so.
+The accent is a palette rather than a colour picker because the value reaches a `style` attribute
+and an arbitrary colour can fail contrast in one theme while passing in the other.
+
+### Two things found by writing the tests
+
+`addSampleMatters` trusted the firm's configured matter types without checking the platform
+catalogue still listed them. A matter row has a foreign key to that catalogue, so a stale key gave
+a constraint violation — a 500 — where a skipped matter and a sentence were wanted. It now reads
+the catalogue and reports what it did not offer.
+
+A firm could lock itself out by demoting or suspending its last administrator. Because a platform
+administrator holds no membership by design, nobody would have been left able to undo it. Both
+changes are now refused, with a message saying why.
+
+### Said plainly
+
+The sidebar's "Integrations" entry, listed as Phase 8 since Phase 3, has been **removed rather
+than deferred**: an integration means sending something somewhere, and Orchelio has no transport
+at all. Workflow management is not offered either — a firm's workflows are derived from its
+practice area, and the settings page says so rather than showing a tab that does nothing.
 
 ---
 

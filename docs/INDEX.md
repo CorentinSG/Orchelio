@@ -39,7 +39,7 @@ the code — is what makes one firm's Orchelio different from another's. Each
 firm's data is isolated from every other firm's, enforced in three independent
 layers and proved by tests.
 
-Built in nine phases. Seven are delivered; see [Roadmap](ROADMAP.md).
+Built in nine phases. Eight are delivered; see [Roadmap](ROADMAP.md).
 
 ---
 
@@ -65,6 +65,8 @@ decided, and what it cost.
 | 12 | [The simulated analysis derives rather than looks up](decisions/ADR-0012-the-simulation-derives-rather-than-looks-up.md) | 6 |
 | 13 | [A conclusion has nowhere to live](decisions/ADR-0013-a-conclusion-has-nowhere-to-live.md) | 6 |
 | 14 | [The effect lives behind the decision](decisions/ADR-0014-the-effect-lives-behind-the-decision.md) | 7 |
+| 15 | [Branding names the firm, not the product](decisions/ADR-0015-branding-names-the-firm-not-the-product.md) | 8 |
+| 16 | [Destructive demonstration controls are commands, not buttons](decisions/ADR-0016-destructive-demonstration-controls-are-commands.md) | 8 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)

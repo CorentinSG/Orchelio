@@ -5,7 +5,7 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { DEMO_ACCOUNTS } from "../src/lib/demo-accounts";
 import { hashPassword } from "../src/lib/auth/password";
-import { DEMO_MATTERS } from "./demo-matters";
+import { DEMO_MATTERS } from "../src/lib/demo/matters";
 
 /**
  * Orchelio — demonstration seed data.

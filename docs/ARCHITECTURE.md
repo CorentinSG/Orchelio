@@ -216,6 +216,28 @@ reflect the cookie the action had just written, so roughly half the time the bro
 a user the wrong firm's screen is the one failure this product cannot have. A 303 makes the browser
 store the cookie and then issue a fresh GET. Boring, and correct every time.
 
+### 4.3bis The one module allowed to look across firms
+
+Platform administration is cross-tenant by nature: a firm list, an instance
+count, the creation of a firm that does not exist yet. Rather than let those
+queries appear wherever a screen needs one, they live in
+`src/lib/data/platform.ts` — so what can see across tenants is **one file to
+audit** rather than a habit spread through administration pages.
+
+Two rules hold inside it.
+
+Nothing it returns names a matter, a client or a document. A platform
+administrator operates the platform; that does not include reading a firm's
+client files, and the way to keep that true is for the query never to ask.
+`tests/integration/platform.test.ts` serialises its output and asserts that no
+client name, matter title or document filename appears.
+
+Instance totals are **summed from each firm's own `_count`**, not read with a
+cross-firm query. The scoping guard refuses `prisma.matter.count()` with no
+firm, and the obvious way to satisfy it — a filter matching every firm — would
+be a query that *looks* scoped and is not. A bypass a reader cannot see is worse
+than an awkward count, so the count is awkward.
+
 ### 4.4 Demo isolation vs production isolation
 
 The demonstration uses a **shared database with a `firmId` column**. That is a legitimate
@@ -455,9 +477,25 @@ Orchelio deliberately does **not** ship a full no-code workflow editor in the fi
 
 ### 8.3 Creating a firm
 
-Via the interface: Platform Administration → Firms → New firm → the onboarding questionnaire.
-The firm receives an identifier, a workspace, a configuration, a dashboard, workflows, roles,
-settings and — optionally — sample data. No code change, no deployment. (Phase 4/8.)
+Entirely through the interface, in two halves by two different people.
+
+1. **A platform administrator** opens Platform administration → Firms, and gives the firm's name,
+   its main practice area and the name and address of its first administrator. That creates the
+   firm, its configuration — carrying all nine locked approval rules from the first second — and
+   the administrator's membership. The firm is left in `onboarding`: it exists, and it is not yet
+   a usable workspace, and the screen says so.
+2. **The firm's own administrator** signs in and answers the seven questions. Confirming enables
+   the workflow templates for the practice area, marks the configuration complete and makes the
+   firm active.
+
+Afterwards, that administrator can add the fictional sample matters from Firm settings →
+Demonstration, and change any answer except the main practice area from the other tabs.
+
+No code change and no deployment. Only practice areas with a full template can be chosen: a firm
+created into an empty one could not finish its questionnaire, which is a dead end two screens
+later rather than a refusal at the point of the mistake.
+
+`tests/e2e/admin.spec.ts` performs exactly this, end to end, as the phase's acceptance test.
 
 ### 8.4 Adding the Anthropic API
 

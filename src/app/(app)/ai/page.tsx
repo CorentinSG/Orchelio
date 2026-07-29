@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 const LOCKED_RULES_NOTE =
   `All ${LOCKED_APPROVALS.length} locked rules are stored against every firm's configuration, ` +
   "so the guarantee is auditable in the data rather than asserted in a comment. " +
-  "The approval centre that acts on them arrives in Phase 7.";
+  "The approval centre acts on them.";
 
 /**
  * Orchelio — the AI workspace.

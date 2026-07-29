@@ -38,8 +38,6 @@ const PRISMA_OUTSIDE_DATA_LAYER = {
     "Counts rows for the public home page's status panel. Platform-wide by definition and reads no firm data.",
   "src/app/login/actions.ts":
     "Sign-in, which happens before a firm exists in the request. Reads users, writes sessions.",
-  "src/app/(app)/admin/firms/page.tsx":
-    "Platform administration lists every firm. Cross-firm by design, behind requirePlatformAdmin, and reads no matter, document or analysis.",
   "src/lib/ai/run.ts":
     "Writes a UsageRecord naming the firm. Worth moving behind a repository when the cost screens land in Phase 8.",
   "src/lib/approvals/raise.ts":
@@ -63,6 +61,19 @@ const UNSCOPED_DATA_EXPORTS = {
   "approvals.knownAction": "Reads the action catalogue in memory. Touches nothing.",
   "firm-scope.assertFirmScoped": "The guard itself.",
   "firm-scope.withFirmScopeGuard": "The guard itself.",
+  "demo.sampleMattersFor":
+    "Pure filter over the fictional matter catalogue. Touches nothing; the firm-scoped writer next to it, addSampleMatters, takes a scope.",
+  // The platform module is the one place allowed to look across tenants, which
+  // is exactly why it is one module with an obvious name rather than queries
+  // spread through administration pages. Everything in it is behind
+  // requirePlatformAdmin, and none of it reads a matter title, a client name or
+  // a document — the queries do not ask for one.
+  "platform.listFirmsForAdministration":
+    "Platform administration lists every firm. Cross-firm by design; counts only, no matter, client or document content.",
+  "platform.platformCounts":
+    "Instance totals, summed from each firm's own `_count`. No cross-firm query is issued.",
+  "platform.createFirm":
+    "Creates the firm a scope would name. There is no firm to be scoped to until it returns.",
 };
 
 const findings = [];

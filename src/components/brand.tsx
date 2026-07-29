@@ -33,6 +33,12 @@ type WordmarkProps = {
   size?: "sm" | "md" | "lg";
   /** Shows the "Demo" edition chip next to the product name. */
   showEdition?: boolean;
+  /**
+   * A small mark rendered beside the subtitle — the open firm's accent colour.
+   * It sits next to the *firm's* name, never next to the product's: a firm
+   * brands itself inside Orchelio, not the software it is using.
+   */
+  mark?: React.ReactNode;
 };
 
 /**
@@ -40,7 +46,12 @@ type WordmarkProps = {
  * subtitle. In the firm workspace the subtitle carries the firm name, which is
  * how a user always knows which tenant is open.
  */
-export function OrchelioWordmark({ subtitle, size = "md", showEdition = true }: WordmarkProps) {
+export function OrchelioWordmark({
+  subtitle,
+  size = "md",
+  showEdition = true,
+  mark,
+}: WordmarkProps) {
   const markSize = size === "lg" ? 40 : size === "sm" ? 26 : 32;
   const nameClass =
     size === "lg" ? "text-2xl" : size === "sm" ? "text-base" : "text-lg";
@@ -58,7 +69,10 @@ export function OrchelioWordmark({ subtitle, size = "md", showEdition = true }: 
           ) : null}
         </div>
         {subtitle ? (
-          <p className="truncate text-sm text-ink-muted">{subtitle}</p>
+          <p className="flex items-center gap-1.5 text-sm text-ink-muted">
+            {mark}
+            <span className="truncate">{subtitle}</span>
+          </p>
         ) : null}
       </div>
     </div>

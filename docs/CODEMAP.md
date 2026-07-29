@@ -15,15 +15,9 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 135.
+Modules: 159.
 
 ## `prisma/`
-
-### `prisma/demo-matters.ts`
-
-Every person, employer, date and document below is invented.
-
-Exports: `DEMO_MATTERS`, `DemoDocument`, `DemoTask`, `DemoMatter`
 
 ### `prisma/schema.prisma`
 
@@ -67,6 +61,12 @@ Append-only, and only by application discipline: `src/lib/audit.ts` exposes one 
 
 Exports: `metadata`, `dynamic`, `ActivityPage`
 
+### `src/app/(app)/admin/demo/page.tsx`
+
+Platform administration — demonstration data.
+
+Exports: `metadata`, `dynamic`, `AdminDemoPage`
+
 ### `src/app/(app)/admin/firms/loading.tsx`
 
 ### `src/app/(app)/admin/firms/page.tsx`
@@ -74,6 +74,12 @@ Exports: `metadata`, `dynamic`, `ActivityPage`
 Platform administration — firms.
 
 Exports: `metadata`, `dynamic`, `AdminFirmsPage`
+
+### `src/app/(app)/admin/system/page.tsx`
+
+Platform administration — technical status.
+
+Exports: `metadata`, `dynamic`, `AdminSystemPage`
 
 ### `src/app/(app)/ai/page.tsx`
 
@@ -139,17 +145,33 @@ Exports: `metadata`, `dynamic`, `OnboardingStepPage`
 
 Exports: `dynamic`, `OnboardingPage`
 
+### `src/app/(app)/settings/page.tsx`
+
+Exports: `metadata`, `dynamic`, `SettingsPage`
+
 ### `src/app/(app)/tasks/page.tsx`
 
 Open work across the firm.
 
 Exports: `metadata`, `dynamic`, `TasksPage`
 
+### `src/app/(app)/usage/page.tsx`
+
+The exact wording the specification asks for, in one place.
+
+Exports: `metadata`, `dynamic`, `UsagePage`
+
 ### `src/app/403/page.tsx`
 
 403.
 
 Exports: `metadata`, `ForbiddenPage`
+
+### `src/app/api/admin/firms/route.ts`
+
+This is the handler the phase's acceptance criterion runs through: a third firm, created entirely through the interface, with no code change.
+
+Exports: `POST`
 
 ### `src/app/api/ai/analyse/route.ts`
 
@@ -166,6 +188,12 @@ Exports: `POST`
 ### `src/app/api/communications/route.ts`
 
 Preparing is not sending, and Orchelio has no sending.
+
+Exports: `POST`
+
+### `src/app/api/demo/sample-data/route.ts`
+
+A firm created through the interface starts empty, and an empty workspace demonstrates nothing.
 
 Exports: `POST`
 
@@ -205,11 +233,29 @@ A plain form POST answered with a 303.
 
 Exports: `POST`
 
+### `src/app/api/settings/members/route.ts`
+
+Managing people is a separate permission from configuring the firm (`firm.users.manage`, not `firm.settings.edit`), so it is a separate route rather than another branc…
+
+Exports: `POST`
+
+### `src/app/api/settings/route.ts`
+
+A plain form POST answered with a 303, like every other consequential form in Orchelio.
+
+Exports: `POST`
+
 ### `src/app/error.tsx`
 
 Application error screen.
 
 Exports: `GlobalError`
+
+### `src/app/guide/page.tsx`
+
+Public, and deliberately so: somebody deciding whether to sign in should be able to read what they would be shown first.
+
+Exports: `metadata`, `GuidePage`
 
 ### `src/app/layout.tsx`
 
@@ -308,6 +354,12 @@ Exports: `statusLabel`, `StatusBadge`, `formatDate`, `relativeDays`, `Unconfirme
 The audience is a lawyer, not an administrator: every control is a labelled checkbox or a plain field, every option says what it means, and nothing is hidden behind an…
 
 Exports: `ProgressBar`, `Field`, `CheckboxOption`, `LockIcon`, `StepActions`, `WorkflowPreview`, `inputClass`
+
+### `src/components/settings-ui.tsx`
+
+Two rules shape everything here.
+
+Exports: `SettingsTabs`, `SaveBar`, `ReadOnlyNotice`, `AccentChoice`, `MemberList`, `LockedRules`, `MemberRow`
 
 ### `src/components/ui.tsx`
 
@@ -479,6 +531,12 @@ Read the schema before reading this: `DraftCommunication.status` is `"draft" | "
 
 Exports: `listDrafts`, `getDraft`, `createDraft`, `countDrafts`, `DraftFilters`, `NewDraft`
 
+### `src/lib/data/demo.ts`
+
+A firm created through the interface starts empty, and an empty workspace demonstrates nothing: every screen is an empty state.
+
+Exports: `sampleMattersFor`, `addSampleMatters`, `demonstrationInventory`, `SampleDataResult`
+
 ### `src/lib/data/documents.ts`
 
 A document is reachable only through its own firm.
@@ -509,6 +567,12 @@ Each step is saved as it is answered, so "Save as draft" is not a separate featu
 
 Exports: `loadDraft`, `saveStep`, `completeOnboarding`, `restartOnboarding`, `matterTypeOptions`, `OnboardingDraft`
 
+### `src/lib/data/platform.ts`
+
+Everything here is deliberately cross-firm, which is why it is in one module with an obvious name rather than scattered through administration pages.
+
+Exports: `listFirmsForAdministration`, `platformCounts`, `createFirm`, `PlatformCounts`, `CreatedFirm`, `CreateFirmOutcome`
+
 ### `src/lib/data/scope.ts`
 
 Every data-access function in `src/lib/data` takes one of these as its first argument.
@@ -521,6 +585,12 @@ Search is the easiest place in any multi-tenant product to leak data: it touches
 
 Exports: `searchFirm`, `SearchResult`
 
+### `src/lib/data/settings.ts`
+
+Every function here changes the same `FirmConfiguration` the onboarding questionnaire writes, through the same pure builders, so the two cannot end up disagreeing abou…
+
+Exports: `updateProfile`, `updateMatterTypes`, `updateAiFeatures`, `updateApprovals`, `readBranding`, `updateBranding`, `allFirmMembers`, `updateMemberRole`, `updateMemberStatus`, `MembershipChange`
+
 ### `src/lib/data/statistics.ts`
 
 Matter types whose subject is discrimination or retaliation.
@@ -531,7 +601,13 @@ Exports: `firmStatistics`, `practiceAreaCounts`, `FirmStatistics`
 
 Costs are billed per firm, so a leak here would not merely expose data — it would produce a wrong invoice.
 
-Exports: `usageSummary`, `listUsageRecords`, `formatCost`, `UsageSummary`
+Exports: `usageSummary`, `usageByOperation`, `usageByMatter`, `listUsageRecords`, `formatCost`, `UsageSummary`, `UsageByOperation`, `UsageByMatter`
+
+### `src/lib/demo/matters.ts`
+
+Every person, employer, date and document below is invented.
+
+Exports: `DEMO_MATTERS`, `DemoDocument`, `DemoTask`, `DemoMatter`
 
 ### `src/lib/demo-accounts.ts`
 
@@ -544,6 +620,12 @@ Exports: `visibleDemoAccounts`, `DEMO_PASSWORD`, `DEMO_ACCOUNTS`, `DemoAccount`
 Every environment variable the application depends on is read here, once, and validated.
 
 Exports: `parseServerEnv`, `serverEnv`, `AI_PROVIDERS`, `APP_ENVIRONMENTS`, `EnvironmentError`, `AiProviderName`, `AppEnvironment`, `EnvSource`, `ServerEnv`
+
+### `src/lib/guide.ts`
+
+Twenty-one steps that walk somebody through the whole product in order, each naming the account to use, the screen to open, and — the part that matters — what to *look…
+
+Exports: `guideAccounts`, `guideAccountsExist`, `GUIDE_STEP_COUNT`, `GUIDE_STEPS`, `GuideStep`
 
 ### `src/lib/http/form-post.ts`
 
@@ -581,6 +663,12 @@ Pure functions, no database and no request.
 
 Exports: `workflowKeysFor`, `aiFeatureKeysFor`, `workflowIdsFrom`, `aiFeatureIdsFrom`, `buildApprovals`, `buildConfiguration`, `validateStep`, `sampleAnswersFor`, `ONBOARDING_STEP_COUNT`, `ONBOARDING_STEPS`, `OnboardingAnswers`, `FirmConfigurationPayload`, `StepValidation`
 
+### `src/lib/platform/new-firm.ts`
+
+Pure rules, no database.
+
+Exports: `slugify`, `uniqueSlug`, `creatablePracticeAreas`, `validateNewFirm`, `looksLikeRealAddress`, `NewFirmInput`, `NewFirmValidation`
+
 ### `src/lib/practice-areas.ts`
 
 The onboarding questionnaire (Phase 4) offers this list.
@@ -599,6 +687,12 @@ The demonstration is built in nine phases.
 
 Exports: `currentPhase`, `PHASES`, `PhaseStatus`, `Phase`
 
+### `src/lib/settings/config.ts`
+
+Settings and the onboarding questionnaire write the *same* record.
+
+Exports: `isSettingsSection`, `settingsSection`, `isAccentColour`, `accentColour`, `parseBranding`, `firmDisplayName`, `configurableApprovalKeys`, `validateProfile`, `SETTINGS_SECTIONS`, `SETTINGS_VIEW_PERMISSION`, `SETTINGS_EDIT_PERMISSION`, `ACCENT_COLOURS`, `DEFAULT_BRANDING`, `SettingsSection`, `AccentColourKey`, `Branding`, `ProfileUpdate`, `ProfileValidation`
+
 ### `src/lib/system-status.ts`
 
 The home page is not a static mock-up: it runs this check on every request so that a broken install is visible immediately, with the exact command needed to fix it.
@@ -610,6 +704,10 @@ Exports: `getDatabaseStatus`, `getSystemStatus`, `listFirms`, `DatabaseStatus`, 
 ### `tests/setup.ts`
 
 ## `tests/e2e/`
+
+### `tests/e2e/admin.spec.ts`
+
+Phase 8 acceptance, in a real browser.
 
 ### `tests/e2e/analysis.spec.ts`
 
@@ -639,6 +737,14 @@ Phase 5 acceptance, in a real browser.
 
 Phase 4 acceptance, in a real browser.
 
+### `tests/e2e/settings.spec.ts`
+
+Phase 8 — firm settings, in a real browser.
+
+### `tests/e2e/usage.spec.ts`
+
+Phase 8 — usage, costs and the guided demonstration, in a real browser.
+
 ## `tests/integration/`
 
 ### `tests/integration/analyses.test.ts`
@@ -666,6 +772,14 @@ This is the suite the whole product rests on.
 ### `tests/integration/matters.test.ts`
 
 The sibling suites prove that *reads* stay inside one firm.
+
+### `tests/integration/platform.test.ts`
+
+This is the phase's acceptance criterion at the layer where it can be checked exactly.
+
+### `tests/integration/settings.test.ts`
+
+Three questions a unit test cannot answer: 1.
 
 ## `tests/stubs/`
 
@@ -719,6 +833,10 @@ The active-firm cookie is a preference, not a credential.
 
 The guard is the backstop that turns a forgotten `where` clause from a silent data leak into a loud failure.
 
+### `tests/unit/guide.test.ts`
+
+A walkthrough is prose that goes stale silently: a screen moves, and the document keeps confidently sending people to a page that answers 404.
+
 ### `tests/unit/json-field.test.ts`
 
 These columns hold firm configuration and AI results.
@@ -726,6 +844,10 @@ These columns hold firm configuration and AI results.
 ### `tests/unit/matter-fields.test.ts`
 
 `Matter.fields` is a JSON column, which is what makes one product serve two practice areas — and also what would let a hand-crafted form post store anything at all.
+
+### `tests/unit/new-firm.test.ts`
+
+The phase's acceptance criterion runs through these rules, so they are tested where they can be tested exactly: without a database, without a browser, and including th…
 
 ### `tests/unit/onboarding-config.test.ts`
 
@@ -738,3 +860,7 @@ The acceptance criterion for this phase: answering the questionnaire must reprod
 The permission matrix is a safety property, not a convenience.
 
 ### `tests/unit/rate-limit.test.ts`
+
+### `tests/unit/settings-config.test.ts`
+
+Two of these are the point of the file.

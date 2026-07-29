@@ -1,0 +1,107 @@
+import { expect, test } from "@playwright/test";
+
+/**
+ * Phase 8 — usage, costs and the guided demonstration, in a real browser.
+ *
+ * The figures themselves are arithmetic and are checked where arithmetic is
+ * checkable. What a browser adds is that the page says, in the words the
+ * specification asks for, that nothing was charged — and that a role without
+ * the permission does not reach it at all.
+ */
+
+const PASSWORD = "orchelio-demo";
+
+async function signIn(page: import("@playwright/test").Page, email: string) {
+  await page.goto("/login");
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+}
+
+test.describe("usage and costs", () => {
+  test("says plainly that no charge was incurred", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await page.goto("/usage");
+
+    await expect(page.getByRole("heading", { name: "Usage and costs" })).toBeVisible();
+    await expect(
+      page.getByText("Simulated cost — No API charge was incurred."),
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toContainText("mock");
+  });
+
+  test("never claims to forecast a real deployment's cost", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await page.goto("/usage");
+
+    await expect(page.getByRole("main")).toContainText(
+      /cannot tell you is what a real deployment would cost/i,
+    );
+  });
+
+  test("shows this firm's figures and not the platform's", async ({ page }) => {
+    await signIn(page, "employment.attorney@demo.local");
+    await page.goto("/usage");
+
+    // Whatever the numbers are, the page is scoped to the open firm and says so.
+    await expect(page.getByRole("main")).toContainText("Carter Employment & Labor Law");
+    await expect(page.getByRole("main")).toContainText("this firm");
+  });
+
+  test("a paralegal has no permission to see costs", async ({ page }) => {
+    await signIn(page, "immigration.paralegal@demo.local");
+    await page.goto("/usage");
+    await expect(page).toHaveURL(/\/403/);
+  });
+
+  test("the sidebar offers it only to those who may open it", async ({ page }) => {
+    await signIn(page, "immigration.paralegal@demo.local");
+    const sidebar = page.locator("aside").first();
+    await expect(sidebar.getByRole("link", { name: "Usage and Costs" })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.waitForURL(/\/login|\/$/);
+
+    await signIn(page, "immigration.attorney@demo.local");
+    await expect(
+      page.locator("aside").first().getByRole("link", { name: "Usage and Costs" }),
+    ).toBeVisible();
+  });
+});
+
+test.describe("the guided demonstration", () => {
+  test("is readable before signing in", async ({ page }) => {
+    // Somebody deciding whether to sign in should be able to read what they
+    // would be shown first.
+    await page.goto("/guide");
+    await expect(page.getByRole("heading", { name: /21 steps through Orchelio/ })).toBeVisible();
+  });
+
+  test("has twenty-one numbered steps", async ({ page }) => {
+    await page.goto("/guide");
+    await expect(page.getByRole("listitem").filter({ has: page.getByRole("link", { name: /^Open \// }) })).toHaveCount(21);
+  });
+
+  test("says up front that everything in it is invented", async ({ page }) => {
+    await page.goto("/guide");
+    await expect(page.getByRole("main")).toContainText(/fictional/i);
+    await expect(page.getByRole("main")).toContainText("orchelio-demo");
+  });
+
+  test("every step links somewhere that answers", async ({ page }) => {
+    await page.goto("/guide");
+
+    const links = page.getByRole("link", { name: /^Open \// });
+    const count = await links.count();
+    expect(count).toBe(21);
+
+    // Following all twenty-one would be a suite of its own; the routes are
+    // checked exhaustively against the filesystem in tests/unit/guide.test.ts.
+    // What is checked here is that they are real links a browser can follow.
+    for (let index = 0; index < count; index += 1) {
+      const href = await links.nth(index).getAttribute("href");
+      expect(href, `step ${index + 1}`).toMatch(/^\//);
+    }
+  });
+});

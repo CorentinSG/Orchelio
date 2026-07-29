@@ -21,9 +21,9 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | ---- | ------ | ----- |
 | Independent security audit and penetration test | ⛔ | Must precede any real use. |
 | Threat model for a multi-tenant legal platform | ⛔ | Tenant crossing is the primary risk. |
-| Server-side authorisation on every route and action | 🟡 | Enforced on every page that exists (`src/lib/auth/guards.ts`); the boundary must be re-verified as matters, documents and AI screens are added. |
-| Input validation on every write path | 🟡 | The sign-in action validates and normalises; matter and document writes arrive in Phase 5. |
-| Upload restrictions: extension allow-list, size cap, content sniffing | 🟡 | Allow-list and size cap defined in `src/lib/constants.ts`; enforcement lands with uploads in Phase 5. Real malware scanning is additional. |
+| Server-side authorisation on every route and action | 🟡 | Enforced on every page and route handler that exists (`src/lib/auth/guards.ts`), including the settings and platform-administration screens, and asserted by hand-built POSTs in the browser suite. It has not been reviewed by anyone but its author. |
+| Input validation on every write path | 🟡 | Every route handler re-validates its own form: sign-in, onboarding, matters, documents, approvals, communications, settings and firm creation. Validation is hand-written per route rather than schema-driven, so a new field is a new place to remember. |
+| Upload restrictions: extension allow-list, size cap, content sniffing | 🟡 | Allow-list and size cap defined in `src/lib/constants.ts` and enforced on upload. No content sniffing and no malware scanning — and no file is ever stored, only its metadata. |
 | Generic error messages that leak nothing | ✅ | `src/app/error.tsx`, `src/app/403/page.tsx`, `src/lib/system-status.ts`. A refusal never confirms a record exists. |
 | Account enumeration resistance | ✅ | Identical message and comparable timing for an unknown address and a wrong password. |
 | Secrets never reachable from the browser | ✅ | Enforced by `src/lib/env.ts` and `server-only`. |
@@ -42,7 +42,7 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | Scoped data-access functions only | ✅ | `src/lib/data` — the firm is a required argument, so omitting it is a compile error. |
 | Query-level enforcement | ✅ | The Prisma client refuses any unscoped query on a firm-scoped model (`src/lib/data/firm-scope.ts`). Checks that a firm is *named*, not that it is named correctly — it defends against omission, not sabotage. |
 | Active-firm selection cannot be forged | ✅ | The cookie can only select among existing memberships; a mismatch is ignored, and a forged form submission is refused and logged. |
-| Automated cross-tenant access tests | ✅ | 62 integration tests against a real database with two firms holding deliberately similar records, plus 14 browser tests. |
+| Automated cross-tenant access tests | ✅ | Integration tests against a real database with two firms holding deliberately similar records, plus browser tests. A third firm created through the interface is asserted to hold nothing belonging to the other two (`tests/integration/platform.test.ts`). |
 | Database-enforced isolation (row-level security, separate schemas or databases) | ⛔ | **The most important remaining gap.** All three enforcement layers run inside the application, so they protect against a programming mistake — not against a compromised application process or a mistaken database administrator. |
 | Separate document storage per firm | ⛔ | |
 | Separate search index per firm | ⛔ | |
@@ -57,6 +57,8 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | Multi-factor authentication | ⛔ | Should be mandatory for attorneys and administrators. |
 | Session expiry and revocation | ✅ | Eight-hour expiry, server-side revocation on sign-out. |
 | Password policy, reset and lockout | ⛔ | None of the three exist. |
+| User provisioning and invitation | ⛔ | A firm administrator can change a member's role or suspend them, but cannot invite anybody: an invitation is an email, and Orchelio has no transport. Creating a firm through the platform screen invents its first administrator with the published demonstration password; outside the demonstration build it refuses and requires an existing account. |
+| Self-service firm creation | 🟡 | A platform administrator can create a firm through the interface. There is no billing, no quota, no approval step and no rate limit on it. |
 | Least-privilege review of every role | 🟡 | The matrix is defined and unit-tested against the specification's exclusions; it has not been reviewed by a practising lawyer. |
 
 ## 4. Data protection

@@ -15,14 +15,17 @@ This repository contains **Orchelio Demo**, a local demonstration build.
 
 ---
 
-## Current status: Phases 1 to 7 of 9 complete
+## Current status: Phases 1 to 8 of 9 complete
 
-Orchelio is built in nine phases. **Phases 1 to 7** are finished: you can sign in, land in the
+Orchelio is built in nine phases. **Phases 1 to 8** are finished: you can sign in, land in the
 right firm workspace, switch between firms, answer a seven-step questionnaire that configures the
 firm, see a dashboard assembled from that configuration, work through matters, run a simulated
-Claude analysis that is independently reviewed, and take — or refuse — the human decisions that
-let anything sensitive happen, with every one of them recorded. It does **not** yet deliver the
-cost screens, firm creation from the interface, or the guided demonstration.
+Claude analysis that is independently reviewed, take — or refuse — the human decisions that let
+anything sensitive happen, read what the assistant would have cost, change any of the firm's
+settings afterwards, and create a **third firm entirely through the interface**. A twenty-one step
+[guided demonstration](http://localhost:3000/guide) walks through the whole of it.
+
+What remains is Phase 9: the accessibility pass and the final documentation.
 
 | Phase | Scope | Status |
 | ----- | ----- | ------ |
@@ -33,7 +36,7 @@ cost screens, firm creation from the interface, or the guided demonstration.
 | 5 | Matters, practice-area fields, simulated document upload | ✅ Delivered |
 | 6 | `AIProvider` interface, `MockAIProvider`, Claude Analyst and Claude Reviewer | ✅ Delivered |
 | 7 | Approval centre, human decisions, append-only audit log | ✅ Delivered |
-| 8 | Simulated AI costs, firm creation, settings, guided demo | Planned |
+| 8 | Simulated AI costs, firm creation, settings, guided demo | ✅ Delivered |
 | 9 | Unit, integration and end-to-end tests, accessibility, final documentation | Planned |
 
 The running application shows this same table, so a screen never claims more than it does.
@@ -261,8 +264,13 @@ orchelio/
 
 Stated plainly, because the demonstration should not be mistaken for a finished product.
 
-1. **Phases 1 to 7 only.** The cost screens, firm creation from the interface and the guided
-   demonstration are not built yet. Every dashboard figure is now counted from real records.
+1. **Phases 1 to 8 only.** What remains is Phase 9 — the accessibility pass and the final
+   documentation. Every dashboard figure is counted from real records.
+   Two things a reader might look for are absent by decision rather than by omission:
+   **workflow management**, because a firm's workflows are derived from its practice area, and
+   **integrations**, because an integration means sending something somewhere and Orchelio has no
+   transport at all. Both were listed in the sidebar as "Phase 8" until this phase, and have been
+   removed rather than deferred.
 2. **Four approval rules of eighteen are raised.** The onboarding questionnaire offers nine
    configurable rules and nine locked ones; this build raises approvals for four of them. The
    approval centre lists the rest by name and says plainly that nothing currently triggers them —
@@ -271,6 +279,11 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
 3. **The sign-in is a demonstration, not a production authentication system.** The passwords are
    published in this repository, there is no multi-factor authentication, no password reset and no
    account lockout. It exists to demonstrate roles and access control.
+
+   Creating a firm through the interface inherits this: the new administrator's account is created
+   with the same published password. There is no invitation flow, because an invitation is an
+   email and Orchelio has no way to send one. Outside the demonstration build the creation form
+   refuses to invent an account at all and requires an administrator who already has one.
 4. **Sign-in attempt throttling is per-process and in memory.** It resets when the server restarts
    and is not shared between instances. It raises the cost of guessing on one machine; it is not
    abuse protection.

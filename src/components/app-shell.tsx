@@ -8,6 +8,7 @@ import { signOutAction } from "@/app/login/actions";
 import { POWERED_BY } from "@/lib/app-config";
 import type { Permission } from "@/lib/auth/permissions";
 import type { Session, SessionFirm } from "@/lib/auth/session";
+import { type Branding, accentColour, firmDisplayName } from "@/lib/settings/config";
 
 /**
  * Orchelio — the signed-in shell.
@@ -43,24 +44,24 @@ const FIRM_NAV: readonly NavItem[] = [
 const FIRM_PLANNED: readonly PlannedItem[] = [];
 
 const ADMIN_NAV: readonly NavItem[] = [
-  { href: "/onboarding", label: "Firm Setup", permission: "firm.settings.edit" },
+  { href: "/settings", label: "Firm Settings", permission: "firm.settings.view" },
+  { href: "/usage", label: "Usage and Costs", permission: "firm.costs.view" },
+  { href: "/onboarding", label: "Setup Questionnaire", permission: "firm.settings.edit" },
 ];
 
-const ADMIN_PLANNED: readonly PlannedItem[] = [
-  { label: "Firm Settings", phase: 8 },
-  { label: "Workflows", phase: 8 },
-  { label: "Users and Roles", phase: 8 },
-  { label: "AI Settings", phase: 6 },
-  { label: "Usage and Costs", phase: 8 },
-  { label: "Integrations", phase: 8 },
+// Empty, and it stays empty: nothing in the firm administration section is
+// waiting on a later phase. "Integrations" was listed here until Phase 8 and is
+// now removed rather than deferred — an integration means sending something
+// somewhere, and Orchelio has no transport at all.
+const ADMIN_PLANNED: readonly PlannedItem[] = [];
+
+const PLATFORM_NAV: readonly NavItem[] = [
+  { href: "/admin/firms", label: "Firms" },
+  { href: "/admin/system", label: "System Overview" },
+  { href: "/admin/demo", label: "Demonstration Data" },
 ];
 
-const PLATFORM_NAV: readonly NavItem[] = [{ href: "/admin/firms", label: "Firms" }];
-
-const PLATFORM_PLANNED: readonly PlannedItem[] = [
-  { label: "System Overview", phase: 8 },
-  { label: "Demo Management", phase: 8 },
-];
+const PLATFORM_PLANNED: readonly PlannedItem[] = [];
 
 function NavGroup({
   title,
@@ -114,17 +115,21 @@ function NavGroup({
 export function AppShell({
   session,
   firm,
+  branding,
   roleLabel,
   permissions,
   children,
 }: {
   session: Session;
   firm: SessionFirm | null;
+  /** The open firm's own branding. Null when no firm is open. */
+  branding: Branding | null;
   roleLabel: string;
   permissions: readonly Permission[];
   children: React.ReactNode;
 }) {
   const granted = new Set(permissions);
+  const accent = branding ? accentColour(branding.accent) : null;
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -133,7 +138,27 @@ export function AppShell({
       <div className="flex flex-1 flex-col lg:flex-row">
         <aside className="border-b border-line bg-surface lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
           <div className="border-b border-line px-4 py-4">
-            <OrchelioWordmark subtitle={firm?.name ?? "No firm workspace"} />
+            {/* The wordmark is the product's and never a firm's: a firm brands
+                itself here, not the software it is using. */}
+            <OrchelioWordmark
+              subtitle={
+                firm && branding ? firmDisplayName(branding, firm.name) : "No firm workspace"
+              }
+              mark={
+                accent ? (
+                  <span
+                    aria-hidden
+                    className="firm-accent size-2.5 shrink-0 rounded-full"
+                    style={
+                      {
+                        "--firm-accent-light": accent.light,
+                        "--firm-accent-dark": accent.dark,
+                      } as React.CSSProperties
+                    }
+                  />
+                ) : null
+              }
+            />
           </div>
 
           {firm ? <FirmSwitcher firms={session.user.firms} activeFirmId={firm.id} /> : null}

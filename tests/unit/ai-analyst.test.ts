@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DEMO_MATTERS, type DemoMatter } from "../../prisma/demo-matters";
+import { DEMO_MATTERS, type DemoMatter } from "@/lib/demo/matters";
 import { STANDING_WARNINGS, analyseMatter } from "@/lib/ai/analyst";
 import { reviewAnalysis } from "@/lib/ai/reviewer";
 import { SUPPORT_LEVELS, supportCaveat, type MatterAnalysisInput } from "@/lib/ai/types";

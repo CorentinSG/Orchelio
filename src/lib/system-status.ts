@@ -8,8 +8,8 @@ import { serverEnv } from "@/lib/env";
  *
  * The home page is not a static mock-up: it runs this check on every request so
  * that a broken install is visible immediately, with the exact command needed
- * to fix it. This is also the seed of the future `/admin/system-overview`
- * screen (Phase 8).
+ * to fix it. The platform administrator's `/admin/system` screen reads the same
+ * check, so the two cannot report different things about one instance.
  */
 
 export type DatabaseStatus =
@@ -102,8 +102,11 @@ export async function getSystemStatus(): Promise<SystemStatus> {
 }
 
 /**
- * Firms registered on this instance. Phase 1 shows the two seeded demo firms;
- * from Phase 3 this list becomes the platform administrator's firm switcher.
+ * Firms registered on this instance, for the public status panel.
+ *
+ * Deliberately not what the administration screens read: those go through
+ * `src/lib/data/platform.ts`, which is the one module allowed to look across
+ * tenants and is written to be audited as such.
  */
 export async function listFirms() {
   try {

@@ -175,3 +175,25 @@
     border-radius: 0.375rem;
   }
 }
+
+/* A firm's accent colour.
+   The two values arrive as inline custom properties from the firm's branding,
+   because they are per-firm data rather than design tokens. The rule that picks
+   between them lives here, so a firm's choice cannot introduce a colour the
+   theme has not accounted for — a free-form value in a `style` attribute could
+   fail contrast in one theme while passing in the other. */
+@utility firm-accent {
+  background-color: var(--firm-accent-light);
+
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--firm-accent-dark);
+  }
+}
+
+:root[data-theme="dark"] .firm-accent {
+  background-color: var(--firm-accent-dark);
+}
+
+:root[data-theme="light"] .firm-accent {
+  background-color: var(--firm-accent-light);
+}
