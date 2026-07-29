@@ -9,7 +9,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `edc6cfdb`
+- Built from commit: `b799b282`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -148,7 +148,7 @@ Nodes (24): AdminDemoPage(), metadata, AdminFirmsPage(), metadata, one(), PagePr
 
 ### Community 12 - "[step]/page.tsx"
 Cohesion: 0.10
-Nodes (20): Answers, metadata, PageProps, CheckboxOption(), LockIcon(), ProgressBar(), StepActions(), WorkflowPreview() (+12 more)
+Nodes (18): Answers, metadata, PageProps, CheckboxOption(), LockIcon(), ProgressBar(), StepActions(), WorkflowPreview() (+10 more)
 
 ### Community 13 - "ai/page.tsx"
 Cohesion: 0.14
@@ -171,8 +171,8 @@ Cohesion: 0.15
 Nodes (17): ADR-0016, POST(), metadata, PageProps, AccentChoice(), LockedRules(), MemberList(), MemberRow (+9 more)
 
 ### Community 18 - "platform.ts"
-Cohesion: 0.19
-Nodes (16): POST(), CreatedFirm, createFirm(), CreateFirmOutcome, buildApprovals(), creatablePracticeAreas(), looksLikeRealAddress(), NewFirmInput (+8 more)
+Cohesion: 0.20
+Nodes (15): POST(), CreatedFirm, createFirm(), CreateFirmOutcome, creatablePracticeAreas(), looksLikeRealAddress(), NewFirmInput, NewFirmValidation (+7 more)
 
 ### Community 19 - "Callout"
 Cohesion: 0.15
@@ -195,8 +195,8 @@ Cohesion: 0.26
 Nodes (13): CLASS_DEFINITIONS, ClassDefinition, classify(), clientMaterialModels(), CONFIDENTIALITY_CLASSES, ConfidentialityClass, Enforcement, isClientMaterial() (+5 more)
 
 ### Community 24 - "onboarding/config.ts"
-Cohesion: 0.28
-Nodes (13): LOCKED_APPROVAL_OPTIONS, resolveKey(), aiFeatureIdsFrom(), aiFeatureKeysFor(), buildConfiguration(), FirmConfigurationPayload, mapKeys(), sampleAnswersFor() (+5 more)
+Cohesion: 0.22
+Nodes (16): AI_FEATURE_OPTIONS, LOCKED_APPROVAL_OPTIONS, resolveKey(), WORKFLOW_STEP_OPTIONS, aiFeatureIdsFrom(), aiFeatureKeysFor(), buildApprovals(), buildConfiguration() (+8 more)
 
 ### Community 25 - "dependencies"
 Cohesion: 0.14
