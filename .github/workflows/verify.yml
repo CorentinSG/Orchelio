@@ -57,6 +57,12 @@ jobs:
       - name: Skills are well formed and their references resolve
         run: npm run skills:check
 
+      # Four properties rather than a promise: every model classified, the
+      # cross-tenant module reading no client material, nothing able to make an
+      # outbound request, nothing writing a file.
+      - name: Confidentiality properties still hold
+        run: npm run confidentiality:check
+
       # A ratchet, not a proof — see docs/HARNESS.md. It fails on a *new*
       # route to Prisma from outside the data layer, not on the reviewed ones.
       - name: No new firm-scope bypass

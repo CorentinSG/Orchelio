@@ -65,7 +65,13 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 
 | Item | Status | Notes |
 | ---- | ------ | ----- |
-| Encryption at rest | ⛔ | |
+| Data classification | ✅ | Five classes in `src/lib/confidentiality/classification.ts`; `npm run confidentiality:check` fails if a model in the schema has none. Shown to the firm at Settings → Confidentiality, including what nothing enforces. See ADR-0018. |
+| No outbound transport | ✅ | The egress allow-list is empty and checked. Source-level only — a dependency could still open a socket; that needs a network policy at the host. |
+| No file content stored | ✅ | Checked. A document is a name, a type and a size. A deployment that stores bytes makes the next row mandatory rather than planned. |
+| Encryption at rest | ⛔ | **The largest gap.** One unencrypted SQLite file. The target — a data key per firm wrapped by a key the firm holds — is designed in ADR-0018 and not built. |
+| Per-firm keys, and crypto-shredding as deletion | ⛔ | Designed in ADR-0018. It is the only deletion that can be proved once backups exist. |
+| Data residency chosen by the firm | ⛔ | Not written down anywhere before ADR-0018. It is the first question a firm asks and the project had no answer. |
+| Support access needs the firm's own approval | ⛔ | Designed in ADR-0018 as a tenth locked rule reusing the existing approval queue. Not built. |
 | Encryption in transit (TLS everywhere) | ⛔ | Deployment concern. |
 | Secret management (not `.env` files on disk) | ⛔ | |
 | Backups, and *tested* restores | ⛔ | An untested backup is not a backup. |

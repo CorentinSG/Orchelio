@@ -205,6 +205,35 @@ test.describe("firm settings", () => {
     await expect(page.getByRole("button", { name: /delete|erase|reset/i })).toHaveCount(0);
   });
 
+  test("the confidentiality report states what nothing enforces yet", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await page.goto("/settings?section=confidentiality");
+
+    // The easy half. The page's own wording, not the check script's.
+    await expect(page.getByRole("main")).toContainText("Nothing leaves the machine");
+    await expect(page.getByText("prisma/orchelio-demo.db")).toBeVisible();
+
+    // The half a supplier would leave out. A page listing only the enforced
+    // promises would be the same shape of lie as a zero where a dash belongs.
+    await expect(page.getByRole("heading", { name: /promise\(s\) nothing enforces yet/ })).toBeVisible();
+    await expect(page.getByRole("main")).toContainText(/encrypted with a key the firm holds/i);
+    await expect(page.getByText("not implemented").first()).toBeVisible();
+
+    // And it says the uncomfortable fact about this build outright.
+    await expect(page.getByRole("main")).toContainText("Encrypted at rest");
+    await expect(page.getByRole("main")).toContainText("anybody with the file has everything");
+  });
+
+  test("the confidentiality report offers nothing to change", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await page.goto("/settings?section=confidentiality");
+
+    // Confidentiality is not a preference a firm sets. It is the one section
+    // with no form, and a switch here would imply it could be switched off.
+    await expect(page.getByRole("button", { name: "Save changes" })).toHaveCount(0);
+    await expect(page.getByRole("checkbox")).toHaveCount(0);
+  });
+
   test("a settings error is announced, not silently discarded", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/settings?section=profile");

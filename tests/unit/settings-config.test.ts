@@ -32,6 +32,9 @@ describe("sections", () => {
       "approvals",
       "people",
       "branding",
+      // Added after Phase 9: the one section with no form. It reports where the
+      // firm's data is and what enforces each promise — see ADR-0018.
+      "confidentiality",
       "demonstration",
     ]);
   });

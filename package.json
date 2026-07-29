@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "verify": "npm run lint && npm run typecheck && npm run docs:check && npm run acceptance:check && npm run skills:check && npm run test",
+    "verify": "npm run lint && npm run typecheck && npm run docs:check && npm run acceptance:check && npm run skills:check && npm run confidentiality:check && npm run test",
     "verify:full": "npm run verify && npm run build && npm run test:e2e",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -34,13 +34,14 @@
     "graph:query": "graphify query",
     "queries": "ORCHELIO_LOG_QUERIES=1 next dev",
     "harness:doctor": "node scripts/doctor.mjs",
-    "check": "npm run lint && npm run typecheck && npm run docs:check && npm run acceptance:check && npm run skills:check && npm run test",
+    "check": "npm run lint && npm run typecheck && npm run docs:check && npm run acceptance:check && npm run skills:check && npm run confidentiality:check && npm run test",
     "postinstall": "prisma generate",
     "docs:check": "node scripts/docs-check.mjs",
     "skills:check": "node scripts/skills-check.mjs",
     "skills:firm-scope": "node .claude/skills/orchelio-firm-scope/scripts/audit.mjs",
     "acceptance:check": "node scripts/acceptance-check.mjs",
-    "test:a11y": "playwright test tests/e2e/accessibility.spec.ts"
+    "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
+    "confidentiality:check": "node scripts/confidentiality-check.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",

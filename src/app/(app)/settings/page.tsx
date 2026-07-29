@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Badge, Callout, Card, CommandLine, DataRow } from "@/components/ui";
 import { CheckboxOption, Field, inputClass } from "@/components/onboarding-ui";
+import { ConfidentialityReport } from "@/components/confidentiality-ui";
 import {
   AccentChoice,
   LockedRules,
@@ -448,6 +449,11 @@ export default async function SettingsPage({ searchParams }: PageProps) {
 
             {canEdit ? <SaveBar /> : null}
           </form>
+        ) : null}
+
+        {/* --- Confidentiality ------------------------------------------- */}
+        {section.slug === "confidentiality" ? (
+          <ConfidentialityReport firmName={firm.name} />
         ) : null}
 
         {/* --- Demonstration -------------------------------------------- */}

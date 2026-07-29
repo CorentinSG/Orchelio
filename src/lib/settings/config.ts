@@ -71,6 +71,12 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     changes: "The firm's display name and accent colour. Not the product's.",
   },
   {
+    slug: "confidentiality",
+    title: "Confidentiality",
+    description: "Where this firm's data is, who can read it, and what leaves the machine.",
+    changes: "Nothing. It reports; it is the one section with no form.",
+  },
+  {
     slug: "demonstration",
     title: "Demonstration",
     description: "The fictional data in this firm's workspace.",

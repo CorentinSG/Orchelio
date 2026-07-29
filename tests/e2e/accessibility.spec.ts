@@ -109,6 +109,7 @@ test.describe("the firm workspace", () => {
       "approvals",
       "people",
       "branding",
+      "confidentiality",
       "demonstration",
     ]) {
       await page.goto(`/settings?section=${section}`);

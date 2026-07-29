@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 163.
+Modules: 167.
 
 ## `prisma/`
 
@@ -36,6 +36,12 @@ Everything created here is fictional.
 ### `scripts/codemap.mjs`
 
 Writes docs/CODEMAP.md: every source module, its exported symbols, and the first line of its file-level comment.
+
+### `scripts/confidentiality-check.mjs`
+
+A firm should not have to take "your data does not go anywhere" on trust.
+
+Exports: `classify`, `MODEL_CLASSIFICATION`
 
 ### `scripts/docs-check.mjs`
 
@@ -335,6 +341,12 @@ Orchelio wordmark.
 
 Exports: `OrchelioMark`, `OrchelioWordmark`, `OrchelioTagline`
 
+### `src/components/confidentiality-ui.tsx`
+
+A firm that has to take "your data does not go anywhere" on trust is a firm that worries about it.
+
+Exports: `ConfidentialityReport`
+
 ### `src/components/demo-banner.tsx`
 
 Standing demonstration warning.
@@ -504,6 +516,12 @@ Exports: `platformCatalogue`, `clearCatalogueCache`, `catalogueCacheSize`, `requ
 Memoised for the request, so every date on a page is measured from the same moment.
 
 Exports: `requestNow`
+
+### `src/lib/confidentiality/classification.ts`
+
+A firm asking "where does my sensitive data go?" is really asking three questions at once, and they have different answers for different records: who may read it, wher…
+
+Exports: `classDefinition`, `sensitivity`, `isClientMaterial`, `classify`, `clientMaterialModels`, `modelsInClass`, `CONFIDENTIALITY_CLASSES`, `CLASS_DEFINITIONS`, `MODEL_CLASSIFICATION`, `ENFORCEMENT`, `ConfidentialityClass`, `ClassDefinition`, `Enforcement`
 
 ### `src/lib/constants.ts`
 
@@ -832,6 +850,10 @@ The single most important property in this phase is that a locked rule cannot be
 ### `tests/unit/cache.test.ts`
 
 A cache is a place where one request's answer is handed to another.
+
+### `tests/unit/confidentiality.test.ts`
+
+Two things are worth testing here and one is not obvious.
 
 ### `tests/unit/dashboard-widgets.test.ts`
 

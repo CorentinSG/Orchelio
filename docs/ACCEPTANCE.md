@@ -227,6 +227,33 @@ The mapping itself is checked by `scripts/acceptance-check.mjs`.
 
 ---
 
+## Beyond the nine phases — confidentiality
+
+Not a phase criterion; recorded here because it is the same kind of claim and
+carries the same risk of becoming prose nobody checks. See
+[ADR-0018](decisions/ADR-0018-confidentiality-by-construction.md).
+
+**Claim:** every record is classified by sensitivity; the one module allowed to
+read across firms touches no client material; nothing can leave the machine;
+nothing writes a file; and the firm is shown the promises nothing enforces yet,
+not only the ones something does.
+
+Proved by:
+
+- `tests/unit/confidentiality.test.ts` — "classifies every model in the schema"
+- `tests/unit/confidentiality.test.ts` — "makes every client-confidential and privileged model firm-scoped"
+- `tests/unit/confidentiality.test.ts` — "lets nothing leave the machine, in any class"
+- `tests/unit/confidentiality.test.ts` — "admits at least one promise that nothing enforces"
+- `tests/unit/confidentiality.test.ts` — "points every enforced promise at something a reader can open"
+- `tests/e2e/settings.spec.ts` — "the confidentiality report states what nothing enforces yet"
+- `tests/e2e/settings.spec.ts` — "the confidentiality report offers nothing to change"
+
+The four source-level properties are enforced by `scripts/confidentiality-check.mjs`,
+which runs in `npm run verify` and in CI, and was made to fail on each of them
+before being trusted.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

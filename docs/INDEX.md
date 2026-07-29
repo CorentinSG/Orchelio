@@ -68,6 +68,7 @@ decided, and what it cost.
 | 15 | [Branding names the firm, not the product](decisions/ADR-0015-branding-names-the-firm-not-the-product.md) | 8 |
 | 16 | [Destructive demonstration controls are commands, not buttons](decisions/ADR-0016-destructive-demonstration-controls-are-commands.md) | 8 |
 | 17 | [The accessibility claim is bounded, and the bound is stated](decisions/ADR-0017-the-accessibility-claim-is-bounded.md) | 9 |
+| 18 | [Confidentiality by construction, and a register of what is not](decisions/ADR-0018-confidentiality-by-construction.md) | post-9 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)

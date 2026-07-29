@@ -160,6 +160,22 @@ by title, and runs inside `npm run verify`. Rename a test and the build fails �
 which is the point, because a document full of claims about tests that no longer
 exist goes on reading like evidence.
 
+### 12bis. Confidentiality is checked, not promised
+
+`src/lib/confidentiality/classification.ts` classifies every model into five
+sensitivity classes. `npm run confidentiality:check` enforces four properties
+and fails the build on each: every schema model is classified, the cross-tenant
+module `src/lib/data/platform.ts` names no client-confidential or privileged
+model, **nothing in `src/` can make an outbound request**, and nothing writes a
+file.
+
+The egress allow-list is **empty**. Adding to it is a decision to send client
+material somewhere and belongs in a review, not in a commit nobody reads.
+
+Settings → Confidentiality shows the firm the whole register, including the
+promises nothing enforces yet. Never add a row there without its limitation.
+See ADR-0018.
+
 ### 12. Accessibility is audited in both themes, and the claim is bounded
 
 `npm run test:a11y` runs axe-core over every principal page in light *and* dark.
@@ -195,7 +211,7 @@ disability. See ADR-0017.
 ## Commands
 
 ```bash
-npm run verify          # lint + typecheck + docs + acceptance + skills + tests — before every commit
+npm run verify          # lint + typecheck + docs + acceptance + skills + confidentiality + tests
 npm run verify:full     # the above, plus build and browser tests
 npm run dev             # http://localhost:3000
 npm run seed            # fictional data, safe to re-run
@@ -203,6 +219,7 @@ npm run codemap         # regenerate docs/CODEMAP.md
 npm run docs:check      # every internal link resolves, no orphaned note
 npm run acceptance:check    # every test named in docs/ACCEPTANCE.md still exists
 npm run test:a11y       # axe-core over every page, both themes
+npm run confidentiality:check   # classification, egress, storage, cross-tenant reads
 npm run skills:check    # .claude/skills frontmatter, and everything they point at
 npm run skills:firm-scope   # no new route to Prisma outside the data layer
 npm run graph:update    # refresh the knowledge graph (local, no API key)

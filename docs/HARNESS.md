@@ -94,6 +94,35 @@ suite with `--retries=0` and reproduce it deliberately before changing anything.
 
 ---
 
+## 2bis. Confidentiality
+
+```bash
+npm run confidentiality:check
+```
+
+Four properties, each of which fails the build rather than being asserted in a
+document:
+
+1. **Every model in the schema is classified** into one of five sensitivity
+   classes. The model list is read from `prisma/schema.prisma`, so a hand-kept
+   copy cannot silently disagree with it.
+2. **`src/lib/data/platform.ts` reads no client material.** The one module
+   allowed to look across tenants may not name a client-confidential or
+   privileged model, nor include such a relation outside a `_count`.
+3. **Nothing in `src/` can make an outbound request.** The allow-list is empty.
+4. **Nothing in `src/` writes a file.**
+
+Comments are stripped before scanning: the platform module explains *why* it
+does not call `prisma.matter.count()`, and a check that tripped on the
+explanation would teach people to delete explanations.
+
+All four were made to fail before being trusted — an unclassified model, a
+planted `prisma.matter.count()`, a planted `fetch()`, a planted `writeFileSync`.
+
+It is source-level. It does not prove what a running process does; a dependency
+can still open a socket, and that needs a network policy at the host. Said in
+the script's own output, and in `docs/PRODUCTION_READINESS.md`.
+
 ## 2c. Skills
 
 `.claude/skills/` holds five skills — instructions an assistant loads when it
@@ -325,6 +354,8 @@ repeated `npm run test:e2e` runs skip the build.
 | `scripts/codemap.mjs` | Generates `docs/CODEMAP.md` |
 | `scripts/docs-check.mjs` | Verifies every internal link and finds orphaned notes |
 | `scripts/acceptance-check.mjs` | Verifies every test named in `docs/ACCEPTANCE.md` still exists |
+| `scripts/confidentiality-check.mjs` | Classification, egress, file storage, cross-tenant reads |
+| `src/lib/confidentiality/classification.ts` | What each record is, and what enforces each promise |
 | `scripts/skills-check.mjs` | Verifies the skills' frontmatter and everything they point at |
 | `docs/ACCEPTANCE.md` | Every acceptance criterion, and the tests that prove it |
 | `docs/DEMONSTRATION.md` | How to give a demonstration, and what to say about the limits |

@@ -208,6 +208,16 @@ if (!existsSync(join(ROOT, "docs", "ACCEPTANCE.md"))) {
   }
 }
 
+// --- Confidentiality --------------------------------------------------------
+
+try {
+  const output = run("node", ["scripts/confidentiality-check.mjs"]);
+  const classified = /All (\d+) models classified/.exec(output);
+  report("ok", "Confidentiality", `${classified ? classified[1] : "?"} models classified, nothing leaves`);
+} catch {
+  report("fail", "Confidentiality", "a confidentiality property no longer holds", "npm run confidentiality:check");
+}
+
 // --- Skills ----------------------------------------------------------------
 
 if (!existsSync(join(ROOT, ".claude", "skills"))) {
