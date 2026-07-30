@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import type { FirmScope } from "@/lib/data/scope";
+import { firmTimezone } from "@/lib/format/dates";
 
 /**
  * Orchelio — firm-level records.
@@ -12,6 +13,18 @@ import type { FirmScope } from "@/lib/data/scope";
 
 export async function firmConfiguration(scope: FirmScope) {
   return prisma.firmConfiguration.findFirst({ where: { firmId: scope.firmId } });
+}
+
+/**
+ * The zone this firm's screens name their dates in.
+ *
+ * For pages that need nothing else from the configuration. A page that already
+ * has it should call `firmTimezone(configuration?.timezone)` instead of asking
+ * the database a second time for the same row.
+ */
+export async function firmTimezoneFor(scope: FirmScope): Promise<string> {
+  const configuration = await firmConfiguration(scope);
+  return firmTimezone(configuration?.timezone);
 }
 
 export async function firmMembers(scope: FirmScope) {

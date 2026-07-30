@@ -4,6 +4,7 @@ import { Callout, Card } from "@/components/ui";
 import { StatusBadge, formatDate } from "@/components/matter-ui";
 import { requireMatterAccess } from "@/lib/auth/workspace";
 import { listIntakes } from "@/lib/data/activity";
+import { firmTimezoneFor } from "@/lib/data/firms";
 import { parseJsonObject } from "@/lib/json-field";
 
 export const metadata = { title: "Intake" };
@@ -18,7 +19,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function IntakePage() {
   const { firm, scope } = await requireMatterAccess();
-  const intakes = await listIntakes(scope);
+  const [intakes, timezone] = await Promise.all([listIntakes(scope), firmTimezoneFor(scope)]);
 
   return (
     <div className="space-y-6">
@@ -46,7 +47,7 @@ export default async function IntakePage() {
             <Card
               key={intake.id}
               title={intake.matter.clientProfile?.displayName ?? "Unknown client"}
-              description={`${intake.matter.reference} · submitted ${formatDate(intake.submittedAt)}`}
+              description={`${intake.matter.reference} · submitted ${formatDate(intake.submittedAt, timezone)}`}
               action={<StatusBadge status={intake.matter.status} />}
             >
               <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2">

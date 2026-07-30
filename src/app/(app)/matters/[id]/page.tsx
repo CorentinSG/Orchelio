@@ -35,6 +35,7 @@ import { ActivityDetail, ActivityStatusBadge, activityLabel } from "@/components
 import { decisionLabel } from "@/lib/approvals/actions";
 import { isDecisionStatus, isPendingStatus } from "@/lib/approvals/status";
 import { firmConfiguration } from "@/lib/data/firms";
+import { firmTimezone, timezoneNotice } from "@/lib/format/dates";
 import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
 import { categoriesFor, categoryLabel, expectedButMissing } from "@/lib/matters/documents";
 import { displayValue, sectionsFor } from "@/lib/matters/fields";
@@ -118,6 +119,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
     latestAnalysisForMatter({ firmId: firm.id }, matter.id),
     firmConfiguration({ firmId: firm.id }),
   ]);
+  const timezone = firmTimezone(configuration?.timezone);
   const enabledAiFeatures = parseStringArray(configuration?.aiFeatures);
   // The catalogue's own list, minus what this firm chose. Practice-area
   // variants count as the same feature: an employment firm enabling
@@ -233,7 +235,10 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "overview" ? (
         <div className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card title="Matter" description="Recorded by the firm. Nothing here is verified.">
+            <Card
+              title="Matter"
+              description={`Recorded by the firm. Nothing here is verified. ${timezoneNotice(timezone)}`}
+            >
               <dl>
                 <DataRow label="Client" value={matter.clientProfile?.displayName ?? "Unknown"} />
                 <DataRow label="Type" value={matter.matterType.label} />
@@ -241,12 +246,12 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                   label="Responsible attorney"
                   value={matter.responsibleAttorney?.name ?? "Unassigned"}
                 />
-                <DataRow label="Opened" value={formatDate(matter.openedAt)} />
+                <DataRow label="Opened" value={formatDate(matter.openedAt, timezone)} />
                 <DataRow
                   label="Next date"
-                  value={<UnconfirmedDate value={matter.nextDeadlineAt} now={now} />}
+                  value={<UnconfirmedDate value={matter.nextDeadlineAt} now={now} timezone={timezone} />}
                 />
-                <DataRow label="Last activity" value={relativeDays(matter.lastActivityAt, now)} />
+                <DataRow label="Last activity" value={relativeDays(matter.lastActivityAt, now, timezone)} />
                 <DataRow label="Documents" value={matter.documents.length} />
                 <DataRow label="Open tasks" value={openTasks.length} />
               </dl>
@@ -305,7 +310,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           title="Intake"
           description={
             matter.intakeResponses[0]
-              ? `Submitted ${formatDate(matter.intakeResponses[0].submittedAt)}.`
+              ? `Submitted ${formatDate(matter.intakeResponses[0].submittedAt, timezone)}.`
               : "No intake has been recorded for this matter."
           }
         >
@@ -367,7 +372,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                       <p className="font-medium text-ink">{document.filename}</p>
                       <p className="text-sm text-ink-muted">
                         {categoryLabel(matter.practiceAreaKey, document.category)} ·{" "}
-                        {fileSize(document.sizeBytes)} · added {formatDate(document.receivedAt)}
+                        {fileSize(document.sizeBytes)} · added {formatDate(document.receivedAt, timezone)}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -419,7 +424,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     <Badge tone={task.priority === "high" ? "warning" : "neutral"}>
                       {task.priority}
                     </Badge>
-                    <span className="text-sm text-ink-muted">{formatDate(task.dueAt)}</span>
+                    <span className="text-sm text-ink-muted">{formatDate(task.dueAt, timezone)}</span>
                   </div>
                 </li>
               ))}
@@ -506,6 +511,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                       startedAt={analysis.startedAt}
                       completedAt={analysis.completedAt}
                       errorMessage={analysis.errorMessage}
+                  timezone={timezone}
                     />
                   ) : (
                     <p className="text-sm text-ink-muted">
@@ -798,7 +804,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                         <p className="font-medium text-ink">{draft.subject}</p>
                         <p className="text-sm text-ink-muted">
                           {draft.channel} · prepared by {draft.createdBy?.name ?? "Orchelio"} on{" "}
-                          {formatDate(draft.createdAt)}
+                          {formatDate(draft.createdAt, timezone)}
                         </p>
                       </div>
                       <Badge tone={draft.status === "approved_for_use" ? "success" : "warning"}>
@@ -852,7 +858,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     type="submit"
                     className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
                   >
-                    Ask a person to confirm {formatDate(matter.nextDeadlineAt)}
+                    Ask a person to confirm {formatDate(matter.nextDeadlineAt, timezone)}
                   </button>
                 </form>
               ) : null}
@@ -860,7 +866,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
             {matter.closedAt ? (
               <p className="mt-3 text-sm text-ink-muted">
-                This matter was closed on {formatDate(matter.closedAt)}.
+                This matter was closed on {formatDate(matter.closedAt, timezone)}.
               </p>
             ) : null}
             {!matter.nextDeadlineAt ? (
@@ -889,6 +895,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                   <ApprovalCard
                     viewerId={session.user.id}
                     requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
+                    timezone={timezone}
                     key={approval.id}
                     approval={approval}
                     canDecide={canDecide && isPendingStatus(approval.status)}

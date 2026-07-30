@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Badge, type Tone } from "@/components/ui";
+import { daysBetween, formatDate } from "@/lib/format/dates";
 import { MATTER_STATUSES } from "@/lib/constants";
 
 /**
@@ -48,26 +49,24 @@ export const ALL_STATUSES = MATTER_STATUSES;
 /**
  * A date, or "Unknown".
  *
- * ISO, deliberately: an unambiguous date matters more than a familiar one when
- * the reader may be in a different country from the person who typed it.
+ * ISO order, deliberately: an unambiguous date matters more than a familiar one
+ * when the reader may be in a different country from the person who typed it.
+ * *Which* day it names comes from the firm's chosen zone — see
+ * `src/lib/format/dates.ts` for why that had to stop being UTC.
  */
-export function formatDate(value: Date | string | null | undefined): string {
-  if (!value) return "Unknown";
-  const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "Unknown";
-  return date.toISOString().slice(0, 10);
-}
+export { formatDate } from "@/lib/format/dates";
 
 /**
  * How long ago, in words. Used for "last activity", never for a deadline.
  *
- * `now` is passed in rather than read here: every date on a page must be
- * measured from the same instant, and a component that reads the clock renders
- * differently each time it is called with the same props.
+ * `now` and `timezone` are both passed in rather than read here: every date on
+ * a page must be measured from the same instant and named in the same zone, and
+ * a component that reaches for either renders differently each time it is
+ * called with the same props.
  */
-export function relativeDays(value: Date | null | undefined, now: Date): string {
+export function relativeDays(value: Date | null | undefined, now: Date, timezone: string): string {
   if (!value) return "Unknown";
-  const days = Math.round((now.getTime() - value.getTime()) / 86_400_000);
+  const days = daysBetween(value, now, timezone);
   if (days <= 0) return "today";
   if (days === 1) return "yesterday";
   if (days < 30) return `${days} days ago`;
@@ -80,15 +79,26 @@ export function relativeDays(value: Date | null | undefined, now: Date): string 
  * Rendered with the caveat attached, because Orchelio never calculates or
  * confirms a deadline — a locked rule, not a preference.
  */
-export function UnconfirmedDate({ value, now }: { value: Date | null | undefined; now: Date }) {
+export function UnconfirmedDate({
+  value,
+  now,
+  timezone,
+}: {
+  value: Date | null | undefined;
+  now: Date;
+  timezone: string;
+}) {
   if (!value) return <span className="text-ink-subtle">None recorded</span>;
 
-  const days = Math.round((value.getTime() - now.getTime()) / 86_400_000);
+  // Counted in the firm's calendar days. An instant twenty-three hours away
+  // falls tomorrow, and "in 0 days" is the wrong answer for somebody reading a
+  // date nobody has confirmed.
+  const days = daysBetween(now, value, timezone);
   const soon = days <= 14;
 
   return (
     <span className={soon ? "font-medium text-warning" : "text-ink"}>
-      {formatDate(value)}
+      {formatDate(value, timezone)}
       <span className="ml-1 text-xs font-normal text-ink-subtle">
         ({days < 0 ? "passed" : `in ${days} days`} · not confirmed)
       </span>

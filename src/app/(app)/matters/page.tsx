@@ -14,6 +14,7 @@ import { actorFor } from "@/lib/auth/session";
 import { matterCountsByStatus, listMatters } from "@/lib/data/matters";
 import { matterTypesForPracticeAreas } from "@/lib/data/catalogues";
 import { firmConfiguration } from "@/lib/data/firms";
+import { firmTimezone } from "@/lib/format/dates";
 import { parseStringArray } from "@/lib/json-field";
 import { statusLabel } from "@/components/matter-ui";
 
@@ -47,6 +48,7 @@ export default async function MattersPage({ searchParams }: PageProps) {
     matterCountsByStatus(scope),
   ]);
 
+  const timezone = firmTimezone(configuration?.timezone);
   const enabledTypes = parseStringArray(configuration?.matterTypes);
   const allTypes = await matterTypesForPracticeAreas(
     parseStringArray(configuration?.practiceAreas),
@@ -211,10 +213,10 @@ export default async function MattersPage({ searchParams }: PageProps) {
                       {matter.responsibleAttorney?.name ?? "Unassigned"}
                     </td>
                     <td className="py-3 pr-4">
-                      <UnconfirmedDate value={matter.nextDeadlineAt} now={now} />
+                      <UnconfirmedDate value={matter.nextDeadlineAt} now={now} timezone={timezone} />
                     </td>
                     <td className="py-3 pr-4 text-ink-muted">
-                      {relativeDays(matter.lastActivityAt, now)}
+                      {relativeDays(matter.lastActivityAt, now, timezone)}
                     </td>
                     <td className="py-3">
                       {matter.aiStatus === "none" ? (

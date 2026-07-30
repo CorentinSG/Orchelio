@@ -5,6 +5,8 @@ import { ActivityDetail, ActivityStatusBadge, activityLabel } from "@/components
 import { requireWorkspacePermission } from "@/lib/auth/workspace";
 import { activityActions, activityUsers, countActivity, listActivity } from "@/lib/data/activity";
 import { requestNow } from "@/lib/clock";
+import { firmTimezoneFor } from "@/lib/data/firms";
+import { formatMoment, timezoneNotice } from "@/lib/format/dates";
 
 export const metadata = { title: "Activity log" };
 export const dynamic = "force-dynamic";
@@ -48,11 +50,12 @@ export default async function ActivityPage({ searchParams }: PageProps) {
       : {}),
   };
 
-  const [events, actions, users, total] = await Promise.all([
+  const [events, actions, users, total, timezone] = await Promise.all([
     listActivity(scope, filters, PAGE_SIZE),
     activityActions(scope),
     activityUsers(scope),
     countActivity(scope, filters),
+    firmTimezoneFor(scope),
   ]);
 
   const activeFilters = Object.values(filters).filter(Boolean).length;
@@ -66,6 +69,10 @@ export default async function ActivityPage({ searchParams }: PageProps) {
           {total} event{total === 1 ? "" : "s"}
           {activeFilters > 0 ? " matching these filters" : ""} for this firm.
         </p>
+        {/* The log is the one screen where the time of day is the point, so it
+            is the one screen that shows it — and it now shows it in the firm's
+            zone rather than the server's. */}
+        <p className="mt-1 text-sm text-ink-subtle">{timezoneNotice(timezone)}</p>
       </header>
 
       <Callout tone="neutral" title="Append-only, by discipline rather than by the database">
@@ -210,7 +217,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
                   dateTime={event.createdAt.toISOString()}
                   className="whitespace-nowrap text-xs text-ink-subtle"
                 >
-                  {event.createdAt.toISOString().replace("T", " ").slice(0, 19)} UTC
+                  {formatMoment(event.createdAt, timezone)}
                 </time>
               </li>
             ))}

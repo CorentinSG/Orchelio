@@ -315,6 +315,30 @@ defect existed in the first place.
 
 ---
 
+## Beyond the nine phases — a setting that changes something
+
+**Claim:** the time zone a firm chose is what every date and time on every
+screen is named in, and the screens say which zone that is. The one setting that
+still changes nothing says so beside its own control. See
+[ADR-0021](decisions/ADR-0021-a-setting-that-changes-nothing-is-a-claim.md).
+
+Proved by:
+
+- `tests/unit/format-dates.test.ts` — "names the firm's day, not the UTC one"
+- `tests/unit/format-dates.test.ts` — "falls back to UTC rather than to the server's zone"
+- `tests/unit/format-dates.test.ts` — "has no default zone, so no call site can forget one"
+- `tests/unit/format-dates.test.ts` — "counts calendar days, not multiples of twenty-four hours"
+- `tests/unit/format-dates.test.ts` — "is not thrown off by a daylight-saving change"
+- `tests/e2e/settings.spec.ts` — "moves the clock on the activity log by the difference between the zones"
+- `tests/e2e/settings.spec.ts` — "names itself, so nobody has to guess which zone a date is in"
+- `tests/e2e/settings.spec.ts` — "says plainly that the language setting changes nothing"
+
+**The browser test proves the setting, not the wording.** One event is read
+twice, in two zones, and the two displayed clocks must differ by exactly three
+hours — an assertion no amount of copy could satisfy.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

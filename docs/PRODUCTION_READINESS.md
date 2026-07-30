@@ -147,7 +147,8 @@ Status legend: ⛔ not started · 🟡 partially addressed · ✅ done
 | Workflow editing by a firm | ⛔ | A firm's workflows follow from its practice area. Changing what one contains is an edit to the seed, for every firm at once. |
 | Any outbound integration | ⛔ | Deliberate and structural: Orchelio has no transport. Adding one reopens every question in sections 1, 4 and 7. |
 | Invitation or self-service user creation | ⛔ | An invitation is an email. See section 3. |
-| Internationalisation | ⛔ | The interface is English only. The configuration carries a `language` field that nothing reads. |
+| Internationalisation | ⛔ | The interface is English only, and the questionnaire offers exactly one language because that is all there is. The stored `language` field is read by nothing, and both screens that offer it say so beside the control rather than leaving it to look as though it works. See ADR-0021. |
+| A deadline is stored as a moment, not as a day | ⛔ | A legal deadline is "the 15th", whoever is reading it. Orchelio stores a `DateTime`, which is correct for every value this build holds — each comes from a clock, because no form lets a person type a date — and every date is now rendered in the firm's own zone. A build that let somebody enter a deadline would need the schema to distinguish a day from an instant first, because rendering a typed day in *any* zone shifts it. See ADR-0021. |
 
 ## The short version
 

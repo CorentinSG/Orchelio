@@ -249,3 +249,100 @@ test.describe("firm settings", () => {
     await expect(alerts(page)).toContainText(/Enter a firm name/);
   });
 });
+
+test.describe("the time zone a firm chose", () => {
+  /**
+   * The setting used to change nothing.
+   *
+   * A firm picked one of four zones in the questionnaire and every date on
+   * every screen stayed UTC, so a decision recorded at half past six on a
+   * Tuesday evening in Los Angeles was dated Wednesday and nothing said why.
+   * These tests are the difference between a setting and a decoration.
+   */
+  async function chooseTimezone(page: import("@playwright/test").Page, value: string) {
+    await page.goto("/settings?section=profile");
+    await page.getByLabel("Timezone").selectOption(value);
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.waitForURL(/section=profile/);
+  }
+
+  /**
+   * How one particular event is worded on the log, found by its instant.
+   *
+   * By instant rather than by position: saving the setting is itself an event,
+   * so "the first row" is a different row on the second reading. The first
+   * draft of this test compared two different events and reported a 373ms
+   * discrepancy as a failure.
+   */
+  async function eventShownAs(page: import("@playwright/test").Page, instant: string) {
+    await page.goto("/activity");
+    const row = page.locator(`time[datetime="${instant}"]`).first();
+    await expect(row).toBeVisible();
+    return (await row.textContent())?.trim() ?? "";
+  }
+
+  /** The instant of the most recent event, as the page itself records it. */
+  async function latestInstant(page: import("@playwright/test").Page) {
+    await page.goto("/activity");
+    const instant = await page.locator("time").first().getAttribute("datetime");
+    expect(instant).toBeTruthy();
+    return instant ?? "";
+  }
+
+  test("names itself, so nobody has to guess which zone a date is in", async ({ page }) => {
+    await signIn(page, "employment.attorney@demo.local");
+    await chooseTimezone(page, "America/Los_Angeles");
+
+    await page.goto("/activity");
+    await expect(page.getByRole("main")).toContainText(
+      "Dates and times are shown in Pacific (Los Angeles).",
+    );
+
+    await page.goto("/approvals");
+    await expect(page.getByRole("main")).toContainText("Pacific (Los Angeles)");
+  });
+
+  test("moves the clock on the activity log by the difference between the zones", async ({
+    page,
+  }) => {
+    await signIn(page, "employment.attorney@demo.local");
+
+    await chooseTimezone(page, "America/New_York");
+    const instant = await latestInstant(page);
+    const eastern = await eventShownAs(page, instant);
+
+    await chooseTimezone(page, "America/Los_Angeles");
+    const pacific = await eventShownAs(page, instant);
+
+    // One event, read twice. Any difference is the zone and nothing else.
+    expect(pacific).not.toBe(eastern);
+
+    // Both zones observe the same daylight-saving rules, so the gap is three
+    // hours whatever time of year the suite runs.
+    const read = (text: string) => Date.parse(`${text.replace(" ", "T")}Z`);
+    expect(read(eastern) - read(pacific)).toBe(3 * 60 * 60 * 1000);
+  });
+
+  test("says plainly that the language setting changes nothing", async ({ page }) => {
+    // The honest half. Time zone now does something; the interface language
+    // does not, and a control that quietly does nothing is the same shape of
+    // claim as a zero where a dash belongs.
+    await signIn(page, "employment.attorney@demo.local");
+    await page.goto("/settings?section=profile");
+
+    await expect(page.getByRole("main")).toContainText(
+      "English is the only interface language Orchelio has",
+    );
+    await expect(page.getByRole("main")).toContainText("nothing reads it yet");
+  });
+
+  test("puts the firm's zone back where the rest of the suite expects it", async ({ page }) => {
+    // Not a test so much as the tidying the serial mode makes safe. Left on
+    // Pacific, every other spec's dates would shift under it.
+    await signIn(page, "employment.attorney@demo.local");
+    await chooseTimezone(page, "America/New_York");
+
+    await page.goto("/settings?section=profile");
+    await expect(page.getByLabel("Timezone")).toHaveValue("America/New_York");
+  });
+});

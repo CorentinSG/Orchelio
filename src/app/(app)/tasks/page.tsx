@@ -4,6 +4,7 @@ import { Badge, Callout, Card } from "@/components/ui";
 import { formatDate } from "@/components/matter-ui";
 import { requireMatterAccess } from "@/lib/auth/workspace";
 import { listTasks } from "@/lib/data/activity";
+import { firmTimezoneFor } from "@/lib/data/firms";
 import { requestNow } from "@/lib/clock";
 
 export const metadata = { title: "Tasks" };
@@ -18,7 +19,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function TasksPage() {
   const { firm, scope } = await requireMatterAccess();
-  const tasks = await listTasks(scope);
+  const [tasks, timezone] = await Promise.all([listTasks(scope), firmTimezoneFor(scope)]);
   const now = requestNow();
 
   const overdue = tasks.filter((task) => task.dueAt && task.dueAt.getTime() < now.getTime());
@@ -61,7 +62,7 @@ export default async function TasksPage() {
                   <Badge tone={task.priority === "high" ? "warning" : "neutral"}>
                     {task.priority}
                   </Badge>
-                  <span className="text-sm text-ink-muted">{formatDate(task.dueAt)}</span>
+                  <span className="text-sm text-ink-muted">{formatDate(task.dueAt, timezone)}</span>
                 </div>
               </li>
             ))}

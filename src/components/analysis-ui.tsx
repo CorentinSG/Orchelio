@@ -237,16 +237,19 @@ export function AnalysisStatus({
   startedAt,
   completedAt,
   errorMessage,
+  timezone,
 }: {
   status: string;
   startedAt: Date;
   completedAt: Date | null;
   errorMessage: string | null;
+  /** The firm's chosen zone. Passed in, never read here. */
+  timezone: string;
 }) {
   if (status === "running") {
     return (
       <Callout tone="brand" title="Running">
-        Started {formatDate(startedAt)}. Reload this page to see the result.
+        Started {formatDate(startedAt, timezone)}. Reload this page to see the result.
       </Callout>
     );
   }
@@ -265,8 +268,8 @@ export function AnalysisStatus({
 
   return (
     <p className="text-sm text-ink-subtle">
-      Run {formatDate(startedAt)}
-      {completedAt ? `, finished ${formatDate(completedAt)}` : null}.
+      Run {formatDate(startedAt, timezone)}
+      {completedAt ? `, finished ${formatDate(completedAt, timezone)}` : null}.
     </p>
   );
 }

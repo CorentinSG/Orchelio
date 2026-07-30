@@ -105,6 +105,7 @@ export function ApprovalCard({
   problem,
   focused,
   viewerId,
+  timezone,
   requireSeparateApprover = false,
 }: {
   approval: ApprovalCardData;
@@ -114,6 +115,9 @@ export function ApprovalCard({
   focused?: boolean;
   /** Who is looking. Used to tell somebody they raised this themselves. */
   viewerId: string;
+  /** The firm's chosen zone. A decision recorded on a Tuesday evening in Los
+   * Angeles must not be dated Wednesday. */
+  timezone: string;
   /** Whether this firm refuses a decision from the person who asked. */
   requireSeparateApprover?: boolean;
 }) {
@@ -155,7 +159,7 @@ export function ApprovalCard({
       <p className="mt-3 text-sm text-ink">{approval.summary}</p>
 
       <p className="mt-2 text-xs text-ink-subtle">
-        Requested by {approval.requestedBy?.name ?? "Orchelio"} on {formatDate(approval.createdAt)}
+        Requested by {approval.requestedBy?.name ?? "Orchelio"} on {formatDate(approval.createdAt, timezone)}
         {href ? (
           <>
             {" · "}
@@ -261,7 +265,7 @@ export function ApprovalCard({
         // and there is no name to put here.
         <div className="mt-3 rounded-md border border-line bg-surface-muted px-3 py-2.5">
           <p className="text-sm text-ink">
-            {`Superseded on ${formatDate(approval.supersededAt)} — nobody decided it`}
+            {`Superseded on ${formatDate(approval.supersededAt, timezone)} — nobody decided it`}
           </p>
           <p className="mt-1 text-sm text-ink-muted">{SUPERSEDED_EXPLANATION}</p>
         </div>
@@ -269,7 +273,7 @@ export function ApprovalCard({
         <div className="mt-3 rounded-md border border-line bg-surface-muted px-3 py-2.5">
           <p className="text-sm text-ink">
             {decisionLabel(approval.status)} by {approval.decidedBy?.name ?? "a person"} on{" "}
-            {formatDate(approval.decidedAt)}
+            {formatDate(approval.decidedAt, timezone)}
           </p>
           {approval.decisionNote ? (
             <p className="mt-1 text-sm text-ink-muted">{approval.decisionNote}</p>

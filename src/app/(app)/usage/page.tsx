@@ -4,6 +4,7 @@ import { Badge, Callout, Card, DataRow } from "@/components/ui";
 import { formatDate } from "@/components/matter-ui";
 import { requireWorkspacePermission } from "@/lib/auth/workspace";
 import { firmConfiguration } from "@/lib/data/firms";
+import { firmTimezone } from "@/lib/format/dates";
 import {
   formatCost,
   listUsageRecords,
@@ -60,6 +61,7 @@ export default async function UsagePage() {
 
   const provider = serverEnv().aiProvider;
   const currency = configuration?.currency ?? "USD";
+  const timezone = firmTimezone(configuration?.timezone);
   const totalRuns = summary.analyses + summary.reviews;
 
   return (
@@ -164,7 +166,7 @@ export default async function UsagePage() {
                   <div className="min-w-0">
                     <p className="text-sm text-ink">{operationLabel(record.operation)}</p>
                     <p className="text-xs text-ink-subtle">
-                      {formatDate(record.occurredAt)}
+                      {formatDate(record.occurredAt, timezone)}
                       {record.matter ? ` · ${record.matter.reference}` : ""} · {record.model}
                     </p>
                   </div>

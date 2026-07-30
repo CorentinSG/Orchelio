@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 171.
+Modules: 173.
 
 ## `prisma/`
 
@@ -369,7 +369,7 @@ Exports: `LoadingScreen`
 
 Two rules live here so that every screen obeys them without remembering to: a value that is not known reads "Unknown" rather than being left blank, and a date is never…
 
-Exports: `statusLabel`, `StatusBadge`, `formatDate`, `relativeDays`, `UnconfirmedDate`, `MatterLink`, `fileSize`, `ALL_STATUSES`
+Exports: `statusLabel`, `StatusBadge`, `relativeDays`, `UnconfirmedDate`, `MatterLink`, `fileSize`, `ALL_STATUSES`
 
 ### `src/components/not-found-notice.tsx`
 
@@ -599,7 +599,7 @@ Exports: `assertFirmScoped`, `withFirmScopeGuard`, `FIRM_SCOPED_MODELS`, `PLATFO
 
 `Firm` itself is not firm-scoped — it *is* the firm — but everything hanging off it is, so those reads go through a scope like every other.
 
-Exports: `firmConfiguration`, `firmMembers`, `enabledWorkflows`, `getFirm`
+Exports: `firmConfiguration`, `firmTimezoneFor`, `firmMembers`, `enabledWorkflows`, `getFirm`
 
 ### `src/lib/data/matters.ts`
 
@@ -666,6 +666,12 @@ Exports: `visibleDemoAccounts`, `DEMO_PASSWORD`, `DEMO_ACCOUNTS`, `DemoAccount`
 Every environment variable the application depends on is read here, once, and validated.
 
 Exports: `parseServerEnv`, `serverEnv`, `AI_PROVIDERS`, `APP_ENVIRONMENTS`, `EnvironmentError`, `AiProviderName`, `AppEnvironment`, `EnvSource`, `ServerEnv`
+
+### `src/lib/format/dates.ts`
+
+The onboarding questionnaire asks a firm which time zone it works in and offers four real answers.
+
+Exports: `firmTimezone`, `timezoneLabel`, `calendarDayIn`, `formatDate`, `formatMoment`, `daysBetween`, `timezoneNotice`, `FALLBACK_TIMEZONE`
 
 ### `src/lib/guide.ts`
 
@@ -890,6 +896,10 @@ The active-firm cookie is a preference, not a credential.
 ### `tests/unit/firm-scope.test.ts`
 
 The guard is the backstop that turns a forgotten `where` clause from a silent data leak into a loud failure.
+
+### `tests/unit/format-dates.test.ts`
+
+Every case here is one where UTC and the firm's zone disagree, because that is the only situation in which any of this matters.
 
 ### `tests/unit/guide.test.ts`
 

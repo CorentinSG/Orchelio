@@ -4,7 +4,8 @@ import { can, type Permission } from "@/lib/auth/permissions";
 import { activeFirmFor, scopeFor } from "@/lib/auth/firm-context";
 import { actorFor, currentSession } from "@/lib/auth/session";
 import { getMatter } from "@/lib/data/matters";
-import { formatDate } from "@/components/matter-ui";
+import { formatDate } from "@/lib/format/dates";
+import { firmTimezoneFor } from "@/lib/data/firms";
 import { raiseApproval } from "@/lib/approvals/raise";
 import { isSameOrigin, seeOther } from "@/lib/http/form-post";
 
@@ -77,6 +78,10 @@ export async function POST(request: Request) {
   const matter = await getMatter({ matterId, firmId: firm.id });
   if (!matter) return seeOther("/403");
 
+  // The summary is stored and read back months later on the approval card, so
+  // the date in it must be the firm's day rather than the server's.
+  const timezone = await firmTimezoneFor(scope);
+
   if (actionKey === "close_matter" && matter.closedAt) {
     return back(`problem=${encodeURIComponent("This matter is already closed.")}`);
   }
@@ -90,7 +95,7 @@ export async function POST(request: Request) {
     actionKey,
     resourceId: matter.id,
     matterId: matter.id,
-    summary: action.summarise(matter.reference, matter.title, formatDate(matter.nextDeadlineAt)),
+    summary: action.summarise(matter.reference, matter.title, formatDate(matter.nextDeadlineAt, timezone)),
     requestedById: session.user.id,
   });
 

@@ -136,6 +136,13 @@ claim ("there is nothing to do"). A widget depending on an AI feature the firm
 switched off is omitted, not shown empty. Refusals are worded identically
 whether a record is missing or forbidden, so a refusal never confirms existence.
 
+**A setting either changes what the product does, or says beside itself that it
+does not.** A select box that stores an answer nobody reads is the same claim as
+a zero where a dash belongs. The firm's time zone is now what every date is
+named in (`src/lib/format/dates.ts`, and the argument is *required* so the
+compiler names every call site); the interface language is not, and both screens
+that offer it say so. See ADR-0021.
+
 **Never write `status: { not: "pending" }` on an approval.** An approval request
 is pending, decided (one of four) or **superseded** — a request a newer analysis
 replaced, which nobody decided. `src/lib/approvals/status.ts` holds the

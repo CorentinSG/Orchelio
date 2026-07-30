@@ -5,6 +5,7 @@ import { fileSize, formatDate } from "@/components/matter-ui";
 import { requireMatterAccess } from "@/lib/auth/workspace";
 import { listDocuments } from "@/lib/data/documents";
 import { listMatters } from "@/lib/data/matters";
+import { firmTimezoneFor } from "@/lib/data/firms";
 import { categoriesFor, categoryLabel } from "@/lib/matters/documents";
 
 export const metadata = { title: "Documents" };
@@ -31,9 +32,10 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
   const query = await searchParams;
   const category = one(query["category"]);
 
-  const [documents, matters] = await Promise.all([
+  const [documents, matters, timezone] = await Promise.all([
     listDocuments(scope, category ? { category } : {}),
     listMatters(scope),
+    firmTimezoneFor(scope),
   ]);
 
   const matterById = new Map(matters.map((matter) => [matter.id, matter]));
@@ -105,7 +107,7 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
                     <p className="font-medium text-ink">{document.filename}</p>
                     <p className="text-sm text-ink-muted">
                       {categoryLabel(firm.primaryPracticeArea, document.category)} ·{" "}
-                      {fileSize(document.sizeBytes)} · added {formatDate(document.receivedAt)}
+                      {fileSize(document.sizeBytes)} · added {formatDate(document.receivedAt, timezone)}
                     </p>
                     {matter ? (
                       <Link

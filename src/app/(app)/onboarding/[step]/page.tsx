@@ -187,7 +187,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             ))}
           </select>
         </Field>
-        <Field label="Language" htmlFor="language">
+        <Field label="Language" htmlFor="language" hint="English is the only interface language Orchelio has. The choice is stored and nothing reads it yet.">
           <select id="language" name="language" defaultValue={answers.language} className={inputClass}>
             {LANGUAGES.map((option) => (
               <option key={option.value} value={option.value}>
@@ -196,7 +196,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             ))}
           </select>
         </Field>
-        <Field label="Currency" htmlFor="currency">
+        <Field label="Currency" htmlFor="currency" hint="Used on the usage and costs screen. Orchelio charges nothing.">
           <select id="currency" name="currency" defaultValue={answers.currency} className={inputClass}>
             {CURRENCIES.map((option) => (
               <option key={option.value} value={option.value}>
@@ -205,7 +205,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             ))}
           </select>
         </Field>
-        <Field label="Time zone" htmlFor="timezone">
+        <Field label="Time zone" htmlFor="timezone" hint="Every date and time Orchelio shows is named in this zone.">
           <select id="timezone" name="timezone" defaultValue={answers.timezone} className={inputClass}>
             {TIMEZONES.map((option) => (
               <option key={option.value} value={option.value}>

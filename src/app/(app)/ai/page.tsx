@@ -5,6 +5,7 @@ import { formatDate } from "@/components/matter-ui";
 import { requireWorkspacePermission } from "@/lib/auth/workspace";
 import { listRecentAnalyses } from "@/lib/data/analyses";
 import { firmConfiguration } from "@/lib/data/firms";
+import { firmTimezone } from "@/lib/format/dates";
 import { formatCost, usageSummary } from "@/lib/data/usage";
 import { parseStringArray } from "@/lib/json-field";
 import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
@@ -38,6 +39,7 @@ export default async function AiWorkspacePage() {
   ]);
 
   const enabled = parseStringArray(configuration?.aiFeatures);
+  const timezone = firmTimezone(configuration?.timezone);
   const provider = serverEnv().aiProvider;
 
   return (
@@ -146,7 +148,7 @@ export default async function AiWorkspacePage() {
                         </span>
                       </Link>
                     </td>
-                    <td className="py-3 pr-4 text-ink-muted">{formatDate(analysis.startedAt)}</td>
+                    <td className="py-3 pr-4 text-ink-muted">{formatDate(analysis.startedAt, timezone)}</td>
                     <td className="py-3 pr-4">
                       <Badge
                         tone={

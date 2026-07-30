@@ -19,6 +19,7 @@ import {
   isSupersededStatus,
 } from "@/lib/approvals/status";
 import { firmConfiguration } from "@/lib/data/firms";
+import { firmTimezone, timezoneNotice } from "@/lib/format/dates";
 import { parseJsonObject } from "@/lib/json-field";
 import {
   APPROVABLE_ACTIONS,
@@ -89,6 +90,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
     firmConfiguration(scope),
   ]);
 
+  const timezone = firmTimezone(configuration?.timezone);
   const firmApprovals = parseJsonObject(configuration?.approvals);
   const canDecide = can(actorFor(session.user, firm.id), "approval.decide");
   const uncovered = rulesWithoutActions();
@@ -101,6 +103,8 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
         <p className="mt-1 text-ink-muted">
           {counts.pending} waiting for a decision. Nothing here has taken effect.
         </p>
+        {/* Which zone the dates below are in, said rather than assumed. */}
+        <p className="mt-1 text-sm text-ink-subtle">{timezoneNotice(timezone)}</p>
       </header>
 
       {one(query["decided"]) ? (
@@ -207,6 +211,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                 approval={approval}
                 viewerId={session.user.id}
                 requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
+                timezone={timezone}
                 canDecide={canDecide}
                 returnTo="/approvals"
                 problem={focus === approval.id ? problem : null}
@@ -238,6 +243,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                 approval={approval}
                 viewerId={session.user.id}
                 requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
+                timezone={timezone}
                 canDecide={false}
                 returnTo="/approvals"
               />
@@ -263,6 +269,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                 approval={approval}
                 viewerId={session.user.id}
                 requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
+                timezone={timezone}
                 canDecide={false}
                 returnTo="/approvals"
               />
