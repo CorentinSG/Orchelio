@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 167.
+Modules: 169.
 
 ## `prisma/`
 
@@ -457,6 +457,12 @@ Two functions, and between them the answer to the phase's acceptance criterion: 
 
 Exports: `raiseApproval`, `recordDecision`, `RaiseOutcome`, `DecisionResult`
 
+### `src/lib/approvals/separation.ts`
+
+Every sensitive action in Orchelio needs a person's decision.
+
+Exports: `isSelfDecision`, `judgeSeparation`, `separationReadiness`, `MINIMUM_DECIDERS_FOR_SEPARATION`, `SELF_DECISION_NOTICE`, `SELF_DECISION_REFUSAL`, `SeparationVerdict`, `SeparationReadiness`
+
 ### `src/lib/audit.ts`
 
 Append-only: this module exposes exactly one write function, and no update or delete path for `AuditEvent` exists anywhere in the codebase.
@@ -551,7 +557,7 @@ Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getRevie
 
 The important function here is `decideApproval`, and the important thing about it is that it is the only way a sensitive action takes effect.
 
-Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
+Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `matterApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
 
 ### `src/lib/data/catalogues.ts`
 
@@ -623,7 +629,7 @@ Exports: `searchFirm`, `SearchResult`
 
 Every function here changes the same `FirmConfiguration` the onboarding questionnaire writes, through the same pure builders, so the two cannot end up disagreeing abou…
 
-Exports: `updateProfile`, `updateMatterTypes`, `updateAiFeatures`, `updateApprovals`, `readBranding`, `updateBranding`, `allFirmMembers`, `updateMemberRole`, `updateMemberStatus`, `MembershipChange`
+Exports: `updateProfile`, `updateMatterTypes`, `updateAiFeatures`, `updateApprovals`, `countDeciders`, `readBranding`, `updateBranding`, `allFirmMembers`, `updateMemberRole`, `updateMemberStatus`, `MembershipChange`
 
 ### `src/lib/data/statistics.ts`
 
@@ -902,6 +908,10 @@ The acceptance criterion for this phase: answering the questionnaire must reprod
 The permission matrix is a safety property, not a convenience.
 
 ### `tests/unit/rate-limit.test.ts`
+
+### `tests/unit/separation-of-duties.test.ts`
+
+The rule is small; the cases that matter are the awkward ones.
 
 ### `tests/unit/settings-config.test.ts`
 

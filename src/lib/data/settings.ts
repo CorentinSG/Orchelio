@@ -2,8 +2,9 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import type { FirmScope } from "@/lib/data/scope";
-import { type FirmRole, isFirmRole } from "@/lib/auth/permissions";
+import { type FirmRole, can, isFirmRole } from "@/lib/auth/permissions";
 import { parseJsonObject } from "@/lib/json-field";
+import { separationReadiness } from "@/lib/approvals/separation";
 import { aiFeatureKeysFor, buildApprovals } from "@/lib/onboarding/config";
 import {
   type Branding,
@@ -90,11 +91,52 @@ export async function updateAiFeatures(
  * `permanentDeletion: true` being stored — not an error, which would imply the
  * request was close to working.
  */
-export async function updateApprovals(scope: FirmScope, keys: readonly string[]): Promise<void> {
+export async function updateApprovals(
+  scope: FirmScope,
+  keys: readonly string[],
+  requireSeparateApprover: boolean,
+): Promise<MembershipChange> {
+  // Refused rather than warned about, and for the same reason the last
+  // administrator cannot be demoted: a firm that switches this on with one
+  // person who may decide has made every request that person raises
+  // undecidable — including by them, so it cannot even be rejected. A warning
+  // beside a control that still works is a warning people click past.
+  if (requireSeparateApprover) {
+    const readiness = separationReadiness(await countDeciders(scope));
+    if (!readiness.workable) {
+      return { ok: false, message: readiness.note };
+    }
+  }
+
   await prisma.firmConfiguration.updateMany({
     where: { firmId: scope.firmId },
-    data: { approvals: JSON.stringify(buildApprovals(configurableApprovalKeys(keys))) },
+    data: {
+      approvals: JSON.stringify(buildApprovals(configurableApprovalKeys(keys))),
+      requireSeparateApprover,
+    },
   });
+
+  return { ok: true };
+}
+
+/**
+ * How many people in this firm may decide an approval.
+ *
+ * Needed before separation of duties can be offered honestly: with one, the
+ * rule makes every request that person raises undecidable — including by them.
+ * Suspended members are excluded, because a suspended member cannot decide.
+ */
+export async function countDeciders(scope: FirmScope): Promise<number> {
+  const members = await prisma.firmMembership.findMany({
+    where: { firmId: scope.firmId, status: "active" },
+    select: { role: true },
+  });
+
+  return members.filter((membership) =>
+    isFirmRole(membership.role)
+      ? can({ userId: "", isPlatformAdmin: false, role: membership.role }, "approval.decide")
+      : false,
+  ).length;
 }
 
 export async function readBranding(scope: FirmScope): Promise<Branding> {

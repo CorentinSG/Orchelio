@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import type { FirmScope } from "@/lib/data/scope";
+import { judgeSeparation } from "@/lib/approvals/separation";
 import {
   type ApprovalDecision,
   approvableAction,
@@ -139,6 +140,25 @@ export async function listDecidedApprovals(
   });
 }
 
+/**
+ * One matter's approvals: a bounded list, and the true total beside it.
+ *
+ * The matter page used to render a single hundred-row window and print its
+ * length as the total. Two things were wrong with that, and the second is the
+ * one that bit: the count was the window size rather than the truth, and a
+ * request raised a moment ago could be pushed out of the window by older ones —
+ * so the screen simply did not show it.
+ */
+export async function matterApprovals(scope: FirmScope, matterId: string, take = 20) {
+  const [pending, decided, counts] = await Promise.all([
+    listPendingApprovals(scope, { matterId }, take),
+    listDecidedApprovals(scope, { matterId }, take),
+    approvalCounts(scope, { matterId }),
+  ]);
+
+  return { shown: [...pending, ...decided], total: counts.pending + counts.decided };
+}
+
 /** Every approval raised about one resource, newest first. */
 export async function approvalsForResource(
   scope: FirmScope,
@@ -193,8 +213,8 @@ export async function createApprovalRequest(scope: FirmScope, input: NewApproval
 }
 
 export type DecisionOutcome =
-  | { ok: true; applied: boolean }
-  | { ok: false; reason: "not_found" | "already_decided" | "note_required" };
+  | { ok: true; applied: boolean; self: boolean }
+  | { ok: false; reason: "not_found" | "already_decided" | "note_required" | "same_person" };
 
 /**
  * Records a decision, then applies whatever it permits.
@@ -227,6 +247,21 @@ export async function decideApproval(
   if (!existing) return { ok: false, reason: "not_found" };
   if (existing.status !== "pending") return { ok: false, reason: "already_decided" };
 
+  // Separation of duties, read here rather than passed in. A caller that
+  // forgot to pass it would silently get the permissive answer, and this is
+  // the one function that records a decision — so it is the one place where
+  // the rule cannot be skipped.
+  const configuration = await prisma.firmConfiguration.findFirst({
+    where: { firmId: scope.firmId },
+    select: { requireSeparateApprover: true },
+  });
+  const separation = judgeSeparation({
+    requestedById: existing.requestedById,
+    decidedById: input.decidedById,
+    requireSeparateApprover: configuration?.requireSeparateApprover ?? false,
+  });
+  if (!separation.allowed) return { ok: false, reason: separation.reason };
+
   // `status: "pending"` in the filter is the lock. A second decision arriving
   // between the read above and this write updates nothing.
   const claimed = await prisma.approvalRequest.updateMany({
@@ -244,7 +279,10 @@ export async function decideApproval(
     ? await applySensitiveEffect(scope, existing.action, existing.resourceId, existing.matterId)
     : false;
 
-  return { ok: true, applied };
+  // `self` is returned so the caller can write it to the log. A decision
+  // somebody took on their own request is exactly the entry an audit is
+  // looking for, and it is worth recording even where the firm allows it.
+  return { ok: true, applied, self: separation.self };
 }
 
 /**

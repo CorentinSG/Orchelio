@@ -16,7 +16,8 @@ import { requireWorkspacePermission } from "@/lib/auth/workspace";
 import { actorFor } from "@/lib/auth/session";
 import { can } from "@/lib/auth/permissions";
 import { firmConfiguration } from "@/lib/data/firms";
-import { allFirmMembers, readBranding } from "@/lib/data/settings";
+import { allFirmMembers, countDeciders, readBranding } from "@/lib/data/settings";
+import { separationReadiness } from "@/lib/approvals/separation";
 import { matterTypeOptions } from "@/lib/data/onboarding";
 import { demonstrationInventory, sampleMattersFor } from "@/lib/data/demo";
 import { parseJsonObject, parseStringArray } from "@/lib/json-field";
@@ -82,11 +83,13 @@ export default async function SettingsPage({ searchParams }: PageProps) {
   const canEdit = can(actor, "firm.settings.edit");
   const canManagePeople = can(actor, "firm.users.manage");
 
-  const [configuration, members, branding] = await Promise.all([
+  const [configuration, members, branding, deciders] = await Promise.all([
     firmConfiguration(scope),
     allFirmMembers(scope),
     readBranding(scope),
+    countDeciders(scope),
   ]);
+  const readiness = separationReadiness(deciders);
 
   const practiceAreas = parseStringArray(configuration?.practiceAreas);
   const chosenMatterTypes = new Set(parseStringArray(configuration?.matterTypes));
@@ -363,6 +366,27 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                   />
                 ))}
               </ul>
+              <div className="mt-5 border-t border-line pt-4">
+                <h3 className="text-sm font-semibold text-ink">Who may decide</h3>
+                <p className="mb-3 mt-0.5 text-sm text-ink-muted">
+                  An approval you grant yourself records that a person looked, and that person is
+                  you. {readiness.note}
+                </p>
+                <ul className="space-y-2">
+                  <CheckboxOption
+                    name="requireSeparateApprover"
+                    value="on"
+                    label="A request must be decided by somebody other than the person who raised it"
+                    description={
+                      readiness.workable
+                        ? "Refused on the server, not merely hidden. The requester is named on every card whether this is on or off."
+                        : "Not workable for this firm yet — turning it on would make every request undecidable."
+                    }
+                    defaultChecked={configuration?.requireSeparateApprover ?? false}
+                  />
+                </ul>
+              </div>
+
               {canEdit ? <SaveBar /> : null}
             </form>
 

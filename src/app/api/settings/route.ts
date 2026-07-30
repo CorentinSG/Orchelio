@@ -105,7 +105,16 @@ export async function POST(request: Request) {
       // Whatever arrives, the nine locked rules are written back in as
       // required. A submission naming one of them is not rejected — it simply
       // has no effect, because there is no state in which it could.
-      await updateApprovals(scope, stringList(formData, "approvalKeys"));
+      {
+        const result = await updateApprovals(
+          scope,
+          stringList(formData, "approvalKeys"),
+          formData.get("requireSeparateApprover") === "on",
+        );
+        if (!result.ok) {
+          return seeOther(back(section, `&error=${encodeURIComponent(result.message)}`));
+        }
+      }
       break;
 
     case "branding":

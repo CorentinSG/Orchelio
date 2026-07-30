@@ -392,3 +392,53 @@ test.describe("The dashboard", () => {
     await expect(tile).toContainText(/Awaiting a human decision/i);
   });
 });
+
+test.describe("Separation of duties", () => {
+  test("names the requester when they are the one about to decide", async ({ page }) => {
+    // The firm has the rule off, so this is information rather than a refusal —
+    // and it is given anyway, because that is what makes the decision considered.
+    await signIn(page, "immigration.attorney@demo.local");
+    await runAnalysis(page, "IMM-2026-003");
+    await page.goto("/approvals");
+
+    const card = pendingCard(page, "IMM-2026-003");
+    await expect(card).toContainText("You raised this request");
+    await expect(card).toContainText("that person is you");
+    // Still decidable: informed, not blocked.
+    await expect(card.getByRole("button", { name: /^Approved$/ })).toBeVisible();
+  });
+
+  test("refuses to switch the rule on at a firm with one decider", async ({ page }) => {
+    // Both demonstration firms have exactly one person who may decide: the
+    // paralegal and the read-only reviewer do not hold `approval.decide`. So
+    // this is the case the product has to handle, and it handles it by
+    // refusing rather than by warning beside a control that still works.
+    await signIn(page, "employment.attorney@demo.local");
+    await page.goto("/settings?section=approvals");
+
+    await page
+      .getByRole("checkbox", { name: /must be decided by somebody other than the person/ })
+      .check();
+    await page.getByRole("button", { name: "Save changes" }).click();
+
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(/undecidable/i);
+
+    // Nothing was stored: the box comes back unticked.
+    await page.goto("/settings?section=approvals");
+    await expect(
+      page.getByRole("checkbox", { name: /must be decided by somebody other than the person/ }),
+    ).not.toBeChecked();
+  });
+
+  test("says why, rather than only that the rule is unavailable", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await page.goto("/settings?section=approvals");
+
+    // The count is real rather than assumed: this firm has one person who may
+    // decide, and the screen names the consequence instead of saying "not
+    // available".
+    await expect(page.getByRole("main")).toContainText(/Only one person here may decide/);
+    await expect(page.getByRole("main")).toContainText(/undecidable/);
+    await expect(page.getByRole("main")).toContainText(/Give a second person the attorney/);
+  });
+});

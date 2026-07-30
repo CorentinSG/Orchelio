@@ -191,6 +191,16 @@ model FirmConfiguration {
   /// Primary jurisdiction, e.g. "NY". Never used to give legal advice.
   jurisdiction String?
 
+  /// When true, a request may not be decided by the person who raised it.
+  ///
+  /// Defaults to false, and that is not laxity. A sole practitioner is a
+  /// legitimate firm, and a firm with one person who may decide would be unable
+  /// to decide anything at all — a safety control that stops the work is a
+  /// safety control somebody turns off for good. The setting is offered, the
+  /// screen says what leaving it off means, and the approval card names the
+  /// requester whether it is on or off. See ADR-0019.
+  requireSeparateApprover Boolean @default(false)
+
   /// "draft" | "complete".
   onboardingStatus String @default("draft")
   /// Last questionnaire step reached, 1-7. Lets a firm resume a draft.

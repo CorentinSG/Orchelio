@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 import { Badge, Callout, type Tone } from "@/components/ui";
+import {
+  SELF_DECISION_NOTICE,
+  SELF_DECISION_REFUSAL,
+  isSelfDecision,
+} from "@/lib/approvals/separation";
 import { formatDate } from "@/components/matter-ui";
 import {
   APPROVAL_DECISIONS,
@@ -78,7 +83,7 @@ export type ApprovalCardData = {
   createdAt: Date;
   decidedAt: Date | null;
   matter: { id: string; reference: string; title: string } | null;
-  requestedBy: { name: string } | null;
+  requestedBy: { id: string; name: string } | null;
   decidedBy: { name: string } | null;
 };
 
@@ -88,16 +93,28 @@ export function ApprovalCard({
   returnTo,
   problem,
   focused,
+  viewerId,
+  requireSeparateApprover = false,
 }: {
   approval: ApprovalCardData;
   canDecide: boolean;
   returnTo: string;
   problem?: string | null;
   focused?: boolean;
+  /** Who is looking. Used to tell somebody they raised this themselves. */
+  viewerId: string;
+  /** Whether this firm refuses a decision from the person who asked. */
+  requireSeparateApprover?: boolean;
 }) {
   const action = approvableAction(approval.action);
   const href = resourceHref(approval.resourceType, approval.matter?.id ?? null);
   const pending = approval.status === "pending";
+
+  // Naming the requester is not conditional; refusing is. Somebody about to
+  // decide their own request is told so whether or not the firm blocks it,
+  // because the information is what makes the decision considered.
+  const self = isSelfDecision(approval.requestedBy?.id, viewerId);
+  const blocked = self && requireSeparateApprover;
 
   return (
     <li
@@ -155,7 +172,18 @@ export function ApprovalCard({
             </Callout>
           ) : null}
 
-          {canDecide ? (
+          {self && canDecide ? (
+            <div className="mt-3">
+              <Callout
+                tone={blocked ? "warning" : "neutral"}
+                title={blocked ? "Somebody else has to decide this one" : "You raised this request"}
+              >
+                {blocked ? SELF_DECISION_REFUSAL : SELF_DECISION_NOTICE}
+              </Callout>
+            </div>
+          ) : null}
+
+          {canDecide && !blocked ? (
             <form method="post" action="/api/approvals/decide" className="mt-4 space-y-3">
               <input type="hidden" name="approvalId" value={approval.id} />
               <input type="hidden" name="returnTo" value={returnTo} />

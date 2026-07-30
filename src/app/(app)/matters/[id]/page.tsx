@@ -27,7 +27,7 @@ import { requireMatterAccess } from "@/lib/auth/workspace";
 import { requestNow } from "@/lib/clock";
 import { matterDetail } from "@/lib/data/matters";
 import { latestAnalysisForMatter } from "@/lib/data/analyses";
-import { listApprovals } from "@/lib/data/approvals";
+import { approvalsForResource, matterApprovals } from "@/lib/data/approvals";
 import { listDrafts } from "@/lib/data/communications";
 import { listMatterActivity } from "@/lib/data/activity";
 import { ApprovalCard } from "@/components/approval-ui";
@@ -146,14 +146,22 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
   // --- Phase 7: approvals, drafts and this matter's own log ----------------
   const [approvals, drafts] = await Promise.all([
-    listApprovals({ firmId: firm.id }, { matterId: matter.id }),
+    // Bounded, and counted separately. This list used to be a single window of
+    // a hundred rows whose length was printed as the total — so a matter with
+    // more than that reported the window size, and a request raised a moment
+    // ago could be pushed out of sight by older ones. Found by a browser test
+    // that raised a date confirmation and could not find it.
+    matterApprovals({ firmId: firm.id }, matter.id),
     listDrafts({ firmId: firm.id }, { matterId: matter.id }),
   ]);
 
   // An approval or a draft names *itself* as its resource, with the matter in
   // the payload, so the matter's own log has to ask for those identifiers too.
   const relatedIds = [
-    ...approvals.map((approval) => approval.id),
+    // The window, not the total: the activity log filter is a convenience and
+    // a bounded one is correct here — an older approval's own events are
+    // reachable from the approvals screen.
+    ...approvals.shown.map((approval) => approval.id),
     ...drafts.map((draft) => draft.id),
     ...matter.documents.map((document) => document.id),
     ...(analysis ? [analysis.id] : []),
@@ -164,19 +172,16 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
   const canDecide = can(actor, "approval.decide");
   const canDraft = can(actor, "communication.draft");
-  const pendingForAnalysis = analysis
-    ? approvals.find(
-        (approval) =>
-          approval.resourceId === analysis.id &&
-          approval.action === "legal_analysis" &&
-          approval.status === "pending",
-      )
-    : undefined;
-  const decidedForAnalysis = analysis
-    ? approvals.find(
-        (approval) => approval.resourceId === analysis.id && approval.status !== "pending",
-      )
-    : undefined;
+  // Asked for directly rather than searched for in the list above. The list is
+  // bounded, so an analysis whose approval had fallen outside the window would
+  // have been reported as having none — which is the opposite of the truth.
+  const analysisApprovals = analysis
+    ? await approvalsForResource({ firmId: firm.id }, "ai_analysis", analysis.id)
+    : [];
+  const pendingForAnalysis = analysisApprovals.find(
+    (approval) => approval.action === "legal_analysis" && approval.status === "pending",
+  );
+  const decidedForAnalysis = analysisApprovals.find((approval) => approval.status !== "pending");
 
   const raisedId = typeof query["raised"] === "string" ? query["raised"] : null;
   const communicationProblem =
@@ -861,15 +866,24 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
             ) : null}
           </Card>
 
-          <Card title={`Approvals on this matter (${approvals.length})`}>
-            {approvals.length === 0 ? (
+          <Card
+            title={`Approvals on this matter (${approvals.total})`}
+            description={
+              approvals.total > approvals.shown.length
+                ? `Showing the ${approvals.shown.length} most recent. The full queue is on the approvals screen.`
+                : undefined
+            }
+          >
+            {approvals.shown.length === 0 ? (
               <Callout tone="neutral" title="Nothing has been asked for">
                 No decision has been requested on this matter.
               </Callout>
             ) : (
               <ul className="space-y-4">
-                {approvals.map((approval) => (
+                {approvals.shown.map((approval) => (
                   <ApprovalCard
+                    viewerId={session.user.id}
+                    requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                     key={approval.id}
                     approval={approval}
                     canDecide={canDecide && approval.status === "pending"}

@@ -107,6 +107,12 @@ switched off, applies it immediately through the *same* `applySensitiveEffect`.
 One implementation, two callers, so the approved and unapproved routes cannot
 drift. See ADR-0014.
 
+`decideApproval` also reads the firm's separation-of-duties setting **itself**
+rather than taking it as an argument — a caller that forgot to pass it would
+silently get the permissive answer. A decider is always told when the request is
+their own, whether or not the firm refuses it, and every audit entry carries
+`decidedOwnRequest`. See ADR-0019.
+
 ### 6. The product is named Orchelio, everywhere
 
 `src/lib/app-config.ts` is the only place the name appears. A unit test fails if

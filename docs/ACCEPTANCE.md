@@ -254,6 +254,35 @@ before being trusted.
 
 ---
 
+## Beyond the nine phases — separation of duties
+
+**Claim:** a decider is always told when the request is their own; a firm may
+refuse such decisions outright; and a firm too small for that rule is refused
+the setting rather than warned about it. See
+[ADR-0019](decisions/ADR-0019-separation-of-duties-is-offered-not-imposed.md).
+
+Proved by:
+
+- `tests/unit/separation-of-duties.test.ts` — "refuses a self-decision when the firm has"
+- `tests/unit/separation-of-duties.test.ts` — "allows a self-decision when the firm has not switched the rule on"
+- `tests/unit/separation-of-duties.test.ts` — "treats an unknown requester as somebody else"
+- `tests/unit/separation-of-duties.test.ts` — "warns a firm with one decider that the rule would stop its work"
+- `tests/integration/approvals.test.ts` — "refuses the same decision once the firm has"
+- `tests/integration/approvals.test.ts` — "refuses a rejection by the requester too, not only an approval"
+- `tests/integration/approvals.test.ts` — "keeps a request decidable when its requester no longer has an account"
+- `tests/integration/approvals.test.ts` — "is decided per firm, not for the instance"
+- `tests/integration/settings.test.ts` — "is refused while only one person may decide"
+- `tests/integration/settings.test.ts` — "does not silently save the other approval rules when it refuses"
+- `tests/integration/settings.test.ts` — "counts only people who may actually decide"
+- `tests/e2e/approvals.spec.ts` — "names the requester when they are the one about to decide"
+- `tests/e2e/approvals.spec.ts` — "refuses to switch the rule on at a firm with one decider"
+
+**Not proved in a browser:** no seeded firm has two people who may decide, so
+the block itself cannot be exercised through the interface. It is proved at the
+integration level, where the fixture is controlled.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

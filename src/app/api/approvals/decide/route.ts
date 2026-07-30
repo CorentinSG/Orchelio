@@ -6,6 +6,7 @@ import { actorFor, currentSession } from "@/lib/auth/session";
 import { isApprovalDecision, requiresNote } from "@/lib/approvals/actions";
 import { recordDecision } from "@/lib/approvals/raise";
 import { isSameOrigin, seeOther } from "@/lib/http/form-post";
+import { SELF_DECISION_REFUSAL } from "@/lib/approvals/separation";
 
 /**
  * Orchelio — record a decision on an approval request.
@@ -82,6 +83,13 @@ export async function POST(request: Request) {
         );
       case "note_required":
         return back(`problem=${encodeURIComponent("That decision needs a note saying why.")}`);
+      case "same_person":
+        // Refused by the server, not merely hidden from the screen: the buttons
+        // are absent for a self-decision, and this is what answers a request
+        // built by hand.
+        return back(
+          `focus=${encodeURIComponent(approvalId)}&problem=${encodeURIComponent(SELF_DECISION_REFUSAL)}`,
+        );
     }
   }
 

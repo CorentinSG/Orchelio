@@ -144,7 +144,7 @@ export async function raiseApproval(
 
 export type DecisionResult =
   | { ok: true; applied: boolean; action: ApprovableAction; matterId: string | null }
-  | { ok: false; reason: "not_found" | "already_decided" | "note_required" };
+  | { ok: false; reason: "not_found" | "already_decided" | "note_required" | "same_person" };
 
 /**
  * Records a person's decision, and everything that followed from it.
@@ -191,6 +191,11 @@ export async function recordDecision(
       note: input.note.trim() || null,
       effectApplied: outcome.applied,
       matterId: before.matterId,
+      // Whether the decider was the requester. Recorded even where the firm
+      // allows it: "this person approved their own request" is precisely the
+      // entry somebody reading the log a year from now is looking for, and a
+      // log that only records the refused cases records the wrong half.
+      decidedOwnRequest: outcome.self,
     },
   });
 

@@ -609,3 +609,159 @@ describe("the numbers the approvals screen prints", () => {
     expect(new Set(decided.map((request) => request.status)).size).toBeGreaterThan(0);
   });
 });
+
+describe("separation of duties", () => {
+  /** Puts the firm's separation rule into a known state. */
+  async function setSeparation(firmId: string, on: boolean) {
+    await fixture.prisma.firmConfiguration.updateMany({
+      where: { firmId },
+      data: { requireSeparateApprover: on },
+    });
+  }
+
+  async function raiseFor(firmId: string, requestedById: string, summary: string) {
+    const request = await fixture.prisma.approvalRequest.create({
+      data: {
+        firmId,
+        resourceType: "ai_analysis",
+        resourceId: `sep-${summary}`,
+        action: "legal_analysis",
+        summary,
+        requestedById,
+      },
+    });
+    return request.id;
+  }
+
+  it("lets the person who asked decide, when the firm has not switched the rule on", async () => {
+    const firmId = fixture.immigration.firmId;
+    await setSeparation(firmId, false);
+    const approvalId = await raiseFor(firmId, fixture.immigration.attorneyId, "self-allowed");
+
+    const outcome = await approvals.decideApproval(
+      { firmId },
+      { approvalId, decision: "approved", note: "", decidedById: fixture.immigration.attorneyId },
+    );
+
+    expect(outcome.ok).toBe(true);
+    // Allowed, and still reported: the caller writes it to the log.
+    if (outcome.ok) expect(outcome.self).toBe(true);
+  });
+
+  it("refuses the same decision once the firm has", async () => {
+    const firmId = fixture.immigration.firmId;
+    await setSeparation(firmId, true);
+    const approvalId = await raiseFor(firmId, fixture.immigration.attorneyId, "self-refused");
+
+    const outcome = await approvals.decideApproval(
+      { firmId },
+      { approvalId, decision: "approved", note: "", decidedById: fixture.immigration.attorneyId },
+    );
+
+    expect(outcome).toEqual({ ok: false, reason: "same_person" });
+
+    // And the request is untouched — refused before anything was written.
+    const after = await fixture.prisma.approvalRequest.findFirst({
+      where: { id: approvalId, firmId },
+    });
+    expect(after?.status).toBe("pending");
+    expect(after?.decidedById).toBeNull();
+  });
+
+  it("refuses a rejection by the requester too, not only an approval", async () => {
+    // The rule is about who decides, not about which way they decide. A
+    // requester quietly rejecting their own request is the same failure.
+    const firmId = fixture.immigration.firmId;
+    await setSeparation(firmId, true);
+    const approvalId = await raiseFor(firmId, fixture.immigration.attorneyId, "self-rejected");
+
+    const outcome = await approvals.decideApproval(
+      { firmId },
+      {
+        approvalId,
+        decision: "rejected",
+        note: "Changed my mind.",
+        decidedById: fixture.immigration.attorneyId,
+      },
+    );
+
+    expect(outcome).toEqual({ ok: false, reason: "same_person" });
+  });
+
+  it("lets somebody else decide it", async () => {
+    const firmId = fixture.immigration.firmId;
+    await setSeparation(firmId, true);
+    const approvalId = await raiseFor(firmId, fixture.immigration.attorneyId, "other-person");
+
+    const colleague = await fixture.prisma.user.create({
+      data: {
+        email: `colleague-${approvalId.slice(0, 8)}@test.local`,
+        name: "A Colleague",
+        passwordHash: "scrypt$16384$8$1$AAAA$AAAA",
+      },
+    });
+
+    const outcome = await approvals.decideApproval(
+      { firmId },
+      { approvalId, decision: "approved", note: "", decidedById: colleague.id },
+    );
+
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) expect(outcome.self).toBe(false);
+  });
+
+  it("keeps a request decidable when its requester no longer has an account", async () => {
+    // An undecidable request is worse than a self-decided one: it cannot even
+    // be rejected, so it sits in the queue for ever.
+    const firmId = fixture.immigration.firmId;
+    await setSeparation(firmId, true);
+
+    const orphan = await fixture.prisma.approvalRequest.create({
+      data: {
+        firmId,
+        resourceType: "ai_analysis",
+        resourceId: "sep-orphan",
+        action: "legal_analysis",
+        summary: "Raised by somebody who has since left",
+        requestedById: null,
+      },
+    });
+
+    const outcome = await approvals.decideApproval(
+      { firmId },
+      {
+        approvalId: orphan.id,
+        decision: "approved",
+        note: "",
+        decidedById: fixture.immigration.attorneyId,
+      },
+    );
+
+    expect(outcome.ok).toBe(true);
+  });
+
+  it("is decided per firm, not for the instance", async () => {
+    await setSeparation(fixture.immigration.firmId, true);
+    await setSeparation(fixture.employment.firmId, false);
+
+    const theirs = await raiseFor(
+      fixture.employment.firmId,
+      fixture.employment.attorneyId,
+      "other-firm",
+    );
+
+    const outcome = await approvals.decideApproval(
+      { firmId: fixture.employment.firmId },
+      {
+        approvalId: theirs,
+        decision: "approved",
+        note: "",
+        decidedById: fixture.employment.attorneyId,
+      },
+    );
+
+    expect(outcome.ok).toBe(true);
+
+    await setSeparation(fixture.immigration.firmId, false);
+  });
+});

@@ -190,6 +190,8 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               <ApprovalCard
                 key={approval.id}
                 approval={approval}
+                viewerId={session.user.id}
+                requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                 canDecide={canDecide}
                 returnTo="/approvals"
                 problem={focus === approval.id ? problem : null}
@@ -219,6 +221,8 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               <ApprovalCard
                 key={approval.id}
                 approval={approval}
+                viewerId={session.user.id}
+                requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                 canDecide={false}
                 returnTo="/approvals"
               />

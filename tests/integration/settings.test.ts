@@ -93,7 +93,7 @@ describe("saving a setting", () => {
 
 describe("the nine locked rules", () => {
   it("are stored as required even when the request names none of them", async () => {
-    await settings.updateApprovals(scope(fixture.immigration.firmId), []);
+    await settings.updateApprovals(scope(fixture.immigration.firmId), [], false);
 
     const stored = JSON.parse(
       (await configurationOf(fixture.immigration.firmId))?.approvals ?? "{}",
@@ -108,7 +108,7 @@ describe("the nine locked rules", () => {
     // The hostile case, written the way a hand-crafted POST would arrive: every
     // locked key submitted as if it were a firm's own choice. The result must be
     // indistinguishable from the honest request above.
-    await settings.updateApprovals(scope(fixture.immigration.firmId), [...LOCKED_APPROVALS]);
+    await settings.updateApprovals(scope(fixture.immigration.firmId), [...LOCKED_APPROVALS], false);
 
     const stored = JSON.parse(
       (await configurationOf(fixture.immigration.firmId))?.approvals ?? "{}",
@@ -120,7 +120,7 @@ describe("the nine locked rules", () => {
   });
 
   it("do not swallow the firm's own choices", async () => {
-    await settings.updateApprovals(scope(fixture.employment.firmId), ["sendEmail", "closeMatter"]);
+    await settings.updateApprovals(scope(fixture.employment.firmId), ["sendEmail", "closeMatter"], false);
 
     const stored = JSON.parse(
       (await configurationOf(fixture.employment.firmId))?.approvals ?? "{}",
@@ -264,5 +264,94 @@ describe("people", () => {
     );
 
     expect(result).toEqual({ ok: true });
+  });
+});
+
+describe("switching separation of duties on", () => {
+  it("is refused while only one person may decide", async () => {
+    // The fixture firm has one attorney. Turning the rule on would make every
+    // request they raise undecidable — including by them.
+    const result = await settings.updateApprovals(scope(fixture.employment.firmId), [], true);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.message).toMatch(/undecidable/i);
+
+    const stored = await configurationOf(fixture.employment.firmId);
+    expect(stored?.requireSeparateApprover).toBe(false);
+  });
+
+  it("does not silently save the other approval rules when it refuses", async () => {
+    // A partial save would be worse than a refusal: the administrator would
+    // believe the whole form applied.
+    const before = await configurationOf(fixture.employment.firmId);
+    await settings.updateApprovals(scope(fixture.employment.firmId), ["prepareFiling"], true);
+    const after = await configurationOf(fixture.employment.firmId);
+
+    expect(after?.approvals).toBe(before?.approvals);
+  });
+
+  it("is allowed once a second person may decide", async () => {
+    const second = await fixture.prisma.user.create({
+      data: {
+        email: "second.decider@test.local",
+        name: "Second Decider",
+        passwordHash: "scrypt$16384$8$1$AAAA$AAAA",
+      },
+    });
+    await fixture.prisma.firmMembership.create({
+      data: {
+        userId: second.id,
+        firmId: fixture.employment.firmId,
+        role: "attorney",
+        status: "active",
+      },
+    });
+
+    const result = await settings.updateApprovals(scope(fixture.employment.firmId), [], true);
+    expect(result).toEqual({ ok: true });
+    expect((await configurationOf(fixture.employment.firmId))?.requireSeparateApprover).toBe(true);
+  });
+
+  it("counts only people who may actually decide", async () => {
+    // A paralegal and a read-only reviewer do not hold `approval.decide`, so
+    // adding them does not make the rule workable.
+    const before = await settings.countDeciders(scope(fixture.immigration.firmId));
+
+    for (const [index, role] of ["paralegal", "read_only"].entries()) {
+      const user = await fixture.prisma.user.create({
+        data: {
+          email: `non-decider-${index}@test.local`,
+          name: `Not A Decider ${index}`,
+          passwordHash: "scrypt$16384$8$1$AAAA$AAAA",
+        },
+      });
+      await fixture.prisma.firmMembership.create({
+        data: { userId: user.id, firmId: fixture.immigration.firmId, role, status: "active" },
+      });
+    }
+
+    expect(await settings.countDeciders(scope(fixture.immigration.firmId))).toBe(before);
+  });
+
+  it("does not count a suspended member", async () => {
+    const suspended = await fixture.prisma.user.create({
+      data: {
+        email: "suspended.attorney@test.local",
+        name: "Suspended Attorney",
+        passwordHash: "scrypt$16384$8$1$AAAA$AAAA",
+      },
+    });
+    const before = await settings.countDeciders(scope(fixture.immigration.firmId));
+
+    await fixture.prisma.firmMembership.create({
+      data: {
+        userId: suspended.id,
+        firmId: fixture.immigration.firmId,
+        role: "attorney",
+        status: "suspended",
+      },
+    });
+
+    expect(await settings.countDeciders(scope(fixture.immigration.firmId))).toBe(before);
   });
 });
