@@ -235,17 +235,51 @@ if (!existsSync(join(ROOT, ".claude", "skills"))) {
 // --- Browser ---------------------------------------------------------------
 
 const chromium = process.env["PLAYWRIGHT_CHROMIUM_EXECUTABLE"];
+
+/**
+ * A browser sitting where Playwright will not look for it.
+ *
+ * Some images ship Chromium under `PLAYWRIGHT_BROWSERS_PATH` at a build number
+ * that does not match the one this Playwright version pins, so Playwright
+ * reports "Executable doesn't exist" while a perfectly good browser is on disk.
+ * Saying "no browser found" there sends somebody to `playwright install`, which
+ * downloads a second copy — and reporting it as fine is worse, because the
+ * whole suite then fails one test at a time with a message about installation.
+ *
+ * So it is reported for what it is: found, and not where Playwright looks.
+ */
+function browserUnderBrowsersPath() {
+  const base = process.env["PLAYWRIGHT_BROWSERS_PATH"];
+  if (!base || !existsSync(base)) return null;
+
+  for (const candidate of ["chromium", "chrome-linux/chrome", "chromium/chrome-linux/chrome"]) {
+    const path = join(base, candidate);
+    if (existsSync(path)) return path;
+  }
+  return null;
+}
+
 if (chromium && existsSync(chromium)) {
   report("ok", "Browser", `using ${chromium}`);
 } else if (existsSync(join(process.env["HOME"] ?? "", ".cache", "ms-playwright"))) {
   report("ok", "Browser", "Playwright browsers installed");
 } else {
-  report(
-    "warn",
-    "Browser",
-    "no browser found — end-to-end tests will not run",
-    "npx playwright install chromium (or set PLAYWRIGHT_CHROMIUM_EXECUTABLE)",
-  );
+  const found = browserUnderBrowsersPath();
+  if (found) {
+    report(
+      "warn",
+      "Browser",
+      `found at ${found}, but Playwright resolves its own pinned build and will not use it`,
+      `export PLAYWRIGHT_CHROMIUM_EXECUTABLE=${found}`,
+    );
+  } else {
+    report(
+      "warn",
+      "Browser",
+      "no browser found — end-to-end tests will not run",
+      "npx playwright install chromium (or set PLAYWRIGHT_CHROMIUM_EXECUTABLE)",
+    );
+  }
 }
 
 // --- Output ----------------------------------------------------------------
