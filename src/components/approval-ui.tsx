@@ -15,6 +15,12 @@ import {
   decisionLabel,
   requiresNote,
 } from "@/lib/approvals/actions";
+import {
+  SUPERSEDED_EXPLANATION,
+  approvalStatusLabel,
+  isPendingStatus,
+  isSupersededStatus,
+} from "@/lib/approvals/status";
 import type { RiskLevel } from "@/lib/constants";
 
 /**
@@ -43,6 +49,10 @@ const STATUS_TONE: Record<string, Tone> = {
   approved_with_edits: "success",
   new_analysis_requested: "brand",
   rejected: "danger",
+  // Neutral, and not by omission. Superseded is neither good news nor bad — it
+  // is the absence of news, and colouring it either way would suggest an
+  // outcome nobody reached.
+  superseded: "neutral",
 };
 
 export function RiskBadge({ level }: { level: string }) {
@@ -51,7 +61,7 @@ export function RiskBadge({ level }: { level: string }) {
 }
 
 export function ApprovalStatusBadge({ status }: { status: string }) {
-  return <Badge tone={STATUS_TONE[status] ?? "neutral"}>{decisionLabel(status)}</Badge>;
+  return <Badge tone={STATUS_TONE[status] ?? "neutral"}>{approvalStatusLabel(status)}</Badge>;
 }
 
 /** Where a link to the thing being decided should point. */
@@ -82,6 +92,7 @@ export type ApprovalCardData = {
   decisionNote: string | null;
   createdAt: Date;
   decidedAt: Date | null;
+  supersededAt: Date | null;
   matter: { id: string; reference: string; title: string } | null;
   requestedBy: { id: string; name: string } | null;
   decidedBy: { name: string } | null;
@@ -108,7 +119,8 @@ export function ApprovalCard({
 }) {
   const action = approvableAction(approval.action);
   const href = resourceHref(approval.resourceType, approval.matter?.id ?? null);
-  const pending = approval.status === "pending";
+  const pending = isPendingStatus(approval.status);
+  const superseded = isSupersededStatus(approval.status);
 
   // Naming the requester is not conditional; refusing is. Somebody about to
   // decide their own request is told so whether or not the firm blocks it,
@@ -243,6 +255,16 @@ export function ApprovalCard({
             </Callout>
           )}
         </>
+      ) : superseded ? (
+        // Never "…by a person on…", which is what this branch used to say for
+        // anything that was not pending. Nobody decided a superseded request,
+        // and there is no name to put here.
+        <div className="mt-3 rounded-md border border-line bg-surface-muted px-3 py-2.5">
+          <p className="text-sm text-ink">
+            {`Superseded on ${formatDate(approval.supersededAt)} — nobody decided it`}
+          </p>
+          <p className="mt-1 text-sm text-ink-muted">{SUPERSEDED_EXPLANATION}</p>
+        </div>
       ) : (
         <div className="mt-3 rounded-md border border-line bg-surface-muted px-3 py-2.5">
           <p className="text-sm text-ink">

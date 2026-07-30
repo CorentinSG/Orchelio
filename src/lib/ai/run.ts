@@ -14,7 +14,7 @@ import { matterDetail } from "@/lib/data/matters";
 import { prisma } from "@/lib/prisma";
 import { parseJsonObject } from "@/lib/json-field";
 import { aiProvider, type AIProvider } from "@/lib/ai/provider";
-import { raiseApproval } from "@/lib/approvals/raise";
+import { raiseApproval, supersedeEarlierAnalysisApprovals } from "@/lib/approvals/raise";
 import type { MatterAnalysisInput, MatterAnalysisResult } from "@/lib/ai/types";
 import { serverEnv } from "@/lib/env";
 
@@ -131,6 +131,18 @@ export async function runAnalysis(
       matterId: matter.id,
       summary: summariseForApproval(matter.reference, result, review.status),
       requestedById: options.userId,
+    });
+
+    // Whatever was waiting on an earlier analysis of this matter is no longer
+    // the question, and leaving it in the queue is not the cautious choice: a
+    // demonstration matter accumulated 113 requests this way, which buried the
+    // one that mattered under a hundred that nobody could act on. Run after
+    // raising, so the new request exists before the old ones stop waiting and
+    // there is no instant in which this matter has nothing outstanding.
+    await supersedeEarlierAnalysisApprovals(scope, {
+      matterId: matter.id,
+      currentAnalysisId: analysis.id,
+      userId: options.userId,
     });
 
     await recordAuditEvent({

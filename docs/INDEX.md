@@ -70,6 +70,7 @@ decided, and what it cost.
 | 17 | [The accessibility claim is bounded, and the bound is stated](decisions/ADR-0017-the-accessibility-claim-is-bounded.md) | 9 |
 | 18 | [Confidentiality by construction, and a register of what is not](decisions/ADR-0018-confidentiality-by-construction.md) | post-9 |
 | 19 | [Separation of duties is offered, not imposed](decisions/ADR-0019-separation-of-duties-is-offered-not-imposed.md) | post-9 |
+| 20 | [A superseded request is not a decision](decisions/ADR-0020-a-superseded-request-is-not-a-decision.md) | post-9 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)

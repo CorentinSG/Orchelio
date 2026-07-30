@@ -442,3 +442,129 @@ test.describe("Separation of duties", () => {
     await expect(page.getByRole("main")).toContainText(/Give a second person the attorney/);
   });
 });
+
+/**
+ * A hand-built form post carrying the browser's real session.
+ *
+ * `page.request.post` does not send a `Secure` cookie over http, so a request
+ * built that way arrives signed out and would pass on a redirect to /login
+ * while proving nothing. Issued through `fetch` in the page, it carries the
+ * session — which is what a request built by hand by a signed-in user actually
+ * looks like.
+ */
+async function postForm(
+  page: import("@playwright/test").Page,
+  path: string,
+  fields: Record<string, string>,
+) {
+  return page.evaluate(
+    async ([target, body]) => {
+      const response = await fetch(target as string, {
+        method: "POST",
+        body: new URLSearchParams(body as Record<string, string>),
+        credentials: "same-origin",
+      });
+      return { url: response.url, status: response.status };
+    },
+    [path, fields] as const,
+  );
+}
+
+test.describe("A request a newer analysis replaced", () => {
+  const REFERENCE = "IMM-2026-001";
+
+  /** Two runs, so the first run's request is no longer the live one. */
+  async function analyseTwice(page: import("@playwright/test").Page) {
+    await runAnalysis(page, REFERENCE);
+    await runAnalysis(page, REFERENCE);
+  }
+
+  function supersededCards(page: import("@playwright/test").Page) {
+    return page.getByRole("region", { name: /^Superseded/ });
+  }
+
+  test("leaves one request waiting, not one per run", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await analyseTwice(page);
+    await page.goto("/approvals?action=legal_analysis");
+
+    const waiting = page
+      .getByRole("region", { name: /^Waiting for a decision/ })
+      .locator("li")
+      .filter({ hasText: REFERENCE });
+    await expect(waiting).toHaveCount(1);
+  });
+
+  test("says nobody decided it, rather than showing it as decided", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await analyseTwice(page);
+    await page.goto("/approvals?action=legal_analysis");
+
+    const superseded = supersededCards(page);
+    await expect(superseded).toContainText(/nobody decided/i);
+    await expect(superseded).toContainText(/nothing was approved/i);
+    // And never in the section that says a person took responsibility. Counted
+    // rather than asserted absent from the region: the region itself may not
+    // exist yet, and a `not.toContainText` against nothing fails for the wrong
+    // reason.
+    const inDecided = await page
+      .getByRole("region", { name: /^Decided/ })
+      .locator("li")
+      .filter({ hasText: "Superseded" })
+      .count();
+    expect(inDecided).toBe(0);
+  });
+
+  test("offers no way to decide it", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await analyseTwice(page);
+    await page.goto("/approvals?status=superseded");
+
+    const superseded = supersededCards(page);
+    await expect(superseded.locator("li").first()).toBeVisible();
+    for (const label of ["Approved", "Approved with edits", "New analysis requested", "Rejected"]) {
+      await expect(superseded.getByRole("button", { name: new RegExp(`^${label}`) })).toHaveCount(0);
+    }
+  });
+
+  test("is refused by the server when the post is built by hand", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await analyseTwice(page);
+    await page.goto("/approvals?status=superseded");
+
+    // The card carries its own identifier, which is what a hand-built request
+    // would use.
+    const id = await supersededCards(page)
+      .locator("li")
+      .first()
+      .getAttribute("id");
+    expect(id).toMatch(/^approval-/);
+
+    const result = await postForm(page, "/api/approvals/decide", {
+      approvalId: (id ?? "").replace(/^approval-/, ""),
+      decision: "approved",
+      note: "",
+      returnTo: "/approvals",
+    });
+    expect(result.url).toContain("problem=");
+
+    await page.goto(result.url);
+    const alert = page.locator("main").getByRole("alert");
+    await expect(alert).toContainText(/nothing left to decide/i);
+    // Not "somebody has already decided this one": nobody did, and saying so
+    // would send the reader looking for a decision that does not exist.
+    await expect(alert).not.toContainText(/already decided/i);
+  });
+
+  test("keeps the row rather than deleting it", async ({ page }) => {
+    await signIn(page, "immigration.attorney@demo.local");
+    await analyseTwice(page);
+    await openMatter(page, REFERENCE);
+    await tabs(page).getByRole("link", { name: "Approvals" }).click();
+    await page.waitForURL(/tab=approvals/);
+
+    const section = page.getByRole("region", { name: /^Approvals on this matter/ });
+    await expect(section).toContainText("Superseded");
+    await expect(section).toContainText(/nobody decided it/i);
+  });
+});

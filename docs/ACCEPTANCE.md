@@ -283,6 +283,38 @@ integration level, where the fixture is controlled.
 
 ---
 
+## Beyond the nine phases — a superseded request
+
+**Claim:** re-running an analysis retires the request the previous one left
+waiting, and a retired request is never counted, listed or worded as one a
+person decided. See
+[ADR-0020](decisions/ADR-0020-a-superseded-request-is-not-a-decision.md).
+
+Proved by:
+
+- `tests/unit/approval-status.test.ts` — "is not one of the four"
+- `tests/unit/approval-status.test.ts` — "says on screen that nobody decided it"
+- `tests/unit/approval-status.test.ts` — "puts a status nobody declared in none of them"
+- `tests/unit/approval-status.test.ts` — "never borrows the word 'decided' for its own refusal"
+- `tests/integration/analyses.test.ts` — "retires the request the previous analysis left waiting"
+- `tests/integration/analyses.test.ts` — "leaves exactly one request waiting however many times it is run"
+- `tests/integration/analyses.test.ts` — "does not bury a request of another kind under the analysis ones"
+- `tests/integration/approvals.test.ts` — "records that nobody decided it"
+- `tests/integration/approvals.test.ts` — "is never counted as decided"
+- `tests/integration/approvals.test.ts` — "cannot then be decided, and is not reported as already decided"
+- `tests/integration/approvals.test.ts` — "appears in the log as superseded, not as a decision"
+- `tests/integration/approvals.test.ts` — "leaves another firm's requests alone"
+- `tests/e2e/approvals.spec.ts` — "leaves one request waiting, not one per run"
+- `tests/e2e/approvals.spec.ts` — "says nobody decided it, rather than showing it as decided"
+- `tests/e2e/approvals.spec.ts` — "is refused by the server when the post is built by hand"
+
+**The partition test is the load-bearing one.** "Every status belongs to exactly
+one of pending, decided and superseded" is what stops a seventh value being
+added later and quietly counted as a decision, which is precisely how this
+defect existed in the first place.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

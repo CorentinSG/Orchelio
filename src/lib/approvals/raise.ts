@@ -10,7 +10,9 @@ import {
   decideApproval,
   getApproval,
   pendingApprovalFor,
+  supersedeEarlierApprovals,
 } from "@/lib/data/approvals";
+import { PENDING_STATUS, SUPERSEDED_STATUS } from "@/lib/approvals/status";
 import { prisma } from "@/lib/prisma";
 import { parseJsonObject } from "@/lib/json-field";
 import {
@@ -142,9 +144,69 @@ export async function raiseApproval(
   };
 }
 
+/**
+ * Retires the requests an earlier analysis of this matter left waiting.
+ *
+ * A request is raised against one analysis. Run the analysis again and the old
+ * request keeps asking a question about a work product nobody is looking at any
+ * more — it cannot be approved sensibly, and rejecting it would record a
+ * verdict on something that was never the problem. It is moot, and the only
+ * honest thing to do with a moot request is to say so.
+ *
+ * Three things this deliberately does not do:
+ *
+ *  * **It does not delete.** The row stays, says why it stopped waiting, and
+ *    says that nobody decided it.
+ *  * **It does not count as a decision.** `"superseded"` is its own status for
+ *    exactly that reason — see `src/lib/approvals/status.ts`.
+ *  * **It does not happen silently.** One audit entry per request, under
+ *    `approval.superseded` rather than `approval.decided`, naming the analysis
+ *    that replaced it. A request that vanished from a queue with no trace is
+ *    one somebody will later swear they never saw.
+ *
+ * Returns how many stopped waiting.
+ */
+export async function supersedeEarlierAnalysisApprovals(
+  scope: FirmScope,
+  input: { matterId: string; currentAnalysisId: string; userId: string },
+): Promise<number> {
+  const superseded = await supersedeEarlierApprovals(scope, {
+    matterId: input.matterId,
+    action: "legal_analysis",
+    currentResourceId: input.currentAnalysisId,
+  });
+
+  for (const request of superseded) {
+    await recordAuditEvent({
+      action: AUDIT_ACTIONS.approvalSuperseded,
+      firmId: scope.firmId,
+      // The person who ran the new analysis. Their action caused this, which is
+      // worth recording — but the entry says superseded, not decided, so it can
+      // never be read as their approval.
+      userId: input.userId,
+      resourceType: "approval_request",
+      resourceId: request.id,
+      oldValue: { status: PENDING_STATUS },
+      newValue: {
+        status: SUPERSEDED_STATUS,
+        approvalAction: "legal_analysis",
+        decidedBy: null,
+        supersededByAnalysisId: input.currentAnalysisId,
+        supersededAnalysisId: request.resourceId,
+        matterId: input.matterId,
+      },
+    });
+  }
+
+  return superseded.length;
+}
+
 export type DecisionResult =
   | { ok: true; applied: boolean; action: ApprovableAction; matterId: string | null }
-  | { ok: false; reason: "not_found" | "already_decided" | "note_required" | "same_person" };
+  | {
+      ok: false;
+      reason: "not_found" | "already_decided" | "note_required" | "same_person" | "superseded";
+    };
 
 /**
  * Records a person's decision, and everything that followed from it.

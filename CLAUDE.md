@@ -136,6 +136,14 @@ claim ("there is nothing to do"). A widget depending on an AI feature the firm
 switched off is omitted, not shown empty. Refusals are worded identically
 whether a record is missing or forbidden, so a refusal never confirms existence.
 
+**Never write `status: { not: "pending" }` on an approval.** An approval request
+is pending, decided (one of four) or **superseded** — a request a newer analysis
+replaced, which nobody decided. `src/lib/approvals/status.ts` holds the
+vocabulary and three predicates that partition it; a unit test fails if a status
+belongs to none or more than one. "Not pending" was true while a decision was
+the only exit from the queue, and counting a superseded request as decided
+claims a person took responsibility for something no person saw. See ADR-0020.
+
 ### 9. Cross-firm reads live in one module
 
 `src/lib/data/platform.ts` is the only place allowed to look across tenants —

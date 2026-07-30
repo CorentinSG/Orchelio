@@ -10,7 +10,14 @@ import {
   approvalCounts,
   listDecidedApprovals,
   listPendingApprovals,
+  listSupersededApprovals,
 } from "@/lib/data/approvals";
+import {
+  SUPERSEDED_EXPLANATION,
+  isDecisionStatus,
+  isPendingStatus,
+  isSupersededStatus,
+} from "@/lib/approvals/status";
 import { firmConfiguration } from "@/lib/data/firms";
 import { parseJsonObject } from "@/lib/json-field";
 import {
@@ -34,6 +41,7 @@ export const dynamic = "force-dynamic";
  */
 const PENDING_SHOWN = 50;
 const DECIDED_SHOWN = 25;
+const SUPERSEDED_SHOWN = 25;
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -64,12 +72,18 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
   const problem = one(query["problem"]) ?? null;
   const focus = one(query["focus"]) ?? one(query["decided"]) ?? null;
 
-  const showPending = !filters.status || filters.status === "pending";
-  const showDecided = !filters.status || filters.status !== "pending";
+  // Three groups, and each asks for itself. This used to be a pair, with
+  // "everything that is not pending" standing in for "decided" — which became
+  // false the moment a request could leave the queue without anybody deciding
+  // it.
+  const showPending = !filters.status || isPendingStatus(filters.status);
+  const showDecided = !filters.status || isDecisionStatus(filters.status);
+  const showSuperseded = !filters.status || isSupersededStatus(filters.status);
 
-  const [pending, decided, counts, actionsPresent, configuration] = await Promise.all([
+  const [pending, decided, superseded, counts, actionsPresent, configuration] = await Promise.all([
     showPending ? listPendingApprovals(scope, filters, PENDING_SHOWN) : [],
     showDecided ? listDecidedApprovals(scope, filters, DECIDED_SHOWN) : [],
+    showSuperseded ? listSupersededApprovals(scope, filters, SUPERSEDED_SHOWN) : [],
     approvalCounts(scope, filters),
     approvalActions(scope),
     firmConfiguration(scope),
@@ -116,6 +130,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               <option value="approved_with_edits">Approved with edits</option>
               <option value="new_analysis_requested">New analysis requested</option>
               <option value="rejected">Rejected</option>
+              <option value="superseded">Superseded — nobody decided</option>
             </select>
           </div>
 
@@ -218,6 +233,31 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
         >
           <ul className="space-y-4">
             {decided.map((approval) => (
+              <ApprovalCard
+                key={approval.id}
+                approval={approval}
+                viewerId={session.user.id}
+                requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
+                canDecide={false}
+                returnTo="/approvals"
+              />
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
+      {superseded.length > 0 ? (
+        <Card
+          title={`Superseded (${counts.superseded})`}
+          description={
+            counts.superseded > superseded.length
+              ? `Nobody decided these. Showing the ${superseded.length} most recent.`
+              : "Nobody decided these."
+          }
+        >
+          <p className="mb-4 text-sm text-ink-muted">{SUPERSEDED_EXPLANATION}</p>
+          <ul className="space-y-4">
+            {superseded.map((approval) => (
               <ApprovalCard
                 key={approval.id}
                 approval={approval}

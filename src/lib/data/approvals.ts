@@ -4,11 +4,19 @@ import { prisma } from "@/lib/prisma";
 import type { FirmScope } from "@/lib/data/scope";
 import { judgeSeparation } from "@/lib/approvals/separation";
 import {
+  APPROVAL_DECISIONS,
   type ApprovalDecision,
   approvableAction,
   decisionApproves,
   requiresNote,
 } from "@/lib/approvals/actions";
+import {
+  PENDING_STATUS,
+  SUPERSEDED_STATUS,
+  isDecisionStatus,
+  isPendingStatus,
+  isSupersededStatus,
+} from "@/lib/approvals/status";
 
 /**
  * Orchelio — approval requests, and the decisions taken on them.
@@ -40,8 +48,9 @@ export async function listApprovals(scope: FirmScope, filters: ApprovalFilters =
       ...(filters.matterId ? { matterId: filters.matterId } : {}),
       ...(filters.riskLevel ? { riskLevel: filters.riskLevel } : {}),
     },
-    // Pending first, then most recent. A decided request is history; a pending
-    // one is somebody waiting.
+    // Grouped by status, then most recent first. The status ordering is
+    // alphabetical rather than meaningful — every screen asks for one status at
+    // a time, and arranges the groups itself.
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     take,
     include: {
@@ -64,21 +73,26 @@ export async function getApproval({ approvalId, firmId }: { approvalId: string }
 }
 
 export async function countPendingApprovals(scope: FirmScope): Promise<number> {
-  return prisma.approvalRequest.count({ where: { firmId: scope.firmId, status: "pending" } });
+  return prisma.approvalRequest.count({ where: { firmId: scope.firmId, status: PENDING_STATUS } });
 }
 
 /**
- * How many requests there really are, waiting and decided.
+ * How many requests there really are, in each of the three states.
  *
  * Separate from `listApprovals` on purpose. The approvals screen used to derive
  * both numbers from the rows it had fetched, which meant that a firm with 172
  * requests waiting was told 100 were — the size of the window, reported as the
  * size of the queue. A number on a screen is a claim, and that one was false.
+ *
+ * The buckets are exhaustive, and an unrecognised status is counted in none of
+ * them rather than swept into `decided`. Over-reporting decisions is the one
+ * error that must not happen here: `decided` is read on screen as "a person
+ * took responsibility for this many things".
  */
 export async function approvalCounts(
   scope: FirmScope,
   filters: ApprovalFilters = {},
-): Promise<{ pending: number; decided: number }> {
+): Promise<{ pending: number; decided: number; superseded: number }> {
   const rows = await prisma.approvalRequest.groupBy({
     by: ["status"],
     where: {
@@ -93,12 +107,15 @@ export async function approvalCounts(
 
   let pending = 0;
   let decided = 0;
+  let superseded = 0;
   for (const row of rows) {
-    if (row.status === "pending") pending += row._count._all;
-    else decided += row._count._all;
+    if (isPendingStatus(row.status)) pending += row._count._all;
+    else if (isSupersededStatus(row.status)) superseded += row._count._all;
+    else if (isDecisionStatus(row.status)) decided += row._count._all;
+    else console.error(`[orchelio] approval request with unknown status "${row.status}"`);
   }
 
-  return { pending, decided };
+  return { pending, decided, superseded };
 }
 
 /** Requests still waiting for a person, newest first. */
@@ -107,25 +124,35 @@ export async function listPendingApprovals(
   filters: ApprovalFilters = {},
   take = 50,
 ) {
-  return listApprovals(scope, { ...filters, status: "pending" }, take);
+  return listApprovals(scope, { ...filters, status: PENDING_STATUS }, take);
 }
 
 /**
- * Requests already decided, most recently decided first.
+ * Requests a person decided, most recently decided first.
  *
- * `status: { not: "pending" }` rather than one status at a time: there are four
- * decisions, and a screen that listed only "approved" would quietly hide the
- * rejections — which are the ones somebody is most likely to be looking for.
+ * The filter names the four decisions rather than saying "not pending", and
+ * that is not a tidying-up. "Not pending" was true while the only way out of
+ * the queue was a decision; a superseded request also leaves the queue, and it
+ * would have arrived in this list — under a heading that says a person decided
+ * it, next to the ones a person did decide.
+ *
+ * Listing all four rather than one at a time is deliberate too: a screen that
+ * showed only "approved" would quietly hide the rejections, which are the ones
+ * somebody is most likely to be looking for.
  */
 export async function listDecidedApprovals(
   scope: FirmScope,
   filters: ApprovalFilters = {},
   take = 25,
 ) {
+  const decided: readonly string[] = APPROVAL_DECISIONS;
   return prisma.approvalRequest.findMany({
     where: {
       firmId: scope.firmId,
-      status: filters.status && filters.status !== "pending" ? filters.status : { not: "pending" },
+      status:
+        filters.status && isDecisionStatus(filters.status)
+          ? filters.status
+          : { in: [...decided] },
       ...(filters.action ? { action: filters.action } : {}),
       ...(filters.matterId ? { matterId: filters.matterId } : {}),
       ...(filters.riskLevel ? { riskLevel: filters.riskLevel } : {}),
@@ -141,6 +168,21 @@ export async function listDecidedApprovals(
 }
 
 /**
+ * Requests overtaken by events, most recent first.
+ *
+ * Its own list because it needs its own heading. Folded into either of the
+ * other two it would be a false claim — either that somebody must act, or that
+ * somebody did.
+ */
+export async function listSupersededApprovals(
+  scope: FirmScope,
+  filters: ApprovalFilters = {},
+  take = 25,
+) {
+  return listApprovals(scope, { ...filters, status: SUPERSEDED_STATUS }, take);
+}
+
+/**
  * One matter's approvals: a bounded list, and the true total beside it.
  *
  * The matter page used to render a single hundred-row window and print its
@@ -150,13 +192,17 @@ export async function listDecidedApprovals(
  * so the screen simply did not show it.
  */
 export async function matterApprovals(scope: FirmScope, matterId: string, take = 20) {
-  const [pending, decided, counts] = await Promise.all([
+  const [pending, decided, superseded, counts] = await Promise.all([
     listPendingApprovals(scope, { matterId }, take),
     listDecidedApprovals(scope, { matterId }, take),
+    listSupersededApprovals(scope, { matterId }, take),
     approvalCounts(scope, { matterId }),
   ]);
 
-  return { shown: [...pending, ...decided], total: counts.pending + counts.decided };
+  return {
+    shown: [...pending, ...decided, ...superseded],
+    total: counts.pending + counts.decided + counts.superseded,
+  };
 }
 
 /** Every approval raised about one resource, newest first. */
@@ -206,7 +252,7 @@ export async function createApprovalRequest(scope: FirmScope, input: NewApproval
       action: input.action,
       riskLevel: input.riskLevel,
       summary: input.summary.slice(0, 2000),
-      status: "pending",
+      status: PENDING_STATUS,
       requestedById: input.requestedById,
     },
   });
@@ -214,7 +260,10 @@ export async function createApprovalRequest(scope: FirmScope, input: NewApproval
 
 export type DecisionOutcome =
   | { ok: true; applied: boolean; self: boolean }
-  | { ok: false; reason: "not_found" | "already_decided" | "note_required" | "same_person" };
+  | {
+      ok: false;
+      reason: "not_found" | "already_decided" | "note_required" | "same_person" | "superseded";
+    };
 
 /**
  * Records a decision, then applies whatever it permits.
@@ -245,7 +294,11 @@ export async function decideApproval(
   });
   // Missing and not-this-firm's are the same answer, deliberately.
   if (!existing) return { ok: false, reason: "not_found" };
-  if (existing.status !== "pending") return { ok: false, reason: "already_decided" };
+  // Told apart, because "somebody already decided this" would be false of a
+  // superseded request and would send the reader looking for a decision that
+  // does not exist.
+  if (isSupersededStatus(existing.status)) return { ok: false, reason: "superseded" };
+  if (!isPendingStatus(existing.status)) return { ok: false, reason: "already_decided" };
 
   // Separation of duties, read here rather than passed in. A caller that
   // forgot to pass it would silently get the permissive answer, and this is
@@ -262,10 +315,12 @@ export async function decideApproval(
   });
   if (!separation.allowed) return { ok: false, reason: separation.reason };
 
-  // `status: "pending"` in the filter is the lock. A second decision arriving
-  // between the read above and this write updates nothing.
+  // `status: PENDING_STATUS` in the filter is the lock. A second decision
+  // arriving between the read above and this write updates nothing — and so
+  // does a supersession, which is why it is safe for that to happen at any
+  // moment without a transaction around the pair.
   const claimed = await prisma.approvalRequest.updateMany({
-    where: { id: input.approvalId, firmId: scope.firmId, status: "pending" },
+    where: { id: input.approvalId, firmId: scope.firmId, status: PENDING_STATUS },
     data: {
       status: input.decision,
       decisionNote: note === "" ? null : note.slice(0, 4000),
@@ -283,6 +338,62 @@ export async function decideApproval(
   // somebody took on their own request is exactly the entry an audit is
   // looking for, and it is worth recording even where the firm allows it.
   return { ok: true, applied, self: separation.self };
+}
+
+/**
+ * Marks a matter's earlier pending requests for one action as superseded.
+ *
+ * Called from exactly one place — `runAnalysis`, once a newer analysis exists —
+ * and deliberately narrow, because supersession is a claim that nobody needs to
+ * answer a question any more, and that claim is only obviously true here. A
+ * draft communication is not superseded by a later draft: each is a separate
+ * set of words somebody may want to approve. Widening this needs the same
+ * argument made again for the new case.
+ *
+ * Returns the rows it changed, so the caller can log one entry each. A request
+ * that leaves the queue with no trace is a request somebody will later swear
+ * they never saw.
+ */
+export async function supersedeEarlierApprovals(
+  scope: FirmScope,
+  input: { matterId: string; action: string; currentResourceId: string; now?: Date },
+) {
+  const candidates = await prisma.approvalRequest.findMany({
+    where: {
+      firmId: scope.firmId,
+      matterId: input.matterId,
+      action: input.action,
+      status: PENDING_STATUS,
+      // The request raised for the analysis that has just run is the live one.
+      resourceId: { not: input.currentResourceId },
+    },
+    select: { id: true },
+  });
+  if (candidates.length === 0) return [];
+
+  const ids = candidates.map((request) => request.id);
+  const supersededAt = input.now ?? new Date();
+
+  await prisma.approvalRequest.updateMany({
+    where: {
+      firmId: scope.firmId,
+      id: { in: ids },
+      // Still pending at the moment of the write: somebody may have decided one
+      // of these between the read above and here, and a real decision outranks
+      // a supersession.
+      status: PENDING_STATUS,
+    },
+    data: { status: SUPERSEDED_STATUS, supersededAt },
+  });
+
+  // Read back rather than returning what was read before the write. The caller
+  // writes an audit entry per row, and a row somebody decided in between is one
+  // this function did not supersede — claiming otherwise would put an event in
+  // the log that never happened.
+  return prisma.approvalRequest.findMany({
+    where: { firmId: scope.firmId, id: { in: ids }, status: SUPERSEDED_STATUS },
+    select: { id: true, resourceId: true, requestedById: true, matterId: true },
+  });
 }
 
 /**
@@ -378,7 +489,7 @@ export async function pendingApprovalFor(
   action: string,
 ) {
   return prisma.approvalRequest.findFirst({
-    where: { firmId: scope.firmId, resourceType, resourceId, action, status: "pending" },
+    where: { firmId: scope.firmId, resourceType, resourceId, action, status: PENDING_STATUS },
   });
 }
 

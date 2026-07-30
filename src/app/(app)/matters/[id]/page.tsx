@@ -33,6 +33,7 @@ import { listMatterActivity } from "@/lib/data/activity";
 import { ApprovalCard } from "@/components/approval-ui";
 import { ActivityDetail, ActivityStatusBadge, activityLabel } from "@/components/activity-ui";
 import { decisionLabel } from "@/lib/approvals/actions";
+import { isDecisionStatus, isPendingStatus } from "@/lib/approvals/status";
 import { firmConfiguration } from "@/lib/data/firms";
 import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
 import { categoriesFor, categoryLabel, expectedButMissing } from "@/lib/matters/documents";
@@ -179,9 +180,13 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
     ? await approvalsForResource({ firmId: firm.id }, "ai_analysis", analysis.id)
     : [];
   const pendingForAnalysis = analysisApprovals.find(
-    (approval) => approval.action === "legal_analysis" && approval.status === "pending",
+    (approval) => approval.action === "legal_analysis" && isPendingStatus(approval.status),
   );
-  const decidedForAnalysis = analysisApprovals.find((approval) => approval.status !== "pending");
+  // `isDecisionStatus`, not "anything that is not pending": a superseded
+  // request is neither, and this value is rendered as "a person decided this".
+  const decidedForAnalysis = analysisApprovals.find((approval) =>
+    isDecisionStatus(approval.status),
+  );
 
   const raisedId = typeof query["raised"] === "string" ? query["raised"] : null;
   const communicationProblem =
@@ -886,7 +891,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                     key={approval.id}
                     approval={approval}
-                    canDecide={canDecide && approval.status === "pending"}
+                    canDecide={canDecide && isPendingStatus(approval.status)}
                     returnTo={`/matters/${matter.id}?tab=approvals`}
                     focused={raisedId === approval.id}
                   />

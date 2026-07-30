@@ -323,3 +323,138 @@ describe("determinism", () => {
     expect(second.analysisId).not.toBe(first.analysisId);
   });
 });
+
+describe("re-running an analysis", () => {
+  /**
+   * The defect this exists for.
+   *
+   * Every run raises "may we rely on this analysis?" against the analysis it
+   * just produced. Nothing used to retire the previous one, so a matter
+   * analysed repeatedly grew a queue of requests about work products nobody
+   * was looking at any more — 113 of them on one demonstration matter, which
+   * buried a "confirm a recorded date" request that a person did need to see.
+   */
+  it("retires the request the previous analysis left waiting", async () => {
+    const scope = { firmId: fixture.immigration.firmId };
+    const matter = await matters.createMatter(scope, {
+      title: "Analysed twice",
+      clientName: "Rerun Test",
+      matterTypeKey: "family_based",
+      practiceAreaKey: "immigration",
+      status: "active",
+      createdById: fixture.immigration.attorneyId,
+      fields: {},
+    });
+
+    await fixture.prisma.firmConfiguration.updateMany({
+      where: { firmId: scope.firmId },
+      data: { approvals: JSON.stringify({ legalAnalysis: true }) },
+    });
+
+    const options = {
+      matterId: matter.id,
+      userId: fixture.immigration.attorneyId,
+      enabledFeatures: FEATURES,
+    };
+    const first = await run.runAnalysis(scope, options);
+    const second = await run.runAnalysis(scope, options);
+    expect(first.ok && second.ok).toBe(true);
+    if (!first.ok || !second.ok) return;
+
+    const requests = await fixture.prisma.approvalRequest.findMany({
+      where: { firmId: scope.firmId, matterId: matter.id, action: "legal_analysis" },
+    });
+
+    expect(requests).toHaveLength(2);
+    const forFirst = requests.find((request) => request.resourceId === first.analysisId);
+    const forSecond = requests.find((request) => request.resourceId === second.analysisId);
+
+    expect(forFirst?.status).toBe("superseded");
+    expect(forSecond?.status).toBe("pending");
+    // Retired, not decided. Nobody read the first analysis.
+    expect(forFirst?.decidedById).toBeNull();
+    expect(forFirst?.decidedAt).toBeNull();
+  });
+
+  it("leaves exactly one request waiting however many times it is run", async () => {
+    const scope = { firmId: fixture.immigration.firmId };
+    const matter = await matters.createMatter(scope, {
+      title: "Analysed five times",
+      clientName: "Rerun Test Two",
+      matterTypeKey: "family_based",
+      practiceAreaKey: "immigration",
+      status: "active",
+      createdById: fixture.immigration.attorneyId,
+      fields: {},
+    });
+
+    const options = {
+      matterId: matter.id,
+      userId: fixture.immigration.attorneyId,
+      enabledFeatures: FEATURES,
+    };
+    for (let attempt = 0; attempt < 5; attempt += 1) await run.runAnalysis(scope, options);
+
+    const waiting = await fixture.prisma.approvalRequest.count({
+      where: {
+        firmId: scope.firmId,
+        matterId: matter.id,
+        action: "legal_analysis",
+        status: "pending",
+      },
+    });
+    const kept = await fixture.prisma.approvalRequest.count({
+      where: { firmId: scope.firmId, matterId: matter.id, action: "legal_analysis" },
+    });
+
+    expect(waiting).toBe(1);
+    // Five runs, five rows: superseding is not deleting, and the history of
+    // what was asked stays readable.
+    expect(kept).toBe(5);
+  });
+
+  it("does not bury a request of another kind under the analysis ones", async () => {
+    // The symptom that made the pile-up visible: a "confirm a recorded date"
+    // request fell outside the window a screen could show, because a hundred
+    // stale analysis requests sat in front of it.
+    const scope = { firmId: fixture.immigration.firmId };
+    const matter = await matters.createMatter(scope, {
+      title: "A date and many analyses",
+      clientName: "Rerun Test Three",
+      matterTypeKey: "family_based",
+      practiceAreaKey: "immigration",
+      status: "active",
+      createdById: fixture.immigration.attorneyId,
+      fields: {},
+    });
+
+    await fixture.prisma.approvalRequest.create({
+      data: {
+        firmId: scope.firmId,
+        matterId: matter.id,
+        resourceType: "matter",
+        resourceId: matter.id,
+        action: "deadline_confirmation",
+        riskLevel: "high",
+        summary: "Confirm the recorded date",
+        requestedById: fixture.immigration.attorneyId,
+      },
+    });
+
+    const options = {
+      matterId: matter.id,
+      userId: fixture.immigration.attorneyId,
+      enabledFeatures: FEATURES,
+    };
+    for (let attempt = 0; attempt < 6; attempt += 1) await run.runAnalysis(scope, options);
+
+    const waiting = await fixture.prisma.approvalRequest.findMany({
+      where: { firmId: scope.firmId, matterId: matter.id, status: "pending" },
+    });
+
+    expect(waiting.map((request) => request.action).sort()).toEqual([
+      "deadline_confirmation",
+      "legal_analysis",
+    ]);
+  });
+});

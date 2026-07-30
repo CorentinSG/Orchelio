@@ -604,7 +604,9 @@ model ApprovalRequest {
   riskLevel String @default("medium")
   summary   String
 
-  /// "pending" | "approved" | "approved_with_edits" | "rejected" | "new_analysis_requested".
+  /// "pending" | one of the four decisions | "superseded".
+  /// The vocabulary and its three buckets live in src/lib/approvals/status.ts.
+  /// "superseded" is not a decision and must never be counted as one.
   status String @default("pending")
 
   /// Mandatory for approved_with_edits, rejected and new_analysis_requested.
@@ -613,8 +615,13 @@ model ApprovalRequest {
   requestedById String?
   decidedById   String?
   decidedAt     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  /// When this request stopped being the question. Separate from decidedAt on
+  /// purpose: decidedAt means a person acted, and nobody acted here.
+  supersededAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   firm        Firm    @relation(fields: [firmId], references: [id], onDelete: Cascade)
   matter      Matter? @relation(fields: [matterId], references: [id], onDelete: Cascade)

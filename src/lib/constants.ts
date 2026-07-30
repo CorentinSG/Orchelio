@@ -161,6 +161,10 @@ export const AUDIT_ACTIONS = {
   reviewCompleted: "ai.review.completed",
   approvalRequested: "approval.requested",
   approvalDecided: "approval.decided",
+  // Distinct from approval.decided, and the distinction is the point: a
+  // superseded request left the queue without anybody deciding it, and a log
+  // that recorded the two the same way would show a decision nobody took.
+  approvalSuperseded: "approval.superseded",
   draftPrepared: "communication.draft.prepared",
   matterClosed: "matter.closed",
   roleChanged: "membership.role.changed",

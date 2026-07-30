@@ -595,8 +595,10 @@ describe("the numbers the approvals screen prints", () => {
     const everything = await fixture.prisma.approvalRequest.count({
       where: { firmId: fixture.employment.firmId },
     });
-    expect(theirs.pending + theirs.decided).toBe(everything);
-    expect(mine.pending + mine.decided).not.toBe(everything);
+    // Three buckets that add up to every row: the counts partition the queue,
+    // so nothing can be reported twice and nothing can go missing.
+    expect(theirs.pending + theirs.decided + theirs.superseded).toBe(everything);
+    expect(mine.pending + mine.decided + mine.superseded).not.toBe(everything);
   });
 
   it("lists decided requests of every kind, not only approvals", async () => {
@@ -763,5 +765,275 @@ describe("separation of duties", () => {
     expect(outcome.ok).toBe(true);
 
     await setSeparation(fixture.immigration.firmId, false);
+  });
+});
+
+describe("a superseded request", () => {
+  /**
+   * A matter of its own for each test.
+   *
+   * Supersession sweeps a whole matter's pending analysis requests, so tests
+   * sharing one matter would sweep up each other's rows and every count would
+   * depend on the order they ran in. The first draft of this block did exactly
+   * that and failed seven ways.
+   */
+  async function freshMatter(label: string): Promise<string> {
+    const created = await matters.createMatter(
+      { firmId: fixture.immigration.firmId },
+      {
+        title: `Supersession — ${label}`,
+        clientName: `Supersession ${label}`,
+        matterTypeKey: "family_based",
+        practiceAreaKey: "immigration",
+        status: "active",
+        createdById: fixture.immigration.attorneyId,
+        fields: {},
+      },
+    );
+    return created.id;
+  }
+
+  /**
+   * Raises a pending "rely on an AI analysis" request against a made-up
+   * analysis identifier. The identifier is all `supersedeEarlierApprovals`
+   * looks at, so a real analysis row is not needed to test what it does with
+   * one.
+   */
+  async function pendingAnalysisRequest(matterId: string, analysisId: string): Promise<string> {
+    const request = await fixture.prisma.approvalRequest.create({
+      data: {
+        firmId: fixture.immigration.firmId,
+        matterId,
+        resourceType: "ai_analysis",
+        resourceId: analysisId,
+        action: "legal_analysis",
+        riskLevel: "high",
+        summary: `Analysis ${analysisId}`,
+        requestedById: fixture.immigration.attorneyId,
+      },
+    });
+    return request.id;
+  }
+
+  const scope = () => ({ firmId: fixture.immigration.firmId });
+
+  it("stops waiting when a newer analysis replaces the one it was about", async () => {
+    const matterId = await freshMatter("replaced");
+    const older = await pendingAnalysisRequest(matterId, "analysis-old");
+    const current = await pendingAnalysisRequest(matterId, "analysis-new");
+
+    const changed = await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "analysis-new",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    expect(changed).toBe(1);
+    const [before, after] = await Promise.all([
+      fixture.prisma.approvalRequest.findFirst({ where: { id: older, firmId: fixture.immigration.firmId } }),
+      fixture.prisma.approvalRequest.findFirst({ where: { id: current, firmId: fixture.immigration.firmId } }),
+    ]);
+
+    expect(before?.status).toBe("superseded");
+    expect(before?.supersededAt).toBeInstanceOf(Date);
+    // The one the new analysis raised is untouched: superseding the live
+    // request would leave the matter with nothing waiting for anybody.
+    expect(after?.status).toBe("pending");
+  });
+
+  it("records that nobody decided it", async () => {
+    // The whole reason "superseded" is its own status. A row carrying a
+    // decider or a decision time would read, to every screen and every query,
+    // exactly like one a person had approved.
+    const matterId = await freshMatter("nobody decided");
+    const older = await pendingAnalysisRequest(matterId, "a1");
+    await pendingAnalysisRequest(matterId, "a2");
+
+    await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "a2",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    const row = await fixture.prisma.approvalRequest.findFirst({ where: { id: older, firmId: fixture.immigration.firmId } });
+    expect(row?.status).toBe("superseded");
+    expect(row?.decidedById).toBeNull();
+    expect(row?.decidedAt).toBeNull();
+    expect(row?.decisionNote).toBeNull();
+  });
+
+  it("is never counted as decided", async () => {
+    const matterId = await freshMatter("counting");
+    const before = await approvals.approvalCounts(scope());
+
+    await pendingAnalysisRequest(matterId, "b1");
+    await pendingAnalysisRequest(matterId, "b2");
+    await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "b2",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    const after = await approvals.approvalCounts(scope());
+    expect(after.superseded).toBe(before.superseded + 1);
+    expect(after.decided).toBe(before.decided);
+    // And the survivor is still waiting, so the queue did not silently empty.
+    expect(after.pending).toBe(before.pending + 1);
+  });
+
+  it("does not appear in the list of decisions", async () => {
+    const matterId = await freshMatter("listing");
+    await pendingAnalysisRequest(matterId, "f1");
+    await pendingAnalysisRequest(matterId, "f2");
+    await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "f2",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    const decided = await approvals.listDecidedApprovals(scope(), {}, 500);
+    expect(decided.some((request) => request.status === "superseded")).toBe(false);
+
+    const listed = await approvals.listSupersededApprovals(scope(), { matterId }, 500);
+    expect(listed).toHaveLength(1);
+    expect(listed.every((request) => request.status === "superseded")).toBe(true);
+  });
+
+  it("still counts towards a matter's total, because the row is kept", async () => {
+    const matterId = await freshMatter("kept");
+    await pendingAnalysisRequest(matterId, "g1");
+    await pendingAnalysisRequest(matterId, "g2");
+    await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "g2",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    const shown = await approvals.matterApprovals(scope(), matterId);
+    expect(shown.total).toBe(2);
+    expect(shown.shown.map((request) => request.status).sort()).toEqual([
+      "pending",
+      "superseded",
+    ]);
+  });
+
+  it("cannot then be decided, and is not reported as already decided", async () => {
+    const matterId = await freshMatter("undecidable");
+    const older = await pendingAnalysisRequest(matterId, "c1");
+    await pendingAnalysisRequest(matterId, "c2");
+    await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "c2",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    const outcome = await approvals.decideApproval(scope(), {
+      approvalId: older,
+      decision: "approved",
+      note: "",
+      decidedById: fixture.immigration.attorneyId,
+    });
+
+    expect(outcome).toEqual({ ok: false, reason: "superseded" });
+    // Still superseded afterwards — the refusal changed nothing.
+    const row = await fixture.prisma.approvalRequest.findFirst({ where: { id: older, firmId: fixture.immigration.firmId } });
+    expect(row?.status).toBe("superseded");
+    expect(row?.decidedById).toBeNull();
+  });
+
+  it("leaves another firm's requests alone", async () => {
+    const theirs = await fixture.prisma.approvalRequest.create({
+      data: {
+        firmId: fixture.employment.firmId,
+        matterId: fixture.employment.matterId,
+        resourceType: "ai_analysis",
+        resourceId: "cross-firm-old",
+        action: "legal_analysis",
+        summary: "Another firm's analysis",
+        requestedById: fixture.employment.attorneyId,
+      },
+    });
+
+    // A supersession run for one firm cannot reach the other's rows even when
+    // handed their matter's identifier.
+    const changed = await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId: fixture.employment.matterId,
+      currentAnalysisId: "cross-firm-new",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    expect(changed).toBe(0);
+    const row = await fixture.prisma.approvalRequest.findFirst({ where: { id: theirs.id, firmId: fixture.employment.firmId } });
+    expect(row?.status).toBe("pending");
+  });
+
+  it("does not touch a request for a different action", async () => {
+    // A draft approved for use is not superseded by an analysis, and neither is
+    // a date somebody was asked to confirm. Supersession is a claim about one
+    // kind of work product being replaced by another of the same kind.
+    const matterId = await freshMatter("other actions");
+    const deadline = await fixture.prisma.approvalRequest.create({
+      data: {
+        firmId: fixture.immigration.firmId,
+        matterId,
+        resourceType: "matter",
+        resourceId: matterId,
+        action: "deadline_confirmation",
+        summary: "Confirm the recorded date",
+        requestedById: fixture.immigration.attorneyId,
+      },
+    });
+
+    await pendingAnalysisRequest(matterId, "d1");
+    const changed = await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "d-current",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    expect(changed).toBe(1);
+    const row = await fixture.prisma.approvalRequest.findFirst({ where: { id: deadline.id, firmId: fixture.immigration.firmId } });
+    expect(row?.status).toBe("pending");
+  });
+
+  it("appears in the log as superseded, not as a decision", async () => {
+    const matterId = await freshMatter("logged");
+    const older = await pendingAnalysisRequest(matterId, "e1");
+    await pendingAnalysisRequest(matterId, "e2");
+    await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "e2",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    const events = await fixture.prisma.auditEvent.findMany({
+      where: { firmId: fixture.immigration.firmId, resourceId: older },
+    });
+
+    const superseded = events.filter((event) => event.action === "approval.superseded");
+    expect(superseded).toHaveLength(1);
+    // The distinction the log exists to preserve: a request that left the queue
+    // without anybody deciding it must not be recorded as a decision.
+    expect(events.some((event) => event.action === "approval.decided")).toBe(false);
+    expect(superseded[0]?.newValue).toContain("e2");
+  });
+
+  it("writes no log entry when nothing was waiting", async () => {
+    const matterId = await freshMatter("nothing waiting");
+    const before = await fixture.prisma.auditEvent.count({
+      where: { firmId: fixture.immigration.firmId, action: "approval.superseded" },
+    });
+
+    const changed = await raise.supersedeEarlierAnalysisApprovals(scope(), {
+      matterId,
+      currentAnalysisId: "nothing-to-supersede",
+      userId: fixture.immigration.attorneyId,
+    });
+
+    expect(changed).toBe(0);
+    const after = await fixture.prisma.auditEvent.count({
+      where: { firmId: fixture.immigration.firmId, action: "approval.superseded" },
+    });
+    expect(after).toBe(before);
   });
 });

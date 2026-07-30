@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 169.
+Modules: 171.
 
 ## `prisma/`
 
@@ -455,13 +455,19 @@ Exports: `approvableAction`, `actionLabel`, `requiresApproval`, `approvalReason`
 
 Two functions, and between them the answer to the phase's acceptance criterion: no sensitive action completes without an explicit human decision, and every decision ap…
 
-Exports: `raiseApproval`, `recordDecision`, `RaiseOutcome`, `DecisionResult`
+Exports: `raiseApproval`, `supersedeEarlierAnalysisApprovals`, `recordDecision`, `RaiseOutcome`, `DecisionResult`
 
 ### `src/lib/approvals/separation.ts`
 
 Every sensitive action in Orchelio needs a person's decision.
 
 Exports: `isSelfDecision`, `judgeSeparation`, `separationReadiness`, `MINIMUM_DECIDERS_FOR_SEPARATION`, `SELF_DECISION_NOTICE`, `SELF_DECISION_REFUSAL`, `SeparationVerdict`, `SeparationReadiness`
+
+### `src/lib/approvals/status.ts`
+
+There used to be five values and no module: one for waiting and four for the decisions, written as string literals wherever a query needed one.
+
+Exports: `isPendingStatus`, `isDecisionStatus`, `isSupersededStatus`, `approvalStatusLabel`, `PENDING_STATUS`, `SUPERSEDED_STATUS`, `APPROVAL_STATUSES`, `SUPERSEDED_EXPLANATION`, `SUPERSEDED_REFUSAL`, `ApprovalStatus`
 
 ### `src/lib/audit.ts`
 
@@ -557,7 +563,7 @@ Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getRevie
 
 The important function here is `decideApproval`, and the important thing about it is that it is the only way a sensitive action takes effect.
 
-Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `matterApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
+Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `listSupersededApprovals`, `matterApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `supersedeEarlierApprovals`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
 
 ### `src/lib/data/catalogues.ts`
 
@@ -852,6 +858,10 @@ Product naming is a requirement of the specification, not a cosmetic detail: the
 ### `tests/unit/approval-rules.test.ts`
 
 The single most important property in this phase is that a locked rule cannot be switched off.
+
+### `tests/unit/approval-status.test.ts`
+
+One property carries most of this file: the three predicates partition the statuses, so every value is in exactly one bucket.
 
 ### `tests/unit/cache.test.ts`
 

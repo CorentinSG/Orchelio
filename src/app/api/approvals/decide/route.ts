@@ -7,6 +7,7 @@ import { isApprovalDecision, requiresNote } from "@/lib/approvals/actions";
 import { recordDecision } from "@/lib/approvals/raise";
 import { isSameOrigin, seeOther } from "@/lib/http/form-post";
 import { SELF_DECISION_REFUSAL } from "@/lib/approvals/separation";
+import { SUPERSEDED_REFUSAL } from "@/lib/approvals/status";
 
 /**
  * Orchelio — record a decision on an approval request.
@@ -90,6 +91,11 @@ export async function POST(request: Request) {
         return back(
           `focus=${encodeURIComponent(approvalId)}&problem=${encodeURIComponent(SELF_DECISION_REFUSAL)}`,
         );
+      case "superseded":
+        // Distinct from "already decided" on purpose: nobody decided this one,
+        // and saying they had would send the reader looking for a decision that
+        // does not exist.
+        return back(`problem=${encodeURIComponent(SUPERSEDED_REFUSAL)}`);
     }
   }
 
