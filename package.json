@@ -29,7 +29,7 @@
     "reset-demo": "prisma migrate reset --force",
     "codemap": "node scripts/codemap.mjs",
     "graph": "graphify . --code-only && graphify cluster-only .",
-    "graph:update": "graphify update . --code-only || npm run graph",
+    "graph:update": "graphify update . --code-only 2>/dev/null || npm run graph",
     "graph:explain": "graphify explain",
     "graph:query": "graphify query",
     "queries": "ORCHELIO_LOG_QUERIES=1 next dev",

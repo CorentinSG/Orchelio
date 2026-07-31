@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 1286 nodes · 3029 edges · 92 communities (80 shown, 12 thin omitted)
+- 1286 nodes · 3029 edges · 93 communities (80 shown, 13 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.68)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `614836f5`
+- Built from commit: `0d9638c2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -66,7 +66,7 @@
 - cache.ts
 - format/dates.ts
 - acceptance-check.mjs
-- prisma.ts
+- system/page.tsx
 - provider.ts
 - deny
 - app.json
@@ -84,6 +84,7 @@
 - onboarding.spec.ts
 - accessibility.spec.ts
 - app/layout.tsx
+- prisma.ts
 - analysis.spec.ts
 - session-start.sh
 - middleware.ts
@@ -122,7 +123,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (92 total, 12 thin omitted)
+## Communities (93 total, 13 thin omitted)
 
 ### Community 0 - "approvals/page.tsx"
 Cohesion: 0.06
@@ -332,9 +333,9 @@ Nodes (9): calendarDayIn(), daysBetween(), firmTimezone(), formatMoment(), KNOWN
 Cohesion: 0.20
 Nodes (8): byFile, cache, document, phases, problems, ROOT, sections, SOURCE
 
-### Community 52 - "prisma.ts"
-Cohesion: 0.19
-Nodes (10): AdminSystemPage(), metadata, GuardedPrismaClient, globalForPrisma, DatabaseStatus, describeFailure(), getDatabaseStatus(), getSystemStatus() (+2 more)
+### Community 52 - "system/page.tsx"
+Cohesion: 0.29
+Nodes (8): AdminSystemPage(), metadata, DatabaseStatus, describeFailure(), getDatabaseStatus(), getSystemStatus(), MigrationRow, SystemStatus
 
 ### Community 53 - "provider.ts"
 Cohesion: 0.40
@@ -399,15 +400,15 @@ Nodes (4): audit(), expectNoViolations(), Page, signIn()
 ## Knowledge Gaps
 - **425 isolated node(s):** `eslintConfig`, `PORT`, `config`, `metadata`, `viewport` (+420 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `withFirmScopeGuard()` connect `dependencies` to `firm-scope.ts`, `prisma.ts`, `fixtures.ts`?**
-  _High betweenness centrality (0.117) - this node is a cross-community bridge._
+- **Why does `withFirmScopeGuard()` connect `dependencies` to `prisma.ts`, `firm-scope.ts`, `fixtures.ts`?**
+  _High betweenness centrality (0.110) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `scripts`?**
-  _High betweenness centrality (0.114) - this node is a cross-community bridge._
+  _High betweenness centrality (0.109) - this node is a cross-community bridge._
 - **What connects `eslintConfig`, `PORT`, `config` to the rest of the system?**
   _425 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `approvals/page.tsx` be split into smaller, more focused modules?**
