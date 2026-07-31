@@ -77,6 +77,13 @@ Nothing uses this. The analysis in this build is a deterministic simulation,
 shape a local model would have to take is settled and enforced *before* anybody
 writes one, rather than argued about in the review that lands it.
 
+> **Since superseded in part.** `src/lib/ai/local-provider.ts` was written
+> against this decision and is now the one entry on the list. Everything above
+> still holds — it is what that module had to satisfy — but the paragraph you
+> have just read describes a state this repository has left. What the provider
+> is allowed to decide is
+> [ADR-0024](ADR-0024-the-model-writes-the-wording-and-nothing-else.md).
+
 ## Consequences
 
 - **A firm can be told where the material goes, in one sentence that is true.**

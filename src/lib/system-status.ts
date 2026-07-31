@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { providerNotice } from "@/lib/ai/notice";
 import { serverEnv } from "@/lib/env";
 
 /**
@@ -33,6 +34,13 @@ export type DatabaseStatus =
 export type SystemStatus = {
   database: DatabaseStatus;
   aiProvider: string;
+  /** One word for what kind of run that provider produces. */
+  aiProviderWord: string;
+  /** The short sentence beneath it. All four come from `src/lib/ai/notice.ts`. */
+  aiProviderHint: string;
+  /** The banner a visitor reads before signing in: title and body. */
+  aiProviderBannerTitle: string;
+  aiProviderBanner: string;
   appEnv: string;
   nodeVersion: string;
 };
@@ -93,9 +101,15 @@ export async function getDatabaseStatus(): Promise<DatabaseStatus> {
 export async function getSystemStatus(): Promise<SystemStatus> {
   const env = serverEnv();
 
+  const notice = providerNotice(env);
+
   return {
     database: await getDatabaseStatus(),
     aiProvider: env.aiProvider,
+    aiProviderWord: notice.word,
+    aiProviderHint: notice.statusHint,
+    aiProviderBannerTitle: notice.bannerTitle,
+    aiProviderBanner: notice.banner,
     appEnv: env.appEnv,
     nodeVersion: process.version,
   };

@@ -372,13 +372,27 @@ absent from the type, not merely left empty. See
 Selection is by environment variable only:
 
 ```
-AI_PROVIDER=mock        # today
+AI_PROVIDER=mock        # what this repository ships with
+AI_PROVIDER=local       # a model on this machine, with LOCAL_MODEL_URL and LOCAL_MODEL_NAME
 AI_PROVIDER=anthropic   # later, and only with ANTHROPIC_API_KEY set server-side
 ```
 
-`src/lib/env.ts` already enforces the safety rule: selecting `anthropic` without a key throws at
-startup instead of silently falling back to the mock. That matters — a silent fallback would let
-a firm believe it was getting a real analysis when it was not.
+`src/lib/env.ts` enforces the safety rule for each of them: a provider selected without what it
+needs throws at startup instead of silently falling back to the mock. That matters — a silent
+fallback would let a firm believe it was getting a real analysis when it was not. For `local` that
+means an address which is not a literal loopback address stops the application from starting, at a
+moment when no client material exists yet.
+
+`local` is the narrowest of the three by design. The model rewords the summary and decides nothing
+else; every fact, date, disagreement and gap is derived by the same code the simulation uses, and
+what the model returns is refused if it concludes, invents a figure, adds a link or names the wrong
+matter. See [ADR-0024](decisions/ADR-0024-the-model-writes-the-wording-and-nothing-else.md), and
+[ADR-0023](decisions/ADR-0023-a-local-model-is-a-checked-exception.md) for why a socket is
+permitted at all.
+
+Every sentence the interface says about the configured provider lives in `src/lib/ai/notice.ts`.
+Three screens used to assert it themselves, which was correct while there was one provider and
+would have gone on being displayed, unchanged and wrong, the moment there were two.
 
 Three constraints hold regardless of provider:
 
@@ -541,6 +555,24 @@ later rather than a refusal at the point of the mistake.
    implementation-independent.
 
 No page and no query changes: the interface is the seam.
+
+### 8.4b Using a model on the firm's own machine
+
+Already implemented — `src/lib/ai/local-provider.ts`. What a firm has to do:
+
+1. Install a local model runner that serves the OpenAI-compatible
+   `/v1/chat/completions` path. Ollama, LM Studio, llama.cpp's server and vLLM all do.
+2. Pull a model. A 7–8B instruction-tuned one is the realistic floor for prose an
+   English-speaking lawyer would accept.
+3. In `.env`, set `AI_PROVIDER=local`, `LOCAL_MODEL_URL` to a **literal** loopback address
+   (`http://127.0.0.1:11434` for Ollama — `localhost` is refused, see ADR-0023) and
+   `LOCAL_MODEL_NAME` to the model.
+4. Restart. A wrong address fails at startup with the reason.
+
+What to expect, said plainly: the analysis is the same either way. The only difference is who wrote
+the paragraph at the top, and every analysis says which. If the model is slow, absent or absurd,
+the firm gets Orchelio's own summary and a sentence explaining why. Nothing in this repository has
+been measured against a real model, because none is installed in it.
 
 ### 8.5 Moving to PostgreSQL
 

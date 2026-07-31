@@ -260,6 +260,32 @@ export type AnalysisReviewInput = {
 };
 
 // ---------------------------------------------------------------------------
+// What a run used
+// ---------------------------------------------------------------------------
+
+/**
+ * What one run consumed, reported by whatever produced it.
+ *
+ * Returned from the run rather than declared once per provider, because the
+ * three providers know different things: the simulation invents plausible
+ * figures, a local model reports whatever its server counted, and a hosted one
+ * would report what it is about to bill for. A single set of numbers on the
+ * provider would have to be a guess for at least one of them.
+ *
+ * `costCents` is money. A local model's is zero and that is a fact, not a
+ * placeholder — the electricity and the machine are real costs and are not
+ * Orchelio's to estimate.
+ */
+export type RunUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  costCents: number;
+};
+
+export type AnalystRun = { analysis: MatterAnalysisResult; usage: RunUsage };
+export type ReviewerRun = { review: AnalysisReviewResult; usage: RunUsage };
+
+// ---------------------------------------------------------------------------
 
 /** The score shown beside a support band. Simulated; see `KeyFact`. */
 export const CONFIDENCE_BY_SUPPORT: Record<SupportLevel, number> = {

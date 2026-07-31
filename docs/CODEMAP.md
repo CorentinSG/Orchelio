@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 181.
+Modules: 186.
 
 ## `prisma/`
 
@@ -179,7 +179,7 @@ Exports: `metadata`, `dynamic`, `TasksPage`
 
 ### `src/app/(app)/usage/page.tsx`
 
-The exact wording the specification asks for, in one place.
+Whether a figure on this page is simulated is a property of the stored record rather than a label this screen adds: the page reads `UsageRecord.isRealCharge` and `Usag…
 
 Exports: `metadata`, `dynamic`, `UsagePage`
 
@@ -433,11 +433,23 @@ A contradiction in a legal file is very often two dates that should be the same 
 
 Exports: `parseIsoDate`, `parseWrittenDate`, `isoDateWithin`, `readDate`, `formatWritten`
 
+### `src/lib/ai/local-provider.ts`
+
+machine.
+
+Exports: `orchelioWroteTheSummary`, `factsMessage`, `judgeSummary`, `tidy`, `LOCAL_PROMPT_VERSION`, `MODEL_WROTE_THE_SUMMARY`, `LocalAIProvider`, `LocalModelSettings`, `SummaryVerdict`
+
 ### `src/lib/ai/loopback.ts`
 
 ## Why this module exists `npm run confidentiality:check` enforces that nothing in `src/` can make an outbound request, against an allow-list that is **empty**.
 
 Exports: `assertLoopback`, `isLoopback`, `NotLoopbackError`, `LOOPBACK_PROMISE`
+
+### `src/lib/ai/notice.ts`
+
+Three screens describe the assistant: the usage page, the AI workspace and the system status.
+
+Exports: `providerNotice`, `runLabel`, `ProviderNotice`
 
 ### `src/lib/ai/provider.ts`
 
@@ -449,7 +461,7 @@ Exports: `aiProvider`, `MockAIProvider`, `UnavailableAIProvider`
 
 The Reviewer's job is to be unimpressed by the Analyst.
 
-Exports: `reviewAnalysis`
+Exports: `assertsAnOutcome`, `reviewAnalysis`
 
 ### `src/lib/ai/run.ts`
 
@@ -461,7 +473,7 @@ Exports: `runAnalysis`, `buildInput`, `ANALYSIS_FAILURE_MESSAGE`, `RunOutcome`
 
 These types are the contract between whatever produces an analysis and every screen that shows one.
 
-Exports: `supportLabel`, `supportCaveat`, `reviewIssueLabel`, `reviewStatusLabel`, `SOURCE_KINDS`, `SUPPORT_LEVELS`, `SUFFICIENCY`, `REVIEW_ISSUE_CATEGORIES`, `REVIEW_STATUSES`, `CONFIDENCE_BY_SUPPORT`, `SourceKind`, `FactSource`, `SupportLevel`, `KeyFact`, `TimelineEvent`, `MissingDocument`, `Contradiction`, `Question`, `Sufficiency`, `MatterAnalysisResult`, `AnalysisDocument`, `MatterAnalysisInput`, `ReviewIssueCategory`, `ReviewIssue`, `ReviewStatus`, `ReviewCheck`, `AnalysisReviewResult`, `AnalysisReviewInput`
+Exports: `supportLabel`, `supportCaveat`, `reviewIssueLabel`, `reviewStatusLabel`, `SOURCE_KINDS`, `SUPPORT_LEVELS`, `SUFFICIENCY`, `REVIEW_ISSUE_CATEGORIES`, `REVIEW_STATUSES`, `CONFIDENCE_BY_SUPPORT`, `SourceKind`, `FactSource`, `SupportLevel`, `KeyFact`, `TimelineEvent`, `MissingDocument`, `Contradiction`, `Question`, `Sufficiency`, `MatterAnalysisResult`, `AnalysisDocument`, `MatterAnalysisInput`, `ReviewIssueCategory`, `ReviewIssue`, `ReviewStatus`, `ReviewCheck`, `AnalysisReviewResult`, `AnalysisReviewInput`, `RunUsage`, `AnalystRun`, `ReviewerRun`
 
 ### `src/lib/app-config.ts`
 
@@ -859,6 +871,10 @@ Exports: `createTwoFirmFixture`, `SHARED_CLIENT_NAME`, `SHARED_DOCUMENT_NAME`, `
 
 This is the suite the whole product rests on.
 
+### `tests/integration/local-model.test.ts`
+
+`tests/unit/local-provider.test.ts` stubs `fetch` and proves the decisions.
+
 ### `tests/integration/matters.test.ts`
 
 The sibling suites prove that *reads* stay inside one firm.
@@ -947,6 +963,10 @@ The screen's whole claim is that a person can predict what one button will do.
 
 These columns hold firm configuration and AI results.
 
+### `tests/unit/local-provider.test.ts`
+
+No model is installed in this repository and none is started here.
+
 ### `tests/unit/loopback.test.ts`
 
 This is the module the confidentiality check leans on, so the interesting tests are all refusals.
@@ -968,6 +988,10 @@ The acceptance criterion for this phase: answering the questionnaire must reprod
 ### `tests/unit/permissions.test.ts`
 
 The permission matrix is a safety property, not a convenience.
+
+### `tests/unit/provider-notice.test.ts`
+
+Three screens used to assert this themselves, which was fine while there was one provider and would have been silently wrong the day there were two.
 
 ### `tests/unit/rate-limit.test.ts`
 

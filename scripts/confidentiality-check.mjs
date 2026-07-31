@@ -59,7 +59,15 @@ const ROOT = process.cwd();
  *     reason: "Sends the matter to a model running on this machine.",
  *   },
  */
-const EGRESS_ALLOWED = {};
+const EGRESS_ALLOWED = {
+  "src/lib/ai/local-provider.ts": {
+    loopbackOnly: true,
+    reason:
+      "Asks a model on the firm's own machine to reword a summary Orchelio has already derived. " +
+      "It opens one socket, to an address assertLoopback produced, and sends no document — " +
+      "Orchelio holds none to send.",
+  },
+};
 
 /** The one function that may produce an address for a `loopbackOnly` module. */
 const LOOPBACK_GUARD = "assertLoopback";
@@ -250,10 +258,25 @@ const counts = [...classified.values()].reduce((tally, key) => {
 
 console.log("\nOrchelio — confidentiality check\n");
 
+// The egress line has to name what is allowed. "Nothing can make an outbound
+// request" printed beside a module that can is the exact reassurance this whole
+// script exists to refuse.
+const loopbackOnly = Object.entries(EGRESS_ALLOWED).filter(([, terms]) => terms?.loopbackOnly);
+const elsewhere = Object.keys(EGRESS_ALLOWED).length - loopbackOnly.length;
+
 if (problems.length === 0) {
   console.log(`  ✓ All ${modelsInSchema.length} models classified`);
   console.log(`  ✓ ${PLATFORM_MODULE} reads no client-confidential or privileged model`);
-  console.log(`  ✓ Nothing in src/ can make an outbound request`);
+  if (elsewhere > 0) {
+    console.log(`  ✓ ${elsewhere} module(s) may reach a third party; each is listed with what it sends`);
+  } else if (loopbackOnly.length > 0) {
+    console.log(
+      `  ✓ Nothing in src/ can reach anywhere but this machine — ` +
+        `${loopbackOnly.length} module(s) may talk to 127.0.0.1, each checked against ${LOOPBACK_GUARD}()`,
+    );
+  } else {
+    console.log(`  ✓ Nothing in src/ can make an outbound request`);
+  }
   console.log(`  ✓ Nothing in src/ writes a file`);
 } else {
   for (const problem of problems) console.log(`  ✗ ${problem}\n`);

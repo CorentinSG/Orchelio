@@ -38,6 +38,8 @@ import {
   settingsSection,
 } from "@/lib/settings/config";
 import { APP_NAME } from "@/lib/app-config";
+import { providerNotice } from "@/lib/ai/notice";
+import { serverEnv } from "@/lib/env";
 
 export const metadata = { title: "Firm settings" };
 export const dynamic = "force-dynamic";
@@ -323,11 +325,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
         {section.slug === "ai" ? (
           <form method="post" action="/api/settings">
             <input type="hidden" name="section" value="ai" />
-            <p className="mb-4 text-sm text-ink-muted">
-              Every feature below is simulated in this build and costs nothing to run. Switching one
-              off removes it from the workspace — and removes the dashboard card that depended on
-              it, rather than leaving the card showing zero.
-            </p>
+            <p className="mb-4 text-sm text-ink-muted">{providerNotice(serverEnv()).featuresNote}</p>
             <ul className="space-y-2">
               {AI_FEATURE_OPTIONS.map((option) => (
                 <CheckboxOption

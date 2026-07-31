@@ -15,7 +15,7 @@ import { prisma } from "@/lib/prisma";
 import { parseJsonObject } from "@/lib/json-field";
 import { aiProvider, type AIProvider } from "@/lib/ai/provider";
 import { raiseApproval, supersedeEarlierAnalysisApprovals } from "@/lib/approvals/raise";
-import type { MatterAnalysisInput, MatterAnalysisResult } from "@/lib/ai/types";
+import type { MatterAnalysisInput, MatterAnalysisResult, RunUsage } from "@/lib/ai/types";
 import { serverEnv } from "@/lib/env";
 
 /**
@@ -37,12 +37,6 @@ import { serverEnv } from "@/lib/env";
  * 3. **A run reaches across firms.** Every write below names the firm, and the
  *    matter is re-read in scope before anything is created.
  */
-
-/** What a simulated run "costs". Fixed, so a demonstration is reproducible. */
-const SIMULATED_USAGE = {
-  analyst: { inputTokens: 8_400, outputTokens: 1_900, costCents: 4 },
-  reviewer: { inputTokens: 3_100, outputTokens: 700, costCents: 2 },
-} as const;
 
 /** Shown to the user when a run fails. Never the underlying error. */
 export const ANALYSIS_FAILURE_MESSAGE =
@@ -74,7 +68,7 @@ export async function runAnalysis(
     return { ok: false, reason: "no_features" };
   }
 
-  const provider = aiProvider(serverEnv().aiProvider);
+  const provider = aiProvider(serverEnv());
   const now = options.now ?? new Date();
 
   const analysis = await beginAnalysis(scope, {
@@ -99,15 +93,18 @@ export async function runAnalysis(
   const input = buildInput(matter, options.enabledFeatures, now);
 
   try {
-    const result = await provider.analyseMatter(input);
+    const { analysis: result, usage: analystUsage } = await provider.analyseMatter(input);
     await completeAnalysis(scope, analysis.id, {
       result,
       warnings: result.warnings,
       completedAt: new Date(),
     });
-    await recordUsage(scope, matter.id, provider, "claude_analyst");
+    await recordUsage(scope, matter.id, provider, "claude_analyst", analystUsage);
 
-    const review = await provider.reviewAnalysis({ analysis: result, matter: input });
+    const { review, usage: reviewerUsage } = await provider.reviewAnalysis({
+      analysis: result,
+      matter: input,
+    });
     await recordReview(scope, {
       analysisId: analysis.id,
       provider: provider.name,
@@ -116,7 +113,7 @@ export async function runAnalysis(
       status: review.status,
       result: review,
     });
-    await recordUsage(scope, matter.id, provider, "claude_reviewer");
+    await recordUsage(scope, matter.id, provider, "claude_reviewer", reviewerUsage);
 
     await setMatterAiStatus(scope, matter.id, "completed");
 
@@ -249,15 +246,21 @@ function summariseForApproval(
   return parts.join(" ");
 }
 
+/**
+ * Writes down what a run used, as the provider reported it.
+ *
+ * `isRealCharge` reads `billable` rather than `!simulated`, and the difference
+ * is the whole reason the two exist: a model on the firm's own machine is not
+ * simulated and is not charged, so deriving one from the other would put "real
+ * charge" beside a run that cost nothing.
+ */
 async function recordUsage(
   scope: FirmScope,
   matterId: string,
   provider: AIProvider,
   operation: "claude_analyst" | "claude_reviewer",
+  usage: RunUsage,
 ): Promise<void> {
-  const usage =
-    operation === "claude_analyst" ? SIMULATED_USAGE.analyst : SIMULATED_USAGE.reviewer;
-
   await prisma.usageRecord.create({
     data: {
       firmId: scope.firmId,
@@ -268,9 +271,8 @@ async function recordUsage(
       inputTokens: usage.inputTokens,
       outputTokens: usage.outputTokens,
       costCents: usage.costCents,
-      // A simulated run is never a real charge, and that is a property of the
-      // stored row rather than a caption on a screen.
-      isRealCharge: !provider.simulated,
+      // A property of the stored row rather than a caption on a screen.
+      isRealCharge: provider.billable,
     },
   });
 }

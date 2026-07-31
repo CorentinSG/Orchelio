@@ -166,7 +166,7 @@ export const GUIDE_STEPS: readonly GuideStep[] = [
     href: "/usage",
     action: "Read the usage and cost screen.",
     notice:
-      "Every figure is simulated, and the record itself carries that fact — it is not a label added by the screen. No API charge was incurred.",
+      "Whether a figure was a real charge is carried by the record itself, not added as a label by the screen. This demonstration runs the simulated provider, so nothing here is billed — and each row is labelled by what produced it rather than by today's setting, so a firm that later installed a model on its own machine would see both kinds described correctly.",
   },
   {
     number: 16,

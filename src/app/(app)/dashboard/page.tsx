@@ -17,6 +17,8 @@ import { formatCost } from "@/lib/data/usage";
 import { requestNow } from "@/lib/clock";
 import { parseStringArray } from "@/lib/json-field";
 import { practiceAreaLabel } from "@/lib/practice-areas";
+import { providerNotice } from "@/lib/ai/notice";
+import { serverEnv } from "@/lib/env";
 
 export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
@@ -129,7 +131,7 @@ export default async function DashboardPage() {
           />
         ))}
         <StatTile
-          label="Simulated AI cost"
+          label={providerNotice(serverEnv()).dashboardCostLabel}
           value={formatCost(statistics.usageCostCents)}
           hint="this firm only — no charge"
         />

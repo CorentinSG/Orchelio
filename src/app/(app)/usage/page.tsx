@@ -13,13 +13,10 @@ import {
   usageSummary,
 } from "@/lib/data/usage";
 import { serverEnv } from "@/lib/env";
-import { APP_NAME } from "@/lib/app-config";
+import { providerNotice, runLabel } from "@/lib/ai/notice";
 
 export const metadata = { title: "Usage and costs" };
 export const dynamic = "force-dynamic";
-
-/** The exact wording the specification asks for, in one place. */
-const SIMULATED_COST_NOTICE = "Simulated cost — No API charge was incurred.";
 
 const OPERATION_LABELS: Record<string, string> = {
   claude_analyst: "Claude Analyst — matter analysis",
@@ -35,18 +32,17 @@ function formatTokens(value: number): string {
 }
 
 /**
- * Orchelio — what the assistant would have cost.
+ * Orchelio — what the assistant cost.
  *
- * Every figure on this page is simulated, and that is a property of the stored
- * record rather than a label this screen adds: `UsageRecord.isRealCharge` is
- * `false` on every row, and the page reads it instead of asserting it. If a
- * real provider were ever billed, the flag would be true and the page would say
- * something different without anyone editing this file.
+ * Whether a figure on this page is simulated is a property of the stored record
+ * rather than a label this screen adds: the page reads
+ * `UsageRecord.isRealCharge` and `UsageRecord.provider` instead of asserting
+ * anything, so a firm that ran ten analyses under the simulation and then
+ * installed a model sees each row described as what it was.
  *
- * The cost columns exist so that a real charge can be recorded later without a
- * schema change. They are not a forecast: nothing here estimates what a real
- * deployment would cost, because the simulation's token counts are derived from
- * the matter's own fields rather than from a model's actual consumption.
+ * Every sentence about the configured provider comes from
+ * `src/lib/ai/notice.ts` for the same reason. This page asserted them itself
+ * until there was a second provider to be wrong about.
  */
 export default async function UsagePage() {
   const { firm, scope } = await requireWorkspacePermission("/usage", "firm.costs.view");
@@ -59,7 +55,8 @@ export default async function UsagePage() {
     firmConfiguration(scope),
   ]);
 
-  const provider = serverEnv().aiProvider;
+  const env = serverEnv();
+  const notice = providerNotice(env);
   const currency = configuration?.currency ?? "USD";
   const timezone = firmTimezone(configuration?.timezone);
   const totalRuns = summary.analyses + summary.reviews;
@@ -70,15 +67,14 @@ export default async function UsagePage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Usage and costs</h1>
         <p className="mt-1 text-ink-muted">
-          Simulated assistant usage for this firm, and this firm only.
+          Assistant usage for this firm, and this firm only.
         </p>
       </header>
 
-      <Callout tone="warning" title={SIMULATED_COST_NOTICE}>
+      <Callout tone="warning" title={notice.costTitle}>
         <p>
-          The AI provider is <code className="font-mono">{provider}</code>. Nothing was sent to
-          Anthropic or to any other service, no API key is configured, and no invoice exists. The
-          figures below show what {APP_NAME} recorded, not what anybody was charged.
+          The AI provider is <code className="font-mono">{env.aiProvider}</code>.{" "}
+          {notice.whereItGoes}
         </p>
       </Callout>
 
@@ -112,9 +108,9 @@ export default async function UsagePage() {
               hint={`${formatTokens(summary.inputTokens)} in / ${formatTokens(summary.outputTokens)} out`}
             />
             <Tile
-              label="Simulated cost"
+              label={notice.costLabel}
               value={formatCost(summary.costCents, currency)}
-              hint="no charge was incurred"
+              hint={notice.costHint}
             />
           </div>
 
@@ -172,7 +168,7 @@ export default async function UsagePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge tone={record.isRealCharge ? "danger" : "neutral"}>
-                      {record.isRealCharge ? "real charge" : "simulated"}
+                      {runLabel(record.provider, record.isRealCharge)}
                     </Badge>
                     <span className="text-sm font-medium text-ink">
                       {formatCost(record.costCents, currency)}
@@ -186,17 +182,8 @@ export default async function UsagePage() {
       )}
 
       <Card title="How these figures are produced">
-        <p className="text-sm text-ink-muted">
-          Each run records the tokens a real request of that size would have used and the cost that
-          would have followed, at published rates. The token counts are derived from the
-          matter&apos;s own fields and document names — the same inputs the simulated analysis
-          reads — so they move realistically with the size of a matter without any request being
-          made.
-        </p>
-        <p className="mt-2 text-sm text-ink-muted">
-          What this page cannot tell you is what a real deployment would cost. That depends on the
-          model, the prompt and the documents actually sent, none of which exist here.
-        </p>
+        <p className="text-sm text-ink-muted">{notice.whatTheFiguresAre}</p>
+        <p className="mt-2 text-sm text-ink-muted">{notice.whatItCannotTell}</p>
       </Card>
     </div>
   );

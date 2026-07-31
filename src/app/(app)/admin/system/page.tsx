@@ -56,10 +56,10 @@ export default async function AdminSystemPage() {
             value={
               <span className="flex items-center justify-end gap-2">
                 <span className="font-mono">{status.aiProvider}</span>
-                {status.aiProvider === "mock" ? <Badge tone="ai">simulated</Badge> : null}
+                <Badge tone="ai">{status.aiProviderWord}</Badge>
               </span>
             }
-            hint={status.aiProvider === "mock" ? "no key, no request, no charge" : undefined}
+            hint={status.aiProviderHint}
           />
         </dl>
       </Card>

@@ -26,6 +26,8 @@ import {
 } from "@/lib/onboarding/catalogue";
 import { ONBOARDING_STEP_COUNT, buildConfiguration } from "@/lib/onboarding/config";
 import { PRACTICE_AREAS, practiceAreaLabel } from "@/lib/practice-areas";
+import { providerNotice } from "@/lib/ai/notice";
+import { serverEnv } from "@/lib/env";
 
 export const metadata = { title: "Set up your firm" };
 export const dynamic = "force-dynamic";
@@ -372,8 +374,10 @@ function StepAiFeatures({ answers }: { answers: Answers }) {
     >
       <div className="mb-4">
         <Callout tone="ai" title="AI-generated — Human review required">
-          Claude never states a legal conclusion, never sends anything and never acts on its own.
-          In this demonstration its answers are simulated: no request leaves your machine.
+          <p>
+            Claude never states a legal conclusion, never sends anything and never acts on its own.
+          </p>
+          <p className="mt-2">{providerNotice(serverEnv()).banner}</p>
         </Callout>
       </div>
 

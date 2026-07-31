@@ -41,6 +41,8 @@ import { categoriesFor, categoryLabel, expectedButMissing } from "@/lib/matters/
 import { displayValue, sectionsFor } from "@/lib/matters/fields";
 import { parseJsonObject, parseStringArray } from "@/lib/json-field";
 import type { AnalysisReviewResult, MatterAnalysisResult } from "@/lib/ai/types";
+import { providerNotice } from "@/lib/ai/notice";
+import { serverEnv } from "@/lib/env";
 
 export const metadata = { title: "Matter" };
 export const dynamic = "force-dynamic";
@@ -528,7 +530,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
             <>
               <Card
                 title="Claude Analyst"
-                description="Simulated in this build. No API call is made and no charge is incurred."
+                description={providerNotice(serverEnv()).analystNote}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   {analysis ? (

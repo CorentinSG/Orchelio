@@ -47,9 +47,6 @@ const INTRODUCTION =
   "features and human approval rules — and each firm’s data stays isolated from every " +
   "other firm.";
 
-const NO_LIVE_AI_NOTICE =
-  `${APP_NAME} runs on a simulated AI provider. No Anthropic API key is required and no ` +
-  "request leaves this machine. Costs shown elsewhere in the product are simulated.";
 
 export default async function HomePage() {
   const [status, firms] = await Promise.all([getSystemStatus(), listFirms()]);
@@ -122,7 +119,7 @@ export default async function HomePage() {
                 label="Firms registered"
                 value={status.database.state === "connected" ? status.database.firmCount : "—"}
               />
-              <DataRow label="AI provider" value={status.aiProvider} hint="simulated" />
+              <DataRow label="AI provider" value={status.aiProvider} hint={status.aiProviderWord} />
               <DataRow label="Environment" value={status.appEnv} />
               <DataRow label="Node.js" value={status.nodeVersion} />
             </dl>
@@ -139,8 +136,8 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="mt-4">
-                <Callout tone="brand" title="No live AI calls are made">
-                  <p>{NO_LIVE_AI_NOTICE}</p>
+                <Callout tone="brand" title={status.aiProviderBannerTitle}>
+                  <p>{status.aiProviderBanner}</p>
                 </Callout>
               </div>
             )}
