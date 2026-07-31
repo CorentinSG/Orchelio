@@ -73,6 +73,7 @@ decided, and what it cost.
 | 20 | [A superseded request is not a decision](decisions/ADR-0020-a-superseded-request-is-not-a-decision.md) | post-9 |
 | 21 | [A setting that changes nothing is a claim](decisions/ADR-0021-a-setting-that-changes-nothing-is-a-claim.md) | post-9 |
 | 22 | [The short way in](decisions/ADR-0022-the-short-way-in.md) | post-9 |
+| 23 | [A local model is a checked exception, not a trusted one](decisions/ADR-0023-a-local-model-is-a-checked-exception.md) | post-9 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)

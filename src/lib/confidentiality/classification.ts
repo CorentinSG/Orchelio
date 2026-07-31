@@ -215,6 +215,13 @@ export const ENFORCEMENT: readonly Enforcement[] = [
       "It checks the source, not the running process. A dependency could call out; that needs a network policy at the host.",
   },
   {
+    rule: "If a model is ever used, it may only be one running on this machine.",
+    enforcedBy:
+      "A module permitted to open a socket at all may instead be marked loopback-only, and that mark is checked rather than trusted: it must take its address from assertLoopback (src/lib/ai/loopback.ts), which returns nothing outside 127.0.0.0/8 and ::1, and it may write no address of its own. A hostname is refused too — including localhost, because a name is resolved by the machine and could be pointed elsewhere.",
+    limitation:
+      "Nothing here uses it yet: this build's analysis is a simulation and the permitted list is empty. It is the shape a local model would have to take, checked in advance rather than argued about afterwards.",
+  },
+  {
     rule: "A platform administrator cannot read a firm's matters or documents.",
     enforcedBy:
       "Cross-tenant reads live only in src/lib/data/platform.ts, which is checked to name no client-confidential or privileged model. Asserted again against the rendered pages in tests/e2e/admin.spec.ts.",

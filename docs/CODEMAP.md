@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 179.
+Modules: 181.
 
 ## `prisma/`
 
@@ -432,6 +432,12 @@ Exports: `analyseMatter`, `STANDING_WARNINGS`, `analystInternals`
 A contradiction in a legal file is very often two dates that should be the same and are not.
 
 Exports: `parseIsoDate`, `parseWrittenDate`, `isoDateWithin`, `readDate`, `formatWritten`
+
+### `src/lib/ai/loopback.ts`
+
+## Why this module exists `npm run confidentiality:check` enforces that nothing in `src/` can make an outbound request, against an allow-list that is **empty**.
+
+Exports: `assertLoopback`, `isLoopback`, `NotLoopbackError`, `LOOPBACK_PROMISE`
 
 ### `src/lib/ai/provider.ts`
 
@@ -940,6 +946,10 @@ The screen's whole claim is that a person can predict what one button will do.
 ### `tests/unit/json-field.test.ts`
 
 These columns hold firm configuration and AI results.
+
+### `tests/unit/loopback.test.ts`
+
+This is the module the confidentiality check leans on, so the interesting tests are all refusals.
 
 ### `tests/unit/matter-fields.test.ts`
 

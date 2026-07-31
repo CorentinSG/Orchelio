@@ -366,6 +366,33 @@ checks that a matter opened this way is waiting for a person like any other.
 
 ---
 
+## Beyond the nine phases — a local model, admitted only where it can be checked
+
+**Claim:** a module may talk to a model on the firm's own machine, and that
+allowance is enforced rather than trusted — it must take its address from a
+function that cannot return anything outside 127.0.0.0/8 and ::1, and may write
+no address of its own. See
+[ADR-0023](decisions/ADR-0023-a-local-model-is-a-checked-exception.md).
+
+Proved by:
+
+- `tests/unit/loopback.test.ts` — "refuses a private network address, which is not the same as this machine"
+- `tests/unit/loopback.test.ts` — "refuses localhost, and says what to write instead"
+- `tests/unit/loopback.test.ts` — "refuses credentials smuggled into the address"
+- `tests/unit/loopback.test.ts` — "refuses a scheme that is not a request to this machine"
+- `tests/unit/loopback.test.ts` — "refuses nothing at all, rather than defaulting to something"
+- `tests/unit/loopback.test.ts` — "says the promise is checked rather than given"
+- `tests/unit/confidentiality.test.ts` — "says, for every promise, what makes it true or that nothing does"
+- `tests/unit/confidentiality.test.ts` — "points every enforced promise at something a reader can open"
+
+**The enforcement itself was proved by planting**, not by a test file: a module
+allowed as loopback that never calls the guard fails the build; one that calls
+the guard but writes an address into its own source fails; one that takes its
+address from outside passes. Recorded here because a check nobody has seen fail
+is a check nobody should believe.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

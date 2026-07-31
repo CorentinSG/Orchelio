@@ -35,7 +35,7 @@ import { join } from "node:path";
 const ROOT = process.cwd();
 
 /**
- * Modules permitted to reach the network, and why.
+ * Modules permitted to open a socket, and on what terms.
  *
  * Empty, and that is the point: Orchelio has no transport. An entry here is a
  * decision to send something somewhere, which is exactly the kind of change
@@ -43,8 +43,29 @@ const ROOT = process.cwd();
  *
  * The day a real Anthropic provider lands, `src/lib/ai/anthropic-provider.ts`
  * belongs here with a sentence saying what it sends and under what agreement.
+ *
+ * An entry may instead be marked `loopbackOnly`, for a module that talks to
+ * something on the firm's own machine — a model running locally. That is a
+ * different promise from "we send this to a third party under an agreement",
+ * and it is only worth making if it is enforced, so an entry marked that way
+ * is **checked**: the module must obtain its address through `assertLoopback`
+ * (`src/lib/ai/loopback.ts`), which cannot return anything but 127.0.0.0/8 or
+ * ::1, and must contain no address literal of its own. Without both, the
+ * allowance is void and the build fails — an allow-list widened on trust is a
+ * hole with a comment beside it.
+ *
+ *   "src/lib/ai/local-provider.ts": {
+ *     loopbackOnly: true,
+ *     reason: "Sends the matter to a model running on this machine.",
+ *   },
  */
 const EGRESS_ALLOWED = {};
+
+/** The one function that may produce an address for a `loopbackOnly` module. */
+const LOOPBACK_GUARD = "assertLoopback";
+
+/** Any absolute http(s) address written into source, so it can be judged. */
+const URL_LITERAL = /https?:\/\/[^"'`\s)]+/g;
 
 /** Ways a module can start an outbound request. */
 const EGRESS_PATTERNS = [
@@ -163,9 +184,33 @@ for (const path of egressUsers) {
     );
   }
 }
-for (const path of Object.keys(EGRESS_ALLOWED)) {
+for (const [path, terms] of Object.entries(EGRESS_ALLOWED)) {
   if (!egressUsers.includes(path)) {
     notes.push(`${path} no longer reaches the network — remove its exception`);
+    continue;
+  }
+  if (!terms?.loopbackOnly) continue;
+
+  // The allowance says the module only ever talks to this machine. Two things
+  // have to be true for that to be a fact rather than an intention.
+  const source = stripComments(readFileSync(join(ROOT, path), "utf8"));
+
+  if (!source.includes(`${LOOPBACK_GUARD}(`)) {
+    problems.push(
+      `${path} is allowed to reach the network only on the promise that it talks to this ` +
+        `machine, but it never calls ${LOOPBACK_GUARD}(). Without it there is nothing ` +
+        "stopping the address being anywhere at all.",
+    );
+  }
+
+  // A literal address is one the guard never sees. Even a loopback one is a
+  // second way to reach the network, and the next edit to it would not be
+  // checked by anything.
+  for (const literal of source.match(URL_LITERAL) ?? []) {
+    problems.push(
+      `${path} writes the address ${literal} into its source. A module that may only ` +
+        `talk to this machine takes its address from ${LOOPBACK_GUARD}() and nowhere else.`,
+    );
   }
 }
 
