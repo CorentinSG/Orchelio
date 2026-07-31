@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 173.
+Modules: 179.
 
 ## `prisma/`
 
@@ -165,6 +165,12 @@ Exports: `dynamic`, `OnboardingPage`
 
 Exports: `metadata`, `dynamic`, `SettingsPage`
 
+### `src/app/(app)/start/page.tsx`
+
+`/matters/new` still exists and still asks for everything: it is the screen for somebody who knows what they want to record.
+
+Exports: `metadata`, `dynamic`, `StartPage`
+
 ### `src/app/(app)/tasks/page.tsx`
 
 Open work across the firm.
@@ -258,6 +264,12 @@ Exports: `POST`
 ### `src/app/api/settings/route.ts`
 
 A plain form POST answered with a 303, like every other consequential form in Orchelio.
+
+Exports: `POST`
+
+### `src/app/api/start/route.ts`
+
+This handler composes three things that already exist and adds no new power: `createMatter`, `addDocument` and `runAnalysis`, in that order, each with the same permiss…
 
 Exports: `POST`
 
@@ -388,6 +400,12 @@ Exports: `ProgressBar`, `Field`, `CheckboxOption`, `LockIcon`, `StepActions`, `W
 Two rules shape everything here.
 
 Exports: `SettingsTabs`, `SaveBar`, `ReadOnlyNotice`, `AccentChoice`, `MemberList`, `LockedRules`, `MemberRow`
+
+### `src/components/start-panel.tsx`
+
+Four answers, and three of them are things the person already knows without looking anything up: who the client is, what it is about, and which kind of matter it is.
+
+Exports: `StartPanel`
 
 ### `src/components/ui.tsx`
 
@@ -745,6 +763,12 @@ Settings and the onboarding questionnaire write the *same* record.
 
 Exports: `isSettingsSection`, `settingsSection`, `isAccentColour`, `accentColour`, `parseBranding`, `firmDisplayName`, `configurableApprovalKeys`, `validateProfile`, `SETTINGS_SECTIONS`, `SETTINGS_VIEW_PERMISSION`, `SETTINGS_EDIT_PERMISSION`, `ACCENT_COLOURS`, `DEFAULT_BRANDING`, `SettingsSection`, `AccentColourKey`, `Branding`, `ProfileUpdate`, `ProfileValidation`
 
+### `src/lib/start/guided.ts`
+
+The product already did everything this does.
+
+Exports: `guidedReadiness`, `MAX_FILES_AT_ONCE`, `UNSORTED_CATEGORY`, `GuidedStep`, `GuidedReadiness`, `GuidedInput`
+
 ### `src/lib/system-status.ts`
 
 The home page is not a static mock-up: it runs this check on every request so that a broken install is visible immediately, with the exact command needed to fix it.
@@ -796,6 +820,10 @@ Phase 4 acceptance, in a real browser.
 ### `tests/e2e/settings.spec.ts`
 
 Phase 8 — firm settings, in a real browser.
+
+### `tests/e2e/start.spec.ts`
+
+The claim this screen makes is not "it is fewer clicks".
 
 ### `tests/e2e/usage.spec.ts`
 
@@ -904,6 +932,10 @@ Every case here is one where UTC and the firm's zone disagree, because that is t
 ### `tests/unit/guide.test.ts`
 
 A walkthrough is prose that goes stale silently: a screen moves, and the document keeps confidently sending people to a page that answers 404.
+
+### `tests/unit/guided-start.test.ts`
+
+The screen's whole claim is that a person can predict what one button will do.
 
 ### `tests/unit/json-field.test.ts`
 

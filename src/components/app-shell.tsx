@@ -32,6 +32,9 @@ type PlannedItem = { label: string; phase: number };
 
 const FIRM_NAV: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
+  // First under the fold and above Matters on purpose: the short way in is the
+  // one a firm needs on its first morning, and a menu is read from the top.
+  { href: "/start", label: "Open a matter", permission: "matter.view" },
   { href: "/matters", label: "Matters", permission: "matter.view" },
   { href: "/intake", label: "Intake", permission: "matter.view" },
   { href: "/documents", label: "Documents", permission: "document.view" },

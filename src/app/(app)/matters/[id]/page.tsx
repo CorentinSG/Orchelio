@@ -94,6 +94,13 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
   const uploadError = typeof query["error"] === "string" ? query["error"] : null;
   const justAdded = query["added"] === "1";
 
+  // Arrived from the one-screen route. It says how many files were recorded
+  // rather than only that something happened: three steps ran on one button
+  // press, and a person who cannot see what each one did has to go and check.
+  const justOpened = query["opened"] === "1";
+  const filesRecorded = Number(query["recorded"] ?? 0);
+  const filesRefused = Number(query["refused"] ?? 0);
+
   const actor = actorFor(session.user, firm.id);
   const canUpload = can(actor, "document.upload");
   const canClassify = can(actor, "document.classify");
@@ -211,6 +218,25 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           <Badge tone="warning">Not verified</Badge>
         </div>
       </header>
+
+      {justOpened ? (
+        <Callout tone="success" title="The matter is open">
+          <p>
+            {`${matter.reference} exists, ${
+              filesRecorded === 1 ? "1 file is listed on it" : `${filesRecorded} files are listed on it`
+            }${
+              Number.isFinite(filesRefused) && filesRefused > 0
+                ? `, and ${filesRefused} ${filesRefused === 1 ? "was" : "were"} not a kind Orchelio accepts`
+                : ""
+            }.`}
+          </p>
+          <p className="mt-2">
+            {
+              "Nothing has been decided. If an analysis ran, it is a draft nobody has stood behind until you read it."
+            }
+          </p>
+        </Callout>
+      ) : null}
 
       <nav aria-label="Matter sections" className="border-b border-line">
         <ul className="-mb-px flex flex-wrap gap-1">

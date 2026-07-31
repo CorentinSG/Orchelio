@@ -339,6 +339,33 @@ hours — an assertion no amount of copy could satisfy.
 
 ---
 
+## Beyond the nine phases — the short way in
+
+**Claim:** a firm can open a matter, list its files and have Orchelio read it in
+one screen — and the screen says which of those steps will run, and which will
+not and why, *before* the button is pressed. See
+[ADR-0022](decisions/ADR-0022-the-short-way-in.md).
+
+Proved by:
+
+- `tests/unit/guided-start.test.ts` — "lists four steps, all of which will run"
+- `tests/unit/guided-start.test.ts` — "keeps the documents step when the role may not add them"
+- `tests/unit/guided-start.test.ts` — "keeps the analysis step when the firm switched every feature off"
+- `tests/unit/guided-start.test.ts` — "tells a role that cannot run one apart from a firm that switched them off"
+- `tests/unit/guided-start.test.ts` — "files a document as unsorted rather than guessing what it is"
+- `tests/unit/guided-start.test.ts` — "refuses somebody who may not open a matter, and says who can"
+- `tests/e2e/start.spec.ts` — "says what each of the four steps will do"
+- `tests/e2e/start.spec.ts` — "opens the matter, lists the files and reads it, then says so"
+- `tests/e2e/start.spec.ts` — "leaves the analysis waiting for a person, like any other"
+- `tests/e2e/start.spec.ts` — "refuses that reviewer on the server, not only on the screen"
+- `tests/e2e/start.spec.ts` — "refuses a kind of matter this firm does not handle"
+
+**The load-bearing one is the third-from-last.** Three steps sharing one button
+is exactly where a shortcut past the approval queue would hide, so the browser
+checks that a matter opened this way is waiting for a person like any other.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

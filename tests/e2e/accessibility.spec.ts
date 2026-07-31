@@ -73,6 +73,7 @@ test.describe("public pages", () => {
 test.describe("the firm workspace", () => {
   for (const path of [
     "/dashboard",
+    "/start",
     "/matters",
     "/intake",
     "/documents",
