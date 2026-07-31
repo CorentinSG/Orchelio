@@ -215,6 +215,20 @@ export const ENFORCEMENT: readonly Enforcement[] = [
       "It checks the source, not the running process. A dependency could call out; that needs a network policy at the host.",
   },
   {
+    rule: "If a model is used, it is one running on this machine.",
+    enforcedBy:
+      "src/lib/ai/local-provider.ts is the one module permitted to open a socket, and only as loopback-only, which is checked rather than trusted: it must take its address from assertLoopback (src/lib/ai/loopback.ts), which returns nothing outside 127.0.0.0/8 and ::1, and it may write no address of its own. A hostname is refused too — including localhost, because a name is resolved by the machine and could be pointed elsewhere. It is used only when AI_PROVIDER=local; this instance ships with the simulation, which opens nothing.",
+    limitation:
+      "It is the address that is checked, not the machine. A model server on 127.0.0.1 that forwarded requests onward would defeat it, and choosing what runs there is the firm's decision. Orchelio can prove where it sent something, not what the thing it sent to did next.",
+  },
+  {
+    rule: "A model is never told whose file it is.",
+    enforcedBy:
+      "The message src/lib/ai/local-provider.ts sends carries counts, the subject of any disagreement, the kinds of missing document and the matter's reference — no client name, no matter title, no field value, no date and no filename. A unit test fails if any of those appear in what is sent.",
+    limitation:
+      "The reference itself is sent, because the summary is anchored to it. It names a file in this firm's system and nothing outside it, but it is not nothing.",
+  },
+  {
     rule: "A platform administrator cannot read a firm's matters or documents.",
     enforcedBy:
       "Cross-tenant reads live only in src/lib/data/platform.ts, which is checked to name no client-confidential or privileged model. Asserted again against the rendered pages in tests/e2e/admin.spec.ts.",

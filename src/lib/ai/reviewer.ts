@@ -57,6 +57,24 @@ const CONCLUSION_PATTERNS: readonly { pattern: RegExp; what: string }[] = [
   { pattern: /\bstatute\s+of\s+limitations\s+(expires|expired|runs)\b/i, what: "a confirmed limitation date" },
 ];
 
+/**
+ * What outcome a passage asserts, or `null` if it asserts none.
+ *
+ * Exported so prose that a model wrote can be judged *before* it becomes an
+ * analysis, against the same list the reviewer applies afterwards. Two readers,
+ * one list: adding a pattern tightens both, and no local model can be let
+ * through by a check that has drifted from the reviewer's.
+ *
+ * The reviewer keeps its own loop rather than calling this, because it reports
+ * every passage that asserts something and this answers about one.
+ */
+export function assertsAnOutcome(text: string): string | null {
+  for (const { pattern, what } of CONCLUSION_PATTERNS) {
+    if (pattern.test(text)) return what;
+  }
+  return null;
+}
+
 export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult {
   const { analysis, matter } = input;
   const issues: ReviewIssue[] = [];

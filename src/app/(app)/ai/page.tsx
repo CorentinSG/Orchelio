@@ -11,6 +11,7 @@ import { parseStringArray } from "@/lib/json-field";
 import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
 import { LOCKED_APPROVALS } from "@/lib/constants";
 import { reviewStatusLabel, type ReviewStatus } from "@/lib/ai/types";
+import { providerNotice } from "@/lib/ai/notice";
 import { serverEnv } from "@/lib/env";
 
 export const metadata = { title: "AI Workspace" };
@@ -40,7 +41,8 @@ export default async function AiWorkspacePage() {
 
   const enabled = parseStringArray(configuration?.aiFeatures);
   const timezone = firmTimezone(configuration?.timezone);
-  const provider = serverEnv().aiProvider;
+  const env = serverEnv();
+  const notice = providerNotice(env);
 
   return (
     <div className="space-y-6">
@@ -52,18 +54,11 @@ export default async function AiWorkspacePage() {
         </p>
       </header>
 
-      <Callout tone="ai" title="Simulated, and structurally so">
+      <Callout tone="ai" title={notice.workspaceTitle}>
         <p>
-          The provider is <code className="font-mono">{provider}</code>. No request leaves this
-          machine, no API key is present, and no charge is incurred. The figures below are
-          recorded so the usage screens have real data to show — they are marked as simulated in
-          the database, not merely on this page.
+          The provider is <code className="font-mono">{env.aiProvider}</code>. {notice.whereItGoes}
         </p>
-        <p className="mt-2">
-          The analyses are produced by deterministic rules over each matter&apos;s recorded fields,
-          intake answers and document <em>names</em>. No document is ever opened: Orchelio stores a
-          filename, a type and a size, and there is no OCR in this build.
-        </p>
+        <p className="mt-2">{notice.howItIsProduced}</p>
       </Callout>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -97,16 +92,16 @@ export default async function AiWorkspacePage() {
           </p>
         </Card>
 
-        <Card title="Simulated usage" description="This firm only. No charge was incurred.">
+        <Card title={notice.usageCardTitle} description="This firm only. No charge was incurred.">
           <dl>
             <DataRow label="Analyses run" value={usage.analyses} />
             <DataRow label="Reviews run" value={usage.reviews} />
             <DataRow label="Input tokens" value={usage.inputTokens.toLocaleString("en-GB")} />
             <DataRow label="Output tokens" value={usage.outputTokens.toLocaleString("en-GB")} />
-            <DataRow label="Simulated cost" value={formatCost(usage.costCents)} />
+            <DataRow label={notice.costLabel} value={formatCost(usage.costCents)} />
             <DataRow
               label="Real charges included"
-              value={usage.includesRealCharges ? "Yes" : "None — every record is simulated"}
+              value={usage.includesRealCharges ? "Yes" : notice.noCharges}
             />
           </dl>
         </Card>

@@ -366,6 +366,90 @@ checks that a matter opened this way is waiting for a person like any other.
 
 ---
 
+## Beyond the nine phases — a local model, admitted only where it can be checked
+
+**Claim:** a module may talk to a model on the firm's own machine, and that
+allowance is enforced rather than trusted — it must take its address from a
+function that cannot return anything outside 127.0.0.0/8 and ::1, and may write
+no address of its own. See
+[ADR-0023](decisions/ADR-0023-a-local-model-is-a-checked-exception.md).
+
+Proved by:
+
+- `tests/unit/loopback.test.ts` — "refuses a private network address, which is not the same as this machine"
+- `tests/unit/loopback.test.ts` — "refuses localhost, and says what to write instead"
+- `tests/unit/loopback.test.ts` — "refuses credentials smuggled into the address"
+- `tests/unit/loopback.test.ts` — "refuses a scheme that is not a request to this machine"
+- `tests/unit/loopback.test.ts` — "refuses nothing at all, rather than defaulting to something"
+- `tests/unit/loopback.test.ts` — "says the promise is checked rather than given"
+- `tests/unit/confidentiality.test.ts` — "says, for every promise, what makes it true or that nothing does"
+- `tests/unit/confidentiality.test.ts` — "points every enforced promise at something a reader can open"
+
+**The enforcement itself was proved by planting**, not by a test file: a module
+allowed as loopback that never calls the guard fails the build; one that calls
+the guard but writes an address into its own source fails; one that takes its
+address from outside passes. Since `src/lib/ai/local-provider.ts` was written,
+the plant was repeated on the real module — removing its `assertLoopback` call
+fails the build with the same message. Recorded here because a check nobody has
+seen fail is a check nobody should believe.
+
+---
+
+## Beyond the nine phases — the model writes the wording and nothing else
+
+**Claim:** with `AI_PROVIDER=local`, a model on the firm's own machine rewords
+the summary and decides nothing else. Every fact, date, disagreement and gap is
+derived by Orchelio; the model is told no client name; what it returns is
+refused if it concludes, invents a figure, adds a link or names the wrong
+matter; and the analysis says which of the two summaries is on the screen. See
+[ADR-0024](decisions/ADR-0024-the-model-writes-the-wording-and-nothing-else.md).
+
+Proved by:
+
+- `tests/unit/local-provider.test.ts` — "keeps every derived part of the analysis whatever the model says"
+- `tests/unit/local-provider.test.ts` — "tells it no client name, no title, no date and no filename"
+- `tests/unit/local-provider.test.ts` — "refuses to exist at an address that is not this machine"
+- `tests/unit/local-provider.test.ts` — "refuses one that concludes, and names what it read as"
+- `tests/unit/local-provider.test.ts` — "refuses a figure it was not given"
+- `tests/unit/local-provider.test.ts` — "never quotes a refused answer into the analysis"
+- `tests/unit/local-provider.test.ts` — "falls back to Orchelio's summary when nothing is listening"
+- `tests/unit/local-provider.test.ts` — "consults no model at all"
+- `tests/unit/local-provider.test.ts` — "is not billable, though it is not simulated either"
+- `tests/unit/local-provider.test.ts` — "records what a refused answer cost, because writing it was still work"
+- `tests/unit/local-provider.test.ts` — "says what it cannot catch, by failing to catch it"
+- `tests/unit/env.test.ts` — "refuses an address that is not on this machine, at startup"
+- `tests/unit/env.test.ts` — "refuses it without a model name, which is what explains a past analysis"
+- `tests/unit/provider-notice.test.ts` — "answers for all of them, with nothing left blank"
+- `tests/unit/provider-notice.test.ts` — "never calls a real run simulated"
+- `tests/unit/provider-notice.test.ts` — "reads the row rather than today's setting"
+- `tests/integration/local-model.test.ts` — "is reached at the address the guard produced, with the request a runner expects"
+- `tests/integration/local-model.test.ts` — "makes one request for a whole analysis, and none for the review"
+- `tests/integration/local-model.test.ts` — "gives up on a server that never answers, and calls it slow rather than absent"
+- `tests/integration/local-model.test.ts` — "keeps the analysis whole when the server answers with nonsense"
+
+**The load-bearing one is the first.** Everything else in this section limits
+what a bad answer can do; that one asserts a bad answer can do nothing at all to
+any fact, by running the same matter twice — once with a paragraph that is
+accepted, once with one that is refused — and requiring the derived parts to be
+identical both times.
+
+Four of these were proved by planting: removing the outcome check fails three
+tests, letting the model's answer clear a derived field fails the first one,
+putting the client's name back into the message fails the second, and collapsing
+"slow" into "absent" fails the two that tell them apart.
+
+The socket tests are separate from the rest on purpose. What `fetch` throws when
+a request times out is a fact about the runtime, not about this code — measured
+as a bare `TimeoutError` on Node 22 — so the provider asks the abort signal
+instead of reading the error, and `tests/integration/local-model.test.ts` runs
+that path against a server which genuinely never answers.
+
+**What no test here proves:** how a real model behaves. None is installed in
+this repository, so how often a given 7B model trips these checks is unknown,
+and a firm should expect to find out on its own machine.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

@@ -46,8 +46,8 @@ export default function GuidePage() {
             <p>{FICTIONAL_DATA_NOTICE}</p>
             <p className="mt-2">
               Every account uses the password <span className="font-mono">{DEMO_PASSWORD}</span>,
-              which is also printed on the sign-in page. No AI request is made anywhere in this
-              walkthrough: the assistant is simulated, and no charge is incurred.
+              which is also printed on the sign-in page. No AI request leaves this machine
+              anywhere in this walkthrough, and no charge is incurred by any of it.
             </p>
           </Callout>
 

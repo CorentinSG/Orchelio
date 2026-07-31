@@ -262,7 +262,7 @@ orchelio/
 | Styling | Tailwind CSS 4 with Orchelio design tokens | One consistent, accessible visual system. |
 | Database | SQLite via Prisma 7 | Free, local, no server to install. |
 | Tests | Vitest (units) + Playwright (browser) | Fast feedback plus real-browser confidence. |
-| AI | Simulated provider, selected by `AI_PROVIDER` | No key, no cost, no data leaving the machine. |
+| AI | Simulated by default, selected by `AI_PROVIDER` | No key, no cost, no data leaving the machine. |
 
 ---
 
@@ -324,6 +324,28 @@ Stated plainly, because the demonstration should not be mistaken for a finished 
    are tracked in [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 
 ---
+
+## Using a model on your own computer
+
+If you would rather have plainer prose than the simulation writes, and would rather not pay anybody
+per word for it, Orchelio can use a model running on the same machine.
+
+1. Install a local model runner — Ollama, LM Studio, llama.cpp's server or vLLM — and pull a model.
+2. In `.env`: `AI_PROVIDER=local`, `LOCAL_MODEL_URL=http://127.0.0.1:11434` and
+   `LOCAL_MODEL_NAME=` the model you pulled.
+3. Restart. If the address is not on this machine, Orchelio refuses to start and says why.
+
+**What the model is allowed to do is write one paragraph.** Every fact, date, disagreement and
+missing document is worked out by Orchelio from the record, exactly as before, and the model is
+never told the client's name. What it writes is checked before it is shown, and thrown away if it
+draws a conclusion, uses a figure it was not given, adds a link or names the wrong matter — in
+which case you get Orchelio's own summary and a sentence saying why. Every analysis says which of
+the two you are reading.
+
+Nothing leaves the machine: `127.0.0.1` is the computer talking to itself, and the build fails if
+that stops being enforced. Nothing here has been measured against a real model, because none is
+installed in this repository. See
+[`docs/decisions/ADR-0024`](docs/decisions/ADR-0024-the-model-writes-the-wording-and-nothing-else.md).
 
 ## Adding the Anthropic API later
 

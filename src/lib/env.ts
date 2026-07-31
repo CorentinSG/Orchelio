@@ -11,7 +11,9 @@
  * API key is deliberately server-only.
  */
 
-export const AI_PROVIDERS = ["mock", "anthropic"] as const;
+import { assertLoopback } from "@/lib/ai/loopback";
+
+export const AI_PROVIDERS = ["mock", "anthropic", "local"] as const;
 export type AiProviderName = (typeof AI_PROVIDERS)[number];
 
 export const APP_ENVIRONMENTS = ["demo", "development", "production"] as const;
@@ -59,6 +61,22 @@ export type ServerEnv = {
    * the browser. Absent in the demo.
    */
   anthropicApiKey: string | undefined;
+  /**
+   * Where a model server on this machine is listening.
+   *
+   * Only meaningful when `aiProvider` is `"local"`, and checked here rather
+   * than at first use: an address that is not on this machine should stop the
+   * application from starting, at a moment when no client material exists yet,
+   * rather than fail on the first matter somebody analyses.
+   */
+  localModelUrl: string | undefined;
+  /**
+   * Which model that server should load, e.g. "qwen2.5:7b".
+   *
+   * Required with `"local"` and recorded on every analysis, so an output kept
+   * for two years can still be explained by what produced it.
+   */
+  localModelName: string | undefined;
 };
 
 /**
@@ -79,12 +97,48 @@ export function parseServerEnv(source: EnvSource = process.env): ServerEnv {
     );
   }
 
+  const localModelUrl = source["LOCAL_MODEL_URL"]?.trim() || undefined;
+  const localModelName = source["LOCAL_MODEL_NAME"]?.trim() || undefined;
+
+  if (aiProvider === "local") {
+    if (!localModelUrl) {
+      throw new EnvironmentError(
+        'AI_PROVIDER is set to "local" but LOCAL_MODEL_URL is missing. ' +
+          "Set it to the address of a model server running on this machine, " +
+          "such as http://127.0.0.1:11434 for Ollama.",
+      );
+    }
+
+    // Refused here, before anything starts, rather than on the first matter.
+    // The address is the whole of the promise a firm is given about where its
+    // material goes, so the application should not come up at all if it is
+    // pointing anywhere but at this machine.
+    try {
+      assertLoopback(localModelUrl);
+    } catch (error) {
+      throw new EnvironmentError(
+        `LOCAL_MODEL_URL cannot be used: ${(error as Error).message} ` +
+          "Orchelio opens a connection to this machine and to nothing else.",
+      );
+    }
+
+    if (!localModelName) {
+      throw new EnvironmentError(
+        'AI_PROVIDER is set to "local" but LOCAL_MODEL_NAME is missing. ' +
+          'Name the model the server should use, such as "qwen2.5:7b". ' +
+          "It is recorded on every analysis so a past output can be explained later.",
+      );
+    }
+  }
+
   return {
     appName,
     appEnv,
     aiProvider,
     databaseUrl,
     anthropicApiKey: source["ANTHROPIC_API_KEY"]?.trim() || undefined,
+    localModelUrl,
+    localModelName,
   };
 }
 
