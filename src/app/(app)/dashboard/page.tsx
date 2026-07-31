@@ -11,6 +11,7 @@ import { actorFor, currentSession } from "@/lib/auth/session";
 import { permissionsFor, roleLabel } from "@/lib/auth/permissions";
 import { listActivity } from "@/lib/data/activity";
 import { firmConfiguration } from "@/lib/data/firms";
+import { firmTimezone, formatMoment } from "@/lib/format/dates";
 import { firmStatistics, practiceAreaCounts } from "@/lib/data/statistics";
 import { formatCost } from "@/lib/data/usage";
 import { requestNow } from "@/lib/clock";
@@ -75,6 +76,7 @@ export default async function DashboardPage() {
 
   const actor = actorFor(session.user, firm.id);
   const permissions = permissionsFor(actor).sort();
+  const timezone = firmTimezone(configuration?.timezone);
   const matterTypes = parseStringArray(configuration?.matterTypes);
   const aiFeatures = parseStringArray(configuration?.aiFeatures);
   const needsOnboarding = configuration?.onboardingStatus !== "complete";
@@ -202,7 +204,7 @@ export default async function DashboardPage() {
                   <p className="text-xs text-ink-muted">{event.user?.name ?? "System"}</p>
                 </div>
                 <time dateTime={event.createdAt.toISOString()} className="text-xs text-ink-subtle">
-                  {event.createdAt.toISOString().replace("T", " ").slice(0, 19)} UTC
+                  {formatMoment(event.createdAt, timezone)}
                 </time>
               </li>
             ))}

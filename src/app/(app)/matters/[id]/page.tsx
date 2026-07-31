@@ -35,7 +35,7 @@ import { ActivityDetail, ActivityStatusBadge, activityLabel } from "@/components
 import { decisionLabel } from "@/lib/approvals/actions";
 import { isDecisionStatus, isPendingStatus } from "@/lib/approvals/status";
 import { firmConfiguration } from "@/lib/data/firms";
-import { firmTimezone, timezoneNotice } from "@/lib/format/dates";
+import { firmTimezone, formatMoment, timezoneNotice } from "@/lib/format/dates";
 import { AI_FEATURE_OPTIONS } from "@/lib/onboarding/catalogue";
 import { categoriesFor, categoryLabel, expectedButMissing } from "@/lib/matters/documents";
 import { displayValue, sectionsFor } from "@/lib/matters/fields";
@@ -936,7 +936,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     dateTime={event.createdAt.toISOString()}
                     className="whitespace-nowrap text-xs text-ink-subtle"
                   >
-                    {event.createdAt.toISOString().replace("T", " ").slice(0, 19)} UTC
+                    {formatMoment(event.createdAt, timezone)}
                   </time>
                 </li>
               ))}
