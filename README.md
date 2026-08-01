@@ -65,7 +65,32 @@ then reopen your terminal.
 
 ## Installation
 
+### The short way: one command
+
+```bash
+npm run setup
+```
+
+It does every step below, in order, and starts the application: creates `.env`, installs the
+dependencies, applies the migrations, loads the fictional data, then opens
+<http://localhost:3000>. Add `-- --no-start` to prepare everything without starting the server.
+
+Someone who would rather not open a terminal at all can double-click
+**`start-orchelio.bat`** on Windows, or run **`./start-orchelio.sh`** on macOS and Linux. Both are
+thin wrappers over the same script ([`scripts/setup-local.mjs`](scripts/setup-local.mjs)).
+
+Safe to re-run: an existing `.env` is left untouched, the migrations apply only what is missing,
+and the seed updates records rather than replacing them. Nothing here deletes anything —
+`npm run reset-demo` is the only command that erases, and you type it yourself.
+
+**En français :** [`DEMARRER.md`](DEMARRER.md) explains the same thing for a reader who is not a
+developer.
+
+### The long way: four commands
+
 Open a terminal **inside the project folder**, then run the four commands below, one at a time.
+This is what `npm run setup` does; running them by hand is useful when one of them fails and you
+want to see where.
 
 ### 1. Install the dependencies
 
@@ -180,6 +205,7 @@ on the real internet.
 
 | Command | What it does |
 | ------- | ------------ |
+| `npm run setup` | Prepares this checkout and starts the application, in one command. Safe to re-run. |
 | `npm run harness:doctor` | Checks that this checkout is ready, and prints the fix for anything that is not. **Start here if something looks wrong.** |
 | `npm run verify` | Style, types and tests in one command — run before committing. |
 | `npm run verify:full` | The above, plus the production build and the browser tests. |

@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 186.
+Modules: 187.
 
 ## `prisma/`
 
@@ -50,6 +50,10 @@ Two guarantees, both cheap and both easy to break by hand: 1.
 ### `scripts/doctor.mjs`
 
 Answers one question: is this checkout ready to work in? It checks the things that actually go wrong — a missing `.env`, an un-migrated database, an empty seed, a stal…
+
+### `scripts/setup-local.mjs`
+
+The README lists five steps and every one of them is easy.
 
 ### `scripts/skills-check.mjs`
 
