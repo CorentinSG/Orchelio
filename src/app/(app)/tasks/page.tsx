@@ -7,7 +7,7 @@ import { listTasks } from "@/lib/data/activity";
 import { firmTimezoneFor } from "@/lib/data/firms";
 import { requestNow } from "@/lib/clock";
 
-export const metadata = { title: "Tasks" };
+export const metadata = { title: "Tâches" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -28,7 +28,7 @@ export default async function TasksPage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Tasks</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Tâches</h1>
         <p className="mt-1 text-ink-muted">
           {tasks.length} open across this firm&apos;s matters
           {overdue.length > 0 ? `, ${overdue.length} past their recorded date` : ""}.

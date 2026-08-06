@@ -128,10 +128,10 @@ test.describe("firm settings", () => {
   test("switching an AI feature off removes the card that depended on it", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
 
-    // The exact widget label, not a loose match: "Missing identity documents"
+    // The exact widget label, not a loose match: "Documents d’identité manquants"
     // does not contain the phrase "missing documents", and a regex that assumed
     // it did would report the card as absent while it was on screen.
-    const card = page.getByText("Missing identity documents");
+    const card = page.getByText("Documents d’identité manquants");
 
     await page.goto("/dashboard");
     await expect(card, "the fixture assumes this firm starts with the feature on").toBeVisible();
@@ -144,8 +144,8 @@ test.describe("firm settings", () => {
     // Omitted, not shown as zero: a "0 missing documents" card at a firm that
     // never asked Orchelio to look would read as reassurance.
     await page.goto("/dashboard");
-    await expect(page.getByText("Missing identity documents")).toHaveCount(0);
-    await expect(page.getByText("Missing immigration documents")).toHaveCount(0);
+    await expect(page.getByText("Documents d’identité manquants")).toHaveCount(0);
+    await expect(page.getByText("Documents d’immigration manquants")).toHaveCount(0);
 
     await page.goto("/settings?section=ai");
     await page.getByRole("checkbox", { name: /Identify missing documents/ }).check();
@@ -161,7 +161,7 @@ test.describe("firm settings", () => {
     await page.getByRole("button", { name: "Save changes" }).click();
     await page.waitForURL(/saved=1/);
 
-    const sidebar = page.getByRole("complementary", { name: "Firm workspace" });
+    const sidebar = page.getByRole("complementary", { name: "Espace du cabinet" });
     await expect(sidebar.getByText("Carter Law")).toBeVisible();
     // The product's own name is untouched by anything a firm can type.
     await expect(sidebar.getByText("Orchelio", { exact: true })).toBeVisible();

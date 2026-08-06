@@ -225,7 +225,7 @@ test.describe("keyboard and focus", () => {
     await page.getByRole("link", { name: /IMM-2026-001/ }).first().click();
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
 
-    const tabs = page.getByRole("navigation", { name: "Matter sections" });
+    const tabs = page.getByRole("navigation", { name: "Sections du dossier" });
     // aria-current is what tells a screen-reader user where they are. Colour
     // alone would leave them counting.
     await expect(tabs.locator("[aria-current='page']")).toHaveCount(1);

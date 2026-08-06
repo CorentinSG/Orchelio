@@ -41,7 +41,7 @@ import { APP_NAME } from "@/lib/app-config";
 import { providerNotice } from "@/lib/ai/notice";
 import { serverEnv } from "@/lib/env";
 
-export const metadata = { title: "Firm settings" };
+export const metadata = { title: "Réglages du cabinet" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -125,7 +125,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Firm settings</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Réglages du cabinet</h1>
         <p className="mt-1 text-ink-muted">
           What this firm handles, what it lets the assistant do, and who may use it.
         </p>

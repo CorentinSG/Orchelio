@@ -41,11 +41,11 @@ test.describe("Protection of signed-out visitors", () => {
     const body = (await response?.text()) ?? "";
 
     for (const workspaceOnly of [
-      "Firm workspace",
-      "Your permissions",
-      "Recent activity",
+      "Espace du cabinet",
+      "Vos autorisations",
+      "Activité récente",
       "approval.decide",
-      "Signed in as",
+      "Session ouverte :",
     ]) {
       expect(body).not.toContain(workspaceOnly);
     }
@@ -96,7 +96,7 @@ test.describe("Workspaces", () => {
 
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
-    await expect(page.getByText("Immigration Law").first()).toBeVisible();
+    await expect(page.getByText("Droit de l’immigration").first()).toBeVisible();
     await expect(page.getByText("Administrateur du cabinet").first()).toBeVisible();
   });
 
@@ -110,7 +110,7 @@ test.describe("Workspaces", () => {
 
     // The specification forbids a paralegal from approving an analysis,
     // confirming a deadline or closing a matter.
-    const permissions = page.getByRole("region", { name: "Your permissions" });
+    const permissions = page.getByRole("region", { name: "Vos autorisations" });
     await expect(permissions).toContainText("document.upload");
     await expect(permissions).not.toContainText("approval.decide");
     await expect(permissions).not.toContainText("deadline.confirm");
@@ -140,7 +140,7 @@ test.describe("Workspaces", () => {
     // A platform administrator holds no firm membership, so /dashboard sends
     // them to platform administration rather than into a firm.
     await expect(page).toHaveURL(/\/admin\/firms/);
-    await expect(page.getByRole("heading", { name: "Firms" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinets" })).toBeVisible();
     await expect(page.getByText("Dupont Immigration Law")).toBeVisible();
     await expect(page.getByText("Carter Employment & Labor Law")).toBeVisible();
     await expect(page.getByText("Scope of this role")).toBeVisible();
@@ -152,7 +152,7 @@ test.describe("Sign-out", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await expect(page).toHaveURL(/\/login/);
 
     await page.goto("/dashboard");

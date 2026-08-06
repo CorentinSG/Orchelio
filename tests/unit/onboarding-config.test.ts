@@ -262,7 +262,7 @@ describe("step validation", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.message).toContain("Family Law");
+      expect(result.message).toContain("Droit de la famille");
     }
   });
 

@@ -126,7 +126,7 @@ test.describe("The seven-step questionnaire", () => {
     // Step 2
     await expect(page.getByText("Step 2 of 7")).toBeVisible();
     await uncheckAll(page, "practiceAreas");
-    await check(page, "Immigration Law");
+    await check(page, "Droit de l’immigration");
     await page.getByLabel("Main practice area").selectOption("immigration");
     await continueStep(page);
 
@@ -174,7 +174,7 @@ test.describe("The seven-step questionnaire", () => {
     await expect(page.getByText("Step 7 of 7")).toBeVisible();
     const summary = page.getByRole("region", { name: "Summary" });
     await expect(summary).toContainText("Dupont Immigration Law");
-    await expect(summary).toContainText("Immigration Law");
+    await expect(summary).toContainText("Droit de l’immigration");
 
     const matterTypesCard = page.getByRole("region", { name: "Matter types" });
     await expect(matterTypesCard).toContainText("family_based");
@@ -187,8 +187,8 @@ test.describe("The seven-step questionnaire", () => {
 
     // The dashboard is now assembled from this configuration.
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByText("Status expiration dates to review")).toBeVisible();
-    await expect(page.getByText("Missing identity documents")).toBeVisible();
+    await expect(page.getByText("Dates d’expiration de statut à revoir")).toBeVisible();
+    await expect(page.getByText("Documents d’identité manquants")).toBeVisible();
   });
 
   test("gives the same answers a different meaning at an employment firm", async ({ page }) => {
@@ -196,7 +196,7 @@ test.describe("The seven-step questionnaire", () => {
 
     await page.goto("/onboarding/2");
     await uncheckAll(page, "practiceAreas");
-    await check(page, "Employment & Labor Law");
+    await check(page, "Droit du travail");
     await page.getByLabel("Main practice area").selectOption("employment_law");
     await continueStep(page);
 
@@ -234,9 +234,9 @@ test.describe("The seven-step questionnaire", () => {
 
     // The same product, the same answers — a different dashboard, because the
     // questions an employment firm asks are not the ones an immigration firm asks.
-    await expect(page.getByText("Termination letters to review")).toBeVisible();
-    await expect(page.getByText("Wage records missing")).toBeVisible();
-    await expect(page.getByText("Status expiration dates to review")).toHaveCount(0);
+    await expect(page.getByText("Lettres de licenciement à examiner")).toBeVisible();
+    await expect(page.getByText("Justificatifs de salaire manquants")).toBeVisible();
+    await expect(page.getByText("Dates d’expiration de statut à revoir")).toHaveCount(0);
   });
 
   test("omits a widget whose AI feature the firm switched off", async ({ page }) => {

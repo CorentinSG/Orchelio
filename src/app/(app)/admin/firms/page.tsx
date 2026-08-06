@@ -9,7 +9,7 @@ import { creatablePracticeAreas } from "@/lib/platform/new-firm";
 import { DEMO_PASSWORD } from "@/lib/demo-accounts";
 import { IS_DEMO } from "@/lib/app-config";
 
-export const metadata = { title: "Firms" };
+export const metadata = { title: "Cabinets" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -50,7 +50,7 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">
           Platform administration
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Firms</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Cabinets</h1>
         <p className="mt-1 text-ink-muted">
           Every firm on this instance. Matter content is deliberately not shown here.
         </p>

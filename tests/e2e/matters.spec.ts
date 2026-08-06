@@ -44,7 +44,7 @@ function alerts(page: import("@playwright/test").Page) {
 
 async function openDocumentsTab(page: import("@playwright/test").Page) {
   await page
-    .getByRole("navigation", { name: "Matter sections" })
+    .getByRole("navigation", { name: "Sections du dossier" })
     .getByRole("link", { name: "Documents" })
     .click();
   await expect(page.getByRole("region", { name: /^Documents \(/ })).toBeVisible();
@@ -64,7 +64,7 @@ test.describe("The matter list", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters");
 
-    await expect(page.getByRole("heading", { name: "Matters", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dossiers", level: 1 })).toBeVisible();
     await expect(page.getByRole("link", { name: /IMM-2026-001/ })).toBeVisible();
 
     // The employment firm's references exist in the same database.
@@ -89,7 +89,7 @@ test.describe("The matter list", () => {
     await page.goto("/matters");
     await expect(page.getByLabel("Representing")).toBeVisible();
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters");
     await expect(page.getByLabel("Representing")).toHaveCount(0);
@@ -166,9 +166,9 @@ test.describe("A matter record", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-001");
 
-    const tabs = page.getByRole("navigation", { name: "Matter sections" });
+    const tabs = page.getByRole("navigation", { name: "Sections du dossier" });
     // All nine exist as of Phase 7. None is a placeholder any more.
-    for (const label of ["Overview", "Timeline", "AI Analysis", "Communications", "Approvals"]) {
+    for (const label of ["Vue d’ensemble", "Chronologie", "Analyse", "Courriers", "Validations"]) {
       await expect(tabs.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
     await expect(tabs).not.toContainText(/Phase \d/);
@@ -176,19 +176,19 @@ test.describe("A matter record", () => {
     await tabs.getByRole("link", { name: "Documents" }).click();
     await expect(page.getByRole("region", { name: /^Documents \(/ })).toBeVisible();
 
-    await tabs.getByRole("link", { name: "Tasks" }).click();
-    await expect(page.getByRole("region", { name: /^Tasks \(/ })).toBeVisible();
+    await tabs.getByRole("link", { name: "Tâches" }).click();
+    await expect(page.getByRole("region", { name: /^Tâches \(/ })).toBeVisible();
 
-    await tabs.getByRole("link", { name: "Intake" }).click();
-    await expect(page.getByRole("region", { name: "Intake" })).toBeVisible();
+    await tabs.getByRole("link", { name: "Questionnaire client" }).click();
+    await expect(page.getByRole("region", { name: "Questionnaire client" })).toBeVisible();
   });
 
   test("presents intake answers as the client's words, not as fact", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-002");
     await page
-      .getByRole("navigation", { name: "Matter sections" })
-      .getByRole("link", { name: "Intake" })
+      .getByRole("navigation", { name: "Sections du dossier" })
+      .getByRole("link", { name: "Questionnaire client" })
       .click();
 
     await expect(page.getByText("What the client said")).toBeVisible();
@@ -220,7 +220,7 @@ test.describe("A matter record", () => {
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
     const employmentMatterUrl = page.url();
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "immigration.attorney@demo.local");
 
     const response = await page.goto(employmentMatterUrl);
@@ -497,7 +497,7 @@ test.describe("The firm workspace pages", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/tasks");
 
-    await expect(page.getByRole("heading", { name: "Tasks", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Tâches", level: 1 })).toBeVisible();
     const body = await page.locator("main").innerText();
     expect(body).not.toContain("IMM-2026-");
   });
@@ -506,7 +506,7 @@ test.describe("The firm workspace pages", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/intake");
 
-    await expect(page.getByRole("heading", { name: "Intake", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Questionnaire client", level: 1 })).toBeVisible();
     const body = await page.locator("main").innerText();
     expect(body).not.toContain("EMP-2026-");
   });
@@ -516,10 +516,10 @@ test.describe("The firm workspace pages", () => {
 
     // A number, not a dash: Phase 5 fills these.
     for (const label of [
-      "Active matters",
-      "New leads",
-      "Missing identity documents",
-      "Status expiration dates to review",
+      "Dossiers actifs",
+      "Premiers contacts",
+      "Documents d’identité manquants",
+      "Dates d’expiration de statut à revoir",
     ]) {
       const tile = page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
       await expect(tile, label).toBeVisible();
@@ -536,7 +536,7 @@ test.describe("The firm workspace pages", () => {
     // on a later phase. Phase 7 filled the last of them. The rule it was
     // protecting (a dash, never a zero, for a figure that is not known) is
     // asserted directly in tests/unit/dashboard-widgets.test.ts.
-    for (const label of ["Pending approvals", "Claude analyses run", "Active matters"]) {
+    for (const label of ["Validations en attente", "Analyses Claude effectuées", "Dossiers actifs"]) {
       const tile = page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
       await expect(tile.locator("p").first(), label).toHaveText(/^\d+$/);
       await expect(tile, label).not.toContainText(/Phase \d/);
@@ -549,9 +549,9 @@ test.describe("The firm workspace pages", () => {
     const tile = (label: string) =>
       page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
 
-    await expect(tile("Employee-side matters").locator("p").first()).toHaveText(/^\d+$/);
-    await expect(tile("Employer-side matters").locator("p").first()).toHaveText(/^\d+$/);
+    await expect(tile("Dossiers côté salarié").locator("p").first()).toHaveText(/^\d+$/);
+    await expect(tile("Dossiers côté employeur").locator("p").first()).toHaveText(/^\d+$/);
     // The immigration firm's questions are not asked here.
-    await expect(page.locator("p", { hasText: /^New leads$/ })).toHaveCount(0);
+    await expect(page.locator("p", { hasText: /^Premiers contacts$/ })).toHaveCount(0);
   });
 });

@@ -51,9 +51,9 @@ describe("practice areas", () => {
     expect(isPracticeAreaAvailable("family_law")).toBe(false);
   });
 
-  it("uses the agreed United States labels", () => {
-    expect(practiceAreaLabel("immigration")).toBe("Immigration Law");
-    expect(practiceAreaLabel("employment_law")).toBe("Employment & Labor Law");
+  it("uses the agreed French labels — the V1 pivot re-agreed them", () => {
+    expect(practiceAreaLabel("immigration")).toBe("Droit de l’immigration");
+    expect(practiceAreaLabel("employment_law")).toBe("Droit du travail");
   });
 
   it("does not invent a label for an unknown key", () => {

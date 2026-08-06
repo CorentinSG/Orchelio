@@ -38,13 +38,13 @@ async function openMatter(page: import("@playwright/test").Page, reference: stri
 }
 
 function tabs(page: import("@playwright/test").Page) {
-  return page.getByRole("navigation", { name: "Matter sections" });
+  return page.getByRole("navigation", { name: "Sections du dossier" });
 }
 
 /** Runs an analysis, which raises the approval both demo firms require. */
 async function runAnalysis(page: import("@playwright/test").Page, reference: string) {
   await openMatter(page, reference);
-  await tabs(page).getByRole("link", { name: "AI Analysis" }).click();
+  await tabs(page).getByRole("link", { name: "Analyse" }).click();
   await page.getByRole("button", { name: /^Run analysis$|^Run again$/ }).click();
   await page.waitForURL(/tab=analysis/);
 }
@@ -157,7 +157,7 @@ test.describe("A locked rule", () => {
   test("raises a decision on a draft, whatever the firm configured", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-003");
-    await tabs(page).getByRole("link", { name: "Communications" }).click();
+    await tabs(page).getByRole("link", { name: "Courriers" }).click();
 
     await page.getByLabel("Subject").fill("Documents we still need");
     await page.getByLabel("Text").fill("Fictional draft to a fictional client.");
@@ -167,7 +167,7 @@ test.describe("A locked rule", () => {
     await expect(page.getByText("Draft prepared, and waiting for a decision")).toBeVisible();
     await expect(page.getByText("Not approved — do not use").first()).toBeVisible();
 
-    await tabs(page).getByRole("link", { name: "Approvals", exact: true }).click();
+    await tabs(page).getByRole("link", { name: "Validations", exact: true }).click();
     const approvals = page.getByRole("region", { name: /^Approvals on this matter/ });
     await expect(approvals).toContainText("Approve a draft for use outside the firm");
     await expect(approvals).toContainText("Cannot be switched off");
@@ -176,7 +176,7 @@ test.describe("A locked rule", () => {
   test("says Orchelio sends nothing, and approving does not change that", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-003");
-    await tabs(page).getByRole("link", { name: "Communications" }).click();
+    await tabs(page).getByRole("link", { name: "Courriers" }).click();
 
     await expect(page.getByText("Orchelio sends nothing")).toBeVisible();
     await expect(page.locator("main")).toContainText(/no .*sent.* status and no\s+transport/i);
@@ -187,7 +187,7 @@ test.describe("A locked rule", () => {
   test("never confirms a date without a person", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-002");
-    await tabs(page).getByRole("link", { name: "Approvals", exact: true }).click();
+    await tabs(page).getByRole("link", { name: "Validations", exact: true }).click();
 
     const ask = page.getByRole("button", { name: /Ask a person to confirm/ });
     await expect(ask).toBeVisible();
@@ -206,7 +206,7 @@ test.describe("What each role may do", () => {
     await signIn(page, "immigration.paralegal@demo.local");
     await page.goto("/approvals");
 
-    await expect(page.getByRole("heading", { name: "Approvals", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Validations", level: 1 })).toBeVisible();
     await expect(page.locator("main")).toContainText(/Your role does not decide these/i);
     await expect(page.getByRole("button", { name: /^Approved$/ })).toHaveCount(0);
   });
@@ -218,7 +218,7 @@ test.describe("What each role may do", () => {
     await page.goto("/approvals");
     const approvalId = (await pendingCard(page, "IMM-2026-001").getAttribute("id")) ?? "";
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "immigration.paralegal@demo.local");
     await page.goto("/approvals");
 
@@ -253,7 +253,7 @@ test.describe("What each role may do", () => {
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
 
     await openMatter(page, "IMM-2026-001");
-    await tabs(page).getByRole("link", { name: "Communications" }).click();
+    await tabs(page).getByRole("link", { name: "Courriers" }).click();
 
     await expect(page.getByRole("region", { name: "Prepare a draft" })).toHaveCount(0);
     await expect(page.getByText("Read only")).toBeVisible();
@@ -277,7 +277,7 @@ test.describe("The activity log", () => {
     await page.waitForURL(/\/approvals/);
 
     await page.goto("/activity");
-    await expect(page.getByRole("heading", { name: "Activity log", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Journal d’activité", level: 1 })).toBeVisible();
     await expect(page.locator("main")).toContainText("Decision recorded");
     // Honest about what the guarantee rests on.
     await expect(page.locator("main")).toContainText(/append-only.*discipline/i);
@@ -303,7 +303,7 @@ test.describe("The activity log", () => {
     // The refusal page is outside the workspace shell and has no sign-out
     // control, which is correct — it is a dead end by design.
     await page.goto("/matters");
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/activity?status=denied");
 
@@ -354,7 +354,7 @@ test.describe("The approval centre", () => {
       (await pendingCard(page, "IMM-2026-001").getAttribute("id")) ?? ""
     ).replace("approval-", "");
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/approvals");
 
@@ -387,9 +387,9 @@ test.describe("The dashboard", () => {
     await runAnalysis(page, "IMM-2026-001");
     await page.goto("/dashboard");
 
-    const tile = page.locator("p", { hasText: /^Pending approvals$/ }).locator("..");
+    const tile = page.locator("p", { hasText: /^Validations en attente$/ }).locator("..");
     await expect(tile.locator("p").first()).toHaveText(/^\d+$/);
-    await expect(tile).toContainText(/Awaiting a human decision/i);
+    await expect(tile).toContainText(/d.une décision humaine/i);
   });
 });
 
@@ -560,7 +560,7 @@ test.describe("A request a newer analysis replaced", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await analyseTwice(page);
     await openMatter(page, REFERENCE);
-    await tabs(page).getByRole("link", { name: "Approvals" }).click();
+    await tabs(page).getByRole("link", { name: "Validations" }).click();
     await page.waitForURL(/tab=approvals/);
 
     const section = page.getByRole("region", { name: /^Approvals on this matter/ });

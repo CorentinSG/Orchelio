@@ -85,7 +85,7 @@ export function validateNewFirm(input: Partial<NewFirmInput>): NewFirmValidation
     const label = PRACTICE_AREAS.find((area) => area.key === input.primaryPracticeArea)?.label;
     return {
       ok: false,
-      message: `${label ?? "That practice area"} has no template yet. Choose Immigration Law or Employment & Labor Law.`,
+      message: `${label ?? "Ce domaine de droit"} n’a pas encore de modèle. Choisissez Droit de l’immigration ou Droit du travail.`,
     };
   }
 

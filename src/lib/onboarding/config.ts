@@ -181,7 +181,7 @@ export function validateStep(step: number, answers: Partial<OnboardingAnswers>):
         const label = PRACTICE_AREAS.find((a) => a.key === answers.primaryPracticeArea)?.label;
         return {
           ok: false,
-          message: `${label ?? "That practice area"} has no template yet. Choose Immigration Law or Employment & Labor Law as the main area.`,
+          message: `${label ?? "Ce domaine de droit"} n’a pas encore de modèle. Choisissez Droit de l’immigration ou Droit du travail comme domaine principal.`,
         };
       }
       return { ok: true };

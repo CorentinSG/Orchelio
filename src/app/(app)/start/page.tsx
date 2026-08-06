@@ -10,7 +10,7 @@ import { matterTypesForPracticeAreas } from "@/lib/data/catalogues";
 import { guidedReadiness } from "@/lib/start/guided";
 import { parseStringArray } from "@/lib/json-field";
 
-export const metadata = { title: "Open a matter" };
+export const metadata = { title: "Ouvrir un dossier" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -55,7 +55,7 @@ export default async function StartPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Open a matter</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Ouvrir un dossier</h1>
         <p className="mt-1 text-ink-muted">
           {
             "Four answers and whatever files you have. Orchelio does the rest and shows you what to check."

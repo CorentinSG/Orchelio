@@ -92,28 +92,27 @@ export default async function DashboardPage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">{firm.name}</h1>
         <p className="mt-1 text-ink-muted">
-          Signed in as {session.user.name} — {roleLabel(firm.role, session.user.isPlatformAdmin)}
+          Session ouverte : {session.user.name} — {roleLabel(firm.role, session.user.isPlatformAdmin)}
         </p>
       </header>
 
       {needsOnboarding ? (
-        <Callout tone="warning" title="This firm is not configured yet">
+        <Callout tone="warning" title="Ce cabinet n’est pas encore configuré">
           <p>
-            The dashboard below is generic until the onboarding questionnaire has been answered.
+            Le tableau de bord ci-dessous reste générique tant que le questionnaire d’installation n’a pas été rempli.
           </p>
           <p className="mt-2">
             <Link href="/onboarding" className="font-medium text-brand underline underline-offset-4">
-              Set up this firm
+              Configurer ce cabinet
             </Link>
           </p>
         </Callout>
       ) : (
-        <Callout tone="brand" title="Assembled from this firm's configuration">
-          The cards below are the ones an{" "}
-          {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()} firm asks about each
-          morning — a firm in another practice area sees different ones, from the same code.
-          Every figure is counted from real records, and a card whose AI feature this firm
-          switched off is absent rather than showing a zero.
+        <Callout tone="brand" title="Assemblé depuis la configuration de ce cabinet">
+          Les cartes ci-dessous sont celles qu’un cabinet de {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()}
+          {" "}consulte chaque matin — un cabinet d’un autre domaine en voit d’autres, depuis le même
+          code. Chaque chiffre est compté depuis de vrais enregistrements, et une carte dont la
+          fonction d’IA a été désactivée est absente plutôt qu’affichée à zéro.
         </Callout>
       )}
 
@@ -133,45 +132,45 @@ export default async function DashboardPage() {
         <StatTile
           label={providerNotice(serverEnv()).dashboardCostLabel}
           value={formatCost(statistics.usageCostCents)}
-          hint="this firm only — no charge"
+          hint="ce cabinet uniquement — aucun frais"
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="Firm workspace" description="Read from the database for this firm only.">
+        <Card title="Espace du cabinet" description="Lu dans la base pour ce cabinet uniquement.">
           <dl>
-            <DataRow label="Firm" value={firm.name} />
+            <DataRow label="Cabinet" value={firm.name} />
             <DataRow
-              label="Primary practice area"
+              label="Domaine de droit principal"
               value={practiceAreaLabel(firm.primaryPracticeArea)}
             />
-            <DataRow label="Tenant status" value={firm.status} />
+            <DataRow label="État du locataire" value={firm.status} />
             <DataRow
               label="Configuration"
               value={
                 configuration
                   ? configuration.onboardingStatus === "complete"
-                    ? "Complete"
-                    : `Draft — step ${configuration.onboardingStep} of 7`
-                  : "Not started"
+                    ? "Terminée"
+                    : `Brouillon — étape ${configuration.onboardingStep} sur 7`
+                  : "Pas commencée"
               }
             />
             <DataRow
-              label="Matter types enabled"
+              label="Types de dossiers activés"
               value={matterTypes.length > 0 ? matterTypes.length : "—"}
             />
             <DataRow label="Clients" value={statistics.clients} />
             <DataRow label="Documents" value={statistics.documents} />
-            <DataRow label="Open tasks" value={statistics.openTasks} />
+            <DataRow label="Tâches ouvertes" value={statistics.openTasks} />
           </dl>
         </Card>
 
         <Card
-          title="Your permissions"
-          description={`What the ${roleLabel(firm.role, false)} role allows, checked on the server.`}
+          title="Vos autorisations"
+          description={`Ce que permet le rôle ${roleLabel(firm.role, false)}, vérifié sur le serveur.`}
         >
           {permissions.length === 0 ? (
-            <p className="text-sm text-ink-muted">This role grants no permissions.</p>
+            <p className="text-sm text-ink-muted">Ce rôle n’accorde aucune autorisation.</p>
           ) : (
             <ul className="flex flex-wrap gap-1.5">
               {permissions.map((permission) => (
@@ -182,18 +181,18 @@ export default async function DashboardPage() {
             </ul>
           )}
           <p className="mt-4 text-sm text-ink-subtle">
-            Permissions are enforced in the server action or page that performs the work, not in
-            the browser. Hiding a button is not access control.
+            Les autorisations sont appliquées par l’action serveur ou la page qui fait le travail,
+            pas par le navigateur. Cacher un bouton n’est pas un contrôle d’accès.
           </p>
         </Card>
       </div>
 
       <Card
-        title="Recent activity"
-        description="This firm's own activity log. Other firms' events are never returned here."
+        title="Activité récente"
+        description="Le journal de ce cabinet uniquement. Les événements des autres cabinets ne sont jamais renvoyés ici."
       >
         {recentActivity.length === 0 ? (
-          <p className="text-sm text-ink-muted">No activity recorded yet for this firm.</p>
+          <p className="text-sm text-ink-muted">Aucune activité enregistrée pour ce cabinet.</p>
         ) : (
           <ul className="divide-y divide-line">
             {recentActivity.map((event) => (

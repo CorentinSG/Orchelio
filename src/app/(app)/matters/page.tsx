@@ -18,7 +18,7 @@ import { firmTimezone } from "@/lib/format/dates";
 import { parseStringArray } from "@/lib/json-field";
 import { statusLabel } from "@/components/matter-ui";
 
-export const metadata = { title: "Matters" };
+export const metadata = { title: "Dossiers" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -66,7 +66,7 @@ export default async function MattersPage({ searchParams }: PageProps) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Matters</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Dossiers</h1>
           <p className="mt-1 text-ink-muted">
             {matters.length} shown{activeFilters > 0 ? " (filtered)" : ""} · every matter here
             belongs to this firm.

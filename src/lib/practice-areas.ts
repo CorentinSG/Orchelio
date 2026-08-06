@@ -29,14 +29,14 @@ export type PracticeArea = {
 };
 
 export const PRACTICE_AREAS: readonly PracticeArea[] = [
-  { key: "immigration", label: "Immigration Law", status: "available" },
-  { key: "employment_law", label: "Employment & Labor Law", status: "available" },
-  { key: "family_law", label: "Family Law", status: "planned" },
-  { key: "personal_injury", label: "Personal Injury", status: "planned" },
-  { key: "criminal_defence", label: "Criminal Defence", status: "planned" },
-  { key: "business_law", label: "Business Law", status: "planned" },
-  { key: "landlord_tenant", label: "Landlord–Tenant Law", status: "planned" },
-  { key: "other", label: "Other", status: "planned" },
+  { key: "immigration", label: "Droit de l’immigration", status: "available" },
+  { key: "employment_law", label: "Droit du travail", status: "available" },
+  { key: "family_law", label: "Droit de la famille", status: "planned" },
+  { key: "personal_injury", label: "Dommage corporel", status: "planned" },
+  { key: "criminal_defence", label: "Droit pénal", status: "planned" },
+  { key: "business_law", label: "Droit des affaires", status: "planned" },
+  { key: "landlord_tenant", label: "Droit des baux", status: "planned" },
+  { key: "other", label: "Autre", status: "planned" },
 ] as const;
 
 export function practiceAreaLabel(key: string): string {

@@ -29,7 +29,7 @@ import {
 } from "@/lib/approvals/actions";
 import { LOCKED_APPROVAL_OPTIONS } from "@/lib/onboarding/catalogue";
 
-export const metadata = { title: "Approvals" };
+export const metadata = { title: "Validations" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -99,7 +99,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Approvals</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Validations</h1>
         <p className="mt-1 text-ink-muted">
           {counts.pending} waiting for a decision. Nothing here has taken effect.
         </p>

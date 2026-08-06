@@ -8,7 +8,7 @@ import { requestNow } from "@/lib/clock";
 import { firmTimezoneFor } from "@/lib/data/firms";
 import { formatMoment, timezoneNotice } from "@/lib/format/dates";
 
-export const metadata = { title: "Activity log" };
+export const metadata = { title: "Journal d’activité" };
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 100;
@@ -64,7 +64,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Activity log</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Journal d’activité</h1>
         <p className="mt-1 text-ink-muted">
           {total} event{total === 1 ? "" : "s"}
           {activeFilters > 0 ? " matching these filters" : ""} for this firm.

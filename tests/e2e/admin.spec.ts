@@ -83,7 +83,7 @@ async function continueStep(page: import("@playwright/test").Page, nextStep: num
 }
 
 async function signOut(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("button", { name: "Se déconnecter" }).click();
   await page.waitForURL(/\/login|\/$/);
 }
 
@@ -108,7 +108,7 @@ test.describe("platform administration", () => {
     await signIn(page, "platform.admin@demo.local");
     await page.goto("/admin/system");
 
-    await expect(page.getByRole("heading", { name: "System overview" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Vue d’ensemble du système" })).toBeVisible();
     await expect(page.getByText("connected")).toBeVisible();
     await expect(page.getByText("simulated")).toBeVisible();
   });
@@ -157,7 +157,7 @@ test.describe("platform administration", () => {
       administratorEmail: "nobody@nowhere.local",
     });
 
-    expect(decodeURIComponent(result.url)).toContain("no template yet");
+    expect(decodeURIComponent(result.url)).toContain("pas encore de modèle");
   });
 });
 
@@ -194,7 +194,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   await page.getByLabel("Email address").fill(firm.email);
   await continueStep(page, 2);
 
-  await page.getByRole("checkbox", { name: "Immigration Law" }).check();
+  await page.getByRole("checkbox", { name: "Droit de l’immigration" }).check();
   await page.getByLabel("Main practice area").selectOption("immigration");
   await continueStep(page, 3);
 
@@ -220,7 +220,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   // assertion worth making here: the workspace that opened belongs to the firm
   // that was just created, not to one that already existed.
   await expect(page.getByRole("heading", { level: 1, name: firm.name })).toBeVisible();
-  await expect(page.getByRole("main")).toContainText("Immigration Law");
+  await expect(page.getByRole("main")).toContainText("Droit de l’immigration");
   await expect(page.getByRole("main")).not.toContainText("not configured yet");
 
   // And it holds nothing belonging to anybody else.

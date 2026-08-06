@@ -31,25 +31,25 @@ type NavItem = {
 type PlannedItem = { label: string; phase: number };
 
 const FIRM_NAV: readonly NavItem[] = [
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard", label: "Tableau de bord" },
   // First under the fold and above Matters on purpose: the short way in is the
   // one a firm needs on its first morning, and a menu is read from the top.
-  { href: "/start", label: "Open a matter", permission: "matter.view" },
-  { href: "/matters", label: "Matters", permission: "matter.view" },
-  { href: "/intake", label: "Intake", permission: "matter.view" },
+  { href: "/start", label: "Ouvrir un dossier", permission: "matter.view" },
+  { href: "/matters", label: "Dossiers", permission: "matter.view" },
+  { href: "/intake", label: "Questionnaire client", permission: "matter.view" },
   { href: "/documents", label: "Documents", permission: "document.view" },
-  { href: "/tasks", label: "Tasks", permission: "matter.view" },
-  { href: "/ai", label: "AI Workspace", permission: "ai.result.view" },
-  { href: "/approvals", label: "Approvals", permission: "approval.view" },
-  { href: "/activity", label: "Activity Log", permission: "firm.audit.view" },
+  { href: "/tasks", label: "Tâches", permission: "matter.view" },
+  { href: "/ai", label: "Assistant", permission: "ai.result.view" },
+  { href: "/approvals", label: "Validations", permission: "approval.view" },
+  { href: "/activity", label: "Journal d’activité", permission: "firm.audit.view" },
 ];
 
 const FIRM_PLANNED: readonly PlannedItem[] = [];
 
 const ADMIN_NAV: readonly NavItem[] = [
-  { href: "/settings", label: "Firm Settings", permission: "firm.settings.view" },
-  { href: "/usage", label: "Usage and Costs", permission: "firm.costs.view" },
-  { href: "/onboarding", label: "Setup Questionnaire", permission: "firm.settings.edit" },
+  { href: "/settings", label: "Réglages du cabinet", permission: "firm.settings.view" },
+  { href: "/usage", label: "Consommation et coûts", permission: "firm.costs.view" },
+  { href: "/onboarding", label: "Questionnaire d’installation", permission: "firm.settings.edit" },
 ];
 
 // Empty, and it stays empty: nothing in the firm administration section is
@@ -59,9 +59,9 @@ const ADMIN_NAV: readonly NavItem[] = [
 const ADMIN_PLANNED: readonly PlannedItem[] = [];
 
 const PLATFORM_NAV: readonly NavItem[] = [
-  { href: "/admin/firms", label: "Firms" },
-  { href: "/admin/system", label: "System Overview" },
-  { href: "/admin/demo", label: "Demonstration Data" },
+  { href: "/admin/firms", label: "Cabinets" },
+  { href: "/admin/system", label: "Vue d’ensemble du système" },
+  { href: "/admin/demo", label: "Données de démonstration" },
 ];
 
 const PLATFORM_PLANNED: readonly PlannedItem[] = [];
@@ -140,7 +140,7 @@ export function AppShell({
 
       <div className="flex flex-1 flex-col lg:flex-row">
         <aside
-          aria-label="Firm workspace"
+          aria-label="Espace du cabinet"
           className="border-b border-line bg-surface lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r"
         >
           <div className="border-b border-line px-4 py-4">
@@ -148,7 +148,7 @@ export function AppShell({
                 itself here, not the software it is using. */}
             <OrchelioWordmark
               subtitle={
-                firm && branding ? firmDisplayName(branding, firm.name) : "No firm workspace"
+                firm && branding ? firmDisplayName(branding, firm.name) : "Aucun espace de cabinet"
               }
               mark={
                 accent ? (
@@ -169,12 +169,12 @@ export function AppShell({
 
           {firm ? <FirmSwitcher firms={session.user.firms} activeFirmId={firm.id} /> : null}
 
-          <nav aria-label="Main" className="space-y-5 px-2 py-4">
+          <nav aria-label="Navigation principale" className="space-y-5 px-2 py-4">
             {firm ? (
               <>
-                <NavGroup title="Firm" items={FIRM_NAV} planned={FIRM_PLANNED} granted={granted} />
+                <NavGroup title="Cabinet" items={FIRM_NAV} planned={FIRM_PLANNED} granted={granted} />
                 <NavGroup
-                  title="Firm administration"
+                  title="Administration du cabinet"
                   items={ADMIN_NAV}
                   planned={ADMIN_PLANNED}
                   granted={granted}
@@ -183,7 +183,7 @@ export function AppShell({
             ) : null}
             {session.user.isPlatformAdmin ? (
               <NavGroup
-                title="Platform administration"
+                title="Administration de la plateforme"
                 items={PLATFORM_NAV}
                 planned={PLATFORM_PLANNED}
               />
@@ -201,7 +201,7 @@ export function AppShell({
                 type="submit"
                 className="w-full rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-muted"
               >
-                Sign out
+                Se déconnecter
               </button>
             </form>
             <p className="mt-4 text-xs text-ink-subtle">{POWERED_BY}</p>

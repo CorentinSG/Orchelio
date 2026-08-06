@@ -30,31 +30,31 @@ export type DashboardWidget = {
 };
 
 const SHARED_WIDGETS: readonly DashboardWidget[] = [
-  { key: "active_matters", label: "Active matters", hint: "Open matters", tone: "brand", availableFrom: 5 },
-  { key: "pending_approvals", label: "Pending approvals", hint: "Awaiting a human decision", tone: "warning", availableFrom: 7 },
-  { key: "recent_analyses", label: "Claude analyses run", hint: "Every one still needs a person", tone: "ai", availableFrom: 6 },
-  { key: "monthly_usage", label: "Simulated tokens used", hint: "This firm only — no charge", tone: "neutral", availableFrom: 6 },
+  { key: "active_matters", label: "Dossiers actifs", hint: "Dossiers ouverts", tone: "brand", availableFrom: 5 },
+  { key: "pending_approvals", label: "Validations en attente", hint: "En attente d’une décision humaine", tone: "warning", availableFrom: 7 },
+  { key: "recent_analyses", label: "Analyses Claude effectuées", hint: "Chacune attend encore une personne", tone: "ai", availableFrom: 6 },
+  { key: "monthly_usage", label: "Jetons simulés consommés", hint: "Ce cabinet uniquement — aucun frais", tone: "neutral", availableFrom: 6 },
 ];
 
 const IMMIGRATION_WIDGETS: readonly DashboardWidget[] = [
-  { key: "new_leads", label: "New leads", hint: "Matters still at the lead stage", tone: "brand", availableFrom: 5 },
-  { key: "consultations_to_prepare", label: "Consultations to prepare", hint: "Matters with a consultation scheduled", tone: "brand", availableFrom: 5 },
-  { key: "status_dates_to_review", label: "Status expiration dates to review", hint: "Recorded expiry within 90 days — not confirmed", tone: "warning", availableFrom: 5 },
-  { key: "missing_identity_documents", label: "Missing identity documents", hint: "Matters missing a passport, I-94 or birth certificate", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
-  { key: "missing_immigration_documents", label: "Missing immigration documents", hint: "Matters missing another expected document", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
-  { key: "awaiting_attorney_approval", label: "Matters awaiting attorney approval", hint: "Analyses not yet approved", tone: "warning", availableFrom: 7 },
-  { key: "upcoming_deadlines", label: "Dates to review", hint: "Within 30 days — recorded, never confirmed", tone: "neutral", availableFrom: 5 },
+  { key: "new_leads", label: "Premiers contacts", hint: "Dossiers encore au stade du premier contact", tone: "brand", availableFrom: 5 },
+  { key: "consultations_to_prepare", label: "Consultations à préparer", hint: "Dossiers avec une consultation programmée", tone: "brand", availableFrom: 5 },
+  { key: "status_dates_to_review", label: "Dates d’expiration de statut à revoir", hint: "Expiration enregistrée sous 90 jours — non confirmée", tone: "warning", availableFrom: 5 },
+  { key: "missing_identity_documents", label: "Documents d’identité manquants", hint: "Dossiers sans passeport, I-94 ou acte de naissance", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "missing_immigration_documents", label: "Documents d’immigration manquants", hint: "Dossiers auxquels manque une autre pièce attendue", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "awaiting_attorney_approval", label: "Dossiers en attente de validation", hint: "Analyses pas encore validées", tone: "warning", availableFrom: 7 },
+  { key: "upcoming_deadlines", label: "Dates à revoir", hint: "Sous 30 jours — enregistrées, jamais confirmées", tone: "neutral", availableFrom: 5 },
 ];
 
 const EMPLOYMENT_WIDGETS: readonly DashboardWidget[] = [
-  { key: "new_employee_intakes", label: "New employee intakes", hint: "Intakes recorded for this firm", tone: "brand", availableFrom: 5 },
-  { key: "employee_side_matters", label: "Employee-side matters", hint: "Open, representing the employee", tone: "brand", availableFrom: 5 },
-  { key: "employer_side_matters", label: "Employer-side matters", hint: "Open, representing the employer", tone: "brand", availableFrom: 5 },
-  { key: "termination_letters_to_review", label: "Termination letters to review", hint: "On file, not yet checked by a person", tone: "warning", availableFrom: 5 },
-  { key: "wage_records_missing", label: "Wage records missing", hint: "Matters missing a pay stub or time record", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "new_employee_intakes", label: "Nouveaux questionnaires salariés", hint: "Questionnaires enregistrés pour ce cabinet", tone: "brand", availableFrom: 5 },
+  { key: "employee_side_matters", label: "Dossiers côté salarié", hint: "Ouverts, représentant le salarié", tone: "brand", availableFrom: 5 },
+  { key: "employer_side_matters", label: "Dossiers côté employeur", hint: "Ouverts, représentant l’employeur", tone: "brand", availableFrom: 5 },
+  { key: "termination_letters_to_review", label: "Lettres de licenciement à examiner", hint: "Au dossier, pas encore vérifiées par une personne", tone: "warning", availableFrom: 5 },
+  { key: "wage_records_missing", label: "Justificatifs de salaire manquants", hint: "Dossiers sans bulletin de paie ni relevé d’heures", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
   // "Assessed" is something the analysis decides, so this one waits for it.
-  { key: "discrimination_awaiting_assessment", label: "Discrimination matters not yet analysed", hint: "No analysis has been run on them", tone: "warning", availableFrom: 6 },
-  { key: "settlement_deadlines", label: "Settlement dates to review", hint: "In settlement discussions with a date recorded", tone: "warning", availableFrom: 5 },
+  { key: "discrimination_awaiting_assessment", label: "Dossiers discrimination non analysés", hint: "Aucune analyse n’a été lancée", tone: "warning", availableFrom: 6 },
+  { key: "settlement_deadlines", label: "Dates de transaction à revoir", hint: "En négociation, avec une date enregistrée", tone: "warning", availableFrom: 5 },
 ];
 
 const BY_PRACTICE_AREA: Record<string, readonly DashboardWidget[]> = {

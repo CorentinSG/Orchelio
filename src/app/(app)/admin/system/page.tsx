@@ -6,7 +6,7 @@ import { getSystemStatus } from "@/lib/system-status";
 import { platformCounts } from "@/lib/data/platform";
 import { APP_FULL_NAME } from "@/lib/app-config";
 
-export const metadata = { title: "System overview" };
+export const metadata = { title: "Vue d’ensemble du système" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -31,7 +31,7 @@ export default async function AdminSystemPage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">
           Platform administration
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">System overview</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Vue d’ensemble du système</h1>
         <p className="mt-1 text-ink-muted">
           Measured on this request. Nothing on this page is cached.
         </p>

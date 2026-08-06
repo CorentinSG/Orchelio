@@ -31,8 +31,8 @@ async function openMatter(page: import("@playwright/test").Page, reference: stri
 async function runAnalysis(page: import("@playwright/test").Page, reference: string) {
   await openMatter(page, reference);
   await page
-    .getByRole("navigation", { name: "Matter sections" })
-    .getByRole("link", { name: "AI Analysis" })
+    .getByRole("navigation", { name: "Sections du dossier" })
+    .getByRole("link", { name: "Analyse" })
     .click();
   await expect(page.getByRole("region", { name: "Claude Analyst" })).toBeVisible();
 
@@ -46,8 +46,8 @@ test.describe("Running an analysis", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-001");
     await page
-      .getByRole("navigation", { name: "Matter sections" })
-      .getByRole("link", { name: "AI Analysis" })
+      .getByRole("navigation", { name: "Sections du dossier" })
+      .getByRole("link", { name: "Analyse" })
       .click();
 
     const panel = page.getByRole("region", { name: "Claude Analyst" });
@@ -69,8 +69,8 @@ test.describe("Running an analysis", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await openMatter(page, "IMM-2026-001");
     await page
-      .getByRole("navigation", { name: "Matter sections" })
-      .getByRole("link", { name: "AI Analysis" })
+      .getByRole("navigation", { name: "Sections du dossier" })
+      .getByRole("link", { name: "Analyse" })
       .click();
 
     const panel = page.getByRole("region", { name: "Claude Analyst" });
@@ -166,11 +166,11 @@ test.describe("The timeline", () => {
     await runAnalysis(page, "IMM-2026-002");
 
     await page
-      .getByRole("navigation", { name: "Matter sections" })
-      .getByRole("link", { name: "Timeline" })
+      .getByRole("navigation", { name: "Sections du dossier" })
+      .getByRole("link", { name: "Chronologie" })
       .click();
 
-    const timeline = page.getByRole("region", { name: "Timeline" });
+    const timeline = page.getByRole("region", { name: "Chronologie" });
     await expect(timeline).toContainText(/No date here is confirmed/i);
     await expect(timeline).toContainText(/Stated by a person/i);
     await expect(timeline).toContainText(/Read from a document/i);
@@ -185,12 +185,12 @@ test.describe("The timeline", () => {
     await page.getByRole("button", { name: "Create matter" }).click();
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
     await page
-      .getByRole("navigation", { name: "Matter sections" })
-      .getByRole("link", { name: "Timeline" })
+      .getByRole("navigation", { name: "Sections du dossier" })
+      .getByRole("link", { name: "Chronologie" })
       .click();
 
     // A matter with no analysis says so, rather than showing a blank panel.
-    const timeline = page.getByRole("region", { name: "Timeline" });
+    const timeline = page.getByRole("region", { name: "Chronologie" });
     await expect(timeline).toContainText(/No timeline yet|No date on this matter/i);
   });
 });
@@ -200,7 +200,7 @@ test.describe("The AI workspace", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/ai");
 
-    await expect(page.getByRole("heading", { name: "AI Workspace", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Assistant", level: 1 })).toBeVisible();
     await expect(page.locator("main")).toContainText(/No request leaves this machine/i);
     await expect(page.locator("main")).toContainText(/no charge is incurred/i);
     await expect(page.locator("main")).toContainText(/No document is ever opened/i);
@@ -247,8 +247,8 @@ test.describe("What each role may do", () => {
 
     await openMatter(page, "IMM-2026-001");
     await page
-      .getByRole("navigation", { name: "Matter sections" })
-      .getByRole("link", { name: "AI Analysis" })
+      .getByRole("navigation", { name: "Sections du dossier" })
+      .getByRole("link", { name: "Analyse" })
       .click();
 
     await expect(page.getByRole("region", { name: "Claude Analyst" })).toBeVisible();
@@ -297,7 +297,7 @@ test.describe("Cross-firm", () => {
     await openMatter(page, "EMP-2026-001");
     const foreignMatterId = page.url().split("/matters/")[1]?.split("?")[0] ?? "";
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters");
 
@@ -324,15 +324,15 @@ test.describe("The dashboard", () => {
     await runAnalysis(page, "IMM-2026-001");
     await page.goto("/dashboard");
 
-    const tile = page.locator("p", { hasText: /^Claude analyses run$/ }).locator("..");
+    const tile = page.locator("p", { hasText: /^Analyses Claude effectuées$/ }).locator("..");
     await expect(tile.locator("p").first()).toHaveText(/^\d+$/);
-    await expect(tile).toContainText(/still needs a person/i);
+    await expect(tile).toContainText(/attend encore une personne/i);
   });
 
   test("counts what is waiting for a person, now that Phase 7 has landed", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
 
-    const tile = page.locator("p", { hasText: /^Pending approvals$/ }).locator("..");
+    const tile = page.locator("p", { hasText: /^Validations en attente$/ }).locator("..");
     await expect(tile.locator("p").first()).toHaveText(/^\d+$/);
     await expect(tile).not.toContainText(/Phase \d/);
   });

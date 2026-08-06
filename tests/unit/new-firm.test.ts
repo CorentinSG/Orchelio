@@ -91,7 +91,7 @@ describe("validateNewFirm", () => {
 
     const result = validateNewFirm({ ...valid, primaryPracticeArea: planned!.key });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.message).toContain("no template yet");
+    if (!result.ok) expect(result.message).toContain("pas encore de modèle");
   });
 
   it("requires an administrator with a plausible address", () => {

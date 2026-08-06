@@ -14,7 +14,7 @@ import { reviewStatusLabel, type ReviewStatus } from "@/lib/ai/types";
 import { providerNotice } from "@/lib/ai/notice";
 import { serverEnv } from "@/lib/env";
 
-export const metadata = { title: "AI Workspace" };
+export const metadata = { title: "Assistant" };
 export const dynamic = "force-dynamic";
 
 const LOCKED_RULES_NOTE =
@@ -48,7 +48,7 @@ export default async function AiWorkspacePage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">AI Workspace</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Assistant</h1>
         <p className="mt-1 text-ink-muted">
           Every analysis this firm has run, and the limits every one of them carries.
         </p>

@@ -15,7 +15,7 @@ import {
 import { serverEnv } from "@/lib/env";
 import { providerNotice, runLabel } from "@/lib/ai/notice";
 
-export const metadata = { title: "Usage and costs" };
+export const metadata = { title: "Consommation et coûts" };
 export const dynamic = "force-dynamic";
 
 const OPERATION_LABELS: Record<string, string> = {
@@ -65,7 +65,7 @@ export default async function UsagePage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Usage and costs</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Consommation et coûts</h1>
         <p className="mt-1 text-ink-muted">
           Assistant usage for this firm, and this firm only.
         </p>

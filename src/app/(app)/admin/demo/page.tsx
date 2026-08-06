@@ -8,7 +8,7 @@ import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo-accounts";
 import { GUIDE_STEP_COUNT } from "@/lib/guide";
 import { FICTIONAL_DATA_NOTICE } from "@/lib/app-config";
 
-export const metadata = { title: "Demonstration data" };
+export const metadata = { title: "Données de démonstration" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -35,7 +35,7 @@ export default async function AdminDemoPage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">
           Platform administration
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Demonstration data</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Données de démonstration</h1>
         <p className="mt-1 text-ink-muted">{FICTIONAL_DATA_NOTICE}</p>
       </header>
 

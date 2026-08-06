@@ -7,7 +7,7 @@ import { listIntakes } from "@/lib/data/activity";
 import { firmTimezoneFor } from "@/lib/data/firms";
 import { parseJsonObject } from "@/lib/json-field";
 
-export const metadata = { title: "Intake" };
+export const metadata = { title: "Questionnaire client" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -25,7 +25,7 @@ export default async function IntakePage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Intake</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Questionnaire client</h1>
         <p className="mt-1 text-ink-muted">
           {intakes.length} recorded for this firm.
         </p>

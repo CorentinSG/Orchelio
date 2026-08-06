@@ -61,7 +61,7 @@ test.describe("Firm switcher", () => {
   test("shows the read-only reviewer only viewing rights, in either firm", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
 
-    const permissions = page.getByRole("region", { name: "Your permissions" });
+    const permissions = page.getByRole("region", { name: "Vos autorisations" });
     await expect(permissions).toContainText("matter.view");
     await expect(permissions).not.toContainText("matter.create");
     await expect(permissions).not.toContainText("approval.decide");
@@ -84,7 +84,7 @@ test.describe("Cross-firm access", () => {
     const dupontFirmId = cookies.find((cookie) => cookie.name === "orchelio_active_firm")?.value;
     expect(dupontFirmId).toBeTruthy();
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "employment.paralegal@demo.local");
     await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
 
@@ -119,7 +119,7 @@ test.describe("Cross-firm access", () => {
     const cookies = await context.cookies();
     const dupontFirmId = cookies.find((cookie) => cookie.name === "orchelio_active_firm")?.value;
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "employment.paralegal@demo.local");
     await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
 

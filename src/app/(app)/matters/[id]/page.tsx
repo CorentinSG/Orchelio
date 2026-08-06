@@ -48,15 +48,15 @@ export const metadata = { title: "Matter" };
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "overview", label: "Overview" },
-  { key: "intake", label: "Intake" },
+  { key: "overview", label: "Vue d’ensemble" },
+  { key: "intake", label: "Questionnaire client" },
   { key: "documents", label: "Documents" },
-  { key: "tasks", label: "Tasks" },
-  { key: "timeline", label: "Timeline" },
-  { key: "analysis", label: "AI Analysis" },
-  { key: "communications", label: "Communications" },
-  { key: "approvals", label: "Approvals" },
-  { key: "activity", label: "Activity" },
+  { key: "tasks", label: "Tâches" },
+  { key: "timeline", label: "Chronologie" },
+  { key: "analysis", label: "Analyse" },
+  { key: "communications", label: "Courriers" },
+  { key: "approvals", label: "Validations" },
+  { key: "activity", label: "Activité" },
 ] as const;
 
 type PageProps = {
@@ -240,7 +240,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
         </Callout>
       ) : null}
 
-      <nav aria-label="Matter sections" className="border-b border-line">
+      <nav aria-label="Sections du dossier" className="border-b border-line">
         <ul className="-mb-px flex flex-wrap gap-1">
           {TABS.map((candidate) => (
             <li key={candidate.key}>
@@ -335,7 +335,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
       {tab === "intake" ? (
         <Card
-          title="Intake"
+          title="Questionnaire client"
           description={
             matter.intakeResponses[0]
               ? `Submitted ${formatDate(matter.intakeResponses[0].submittedAt, timezone)}.`
@@ -435,7 +435,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       ) : null}
 
       {tab === "tasks" ? (
-        <Card title={`Tasks (${openTasks.length} open)`}>
+        <Card title={`Tâches (${openTasks.length} ouvertes)`}>
           {matter.tasks.length === 0 ? (
             <p className="text-sm text-ink-muted">No task on this matter.</p>
           ) : (
@@ -463,7 +463,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
       {tab === "timeline" ? (
         <Card
-          title="Timeline"
+          title="Chronologie"
           description="Every date on this matter, in order, with where each one came from."
         >
           {!canSeeResults ? (
@@ -939,7 +939,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
       {tab === "activity" ? (
         <Card
-          title="Activity"
+          title="Activité"
           description="Everything recorded about this matter, most recent first."
         >
           {!can(actor, "firm.audit.view") ? (
