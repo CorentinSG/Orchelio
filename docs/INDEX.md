@@ -107,6 +107,8 @@ differently without knowing what you knew. Preferences do not need a note.
   and the defects found on the way.
 - [Plan V1](PLAN-V1.md) — the construction plan for Version 1, the connected
   cockpit. In French; approved by the owner on 6 August 2026.
+- [Glossaire](GLOSSAIRE.md) — the product's French, decided once before the
+  first screen was translated. Every screen translation follows it.
 - [Acceptance criteria](ACCEPTANCE.md) — every phase's criterion and the tests
   that prove it, checked rather than asserted.
 - [Giving a demonstration](DEMONSTRATION.md) — the procedure, the ten-minute
