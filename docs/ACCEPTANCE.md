@@ -450,6 +450,47 @@ and a firm should expect to find out on its own machine.
 
 ---
 
+## V1-1 — real AI behind the same gate, governed and counted
+
+**Criterion.** A hosted Mistral model may write the summary's wording under
+exactly the discipline the local model works under (one shared
+implementation), the only path to it is the one reviewed module, every call is
+counted to the fraction of a cent and marked as an estimate, and every screen
+that describes the provider tells the truth about this one. See
+[ADR-0025](decisions/ADR-0025-egress-is-governed-not-forbidden.md) and
+[ADR-0027](decisions/ADR-0027-real-ai-behind-the-same-gate.md).
+
+Proved by:
+
+- `tests/unit/mistral-provider.test.ts` — "goes to api.mistral.ai with the key in the header, and nowhere in the body"
+- `tests/unit/mistral-provider.test.ts` — "sends the same figures message the local provider sends — one implementation"
+- `tests/unit/mistral-provider.test.ts` — "tells the model no name, no title, no field value and no filename"
+- `tests/unit/mistral-provider.test.ts` — "drops a paragraph that concludes, and never quotes it"
+- `tests/unit/mistral-provider.test.ts` — "falls back to the derived summary when Mistral cannot be reached"
+- `tests/unit/mistral-provider.test.ts` — "names the key as the problem on a 401, without quoting the response"
+- `tests/unit/mistral-provider.test.ts` — "estimates from the price table, in micro-euros, and says it is an estimate"
+- `tests/unit/mistral-provider.test.ts` — "records what a refused answer cost — the invoice does not care that it was refused"
+- `tests/unit/mistral-provider.test.ts` — "a fraction of a cent is not rounded into a free-looking zero"
+- `tests/unit/mistral-provider.test.ts` — "every routed model has a price, so no estimate can silently be a guess"
+- `tests/unit/mistral-provider.test.ts` — "an unpriced model is recorded as unknown, never invented"
+- `tests/unit/mistral-provider.test.ts` — "consults no model at all — a model must not mark its own work"
+- `tests/unit/mistral-provider.test.ts` — "is real, billable, and routed as intermediate"
+- `tests/unit/env.test.ts` — "refuses the Mistral provider without its key, at startup and by name"
+- `tests/unit/provider-notice.test.ts` — "says where the material goes, and exactly what the material is"
+- `tests/unit/provider-notice.test.ts` — "calls its cost an estimate, never an invoice"
+- `tests/unit/provider-notice.test.ts` — "never claims nothing leaves the machine — something now does"
+
+**What no test here proves:** that Mistral's models behave well, or what an
+invoice will actually say. The build never touches the network; the live path
+is proved by a human running `npm run ai:smoke`, and the estimates follow a
+price table whose date is printed beside every figure derived from it. The
+governed egress itself — module confined to its hosts, hosts unnameable
+elsewhere, register row mandatory — is enforced by
+`npm run confidentiality:check`, whose failure branches were proved by
+planting rather than by a test file this document could name.
+
+---
+
 ## What no test here proves
 
 Stated because a coverage document that only lists what is covered is the same

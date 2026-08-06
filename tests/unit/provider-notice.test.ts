@@ -23,6 +23,8 @@ function envFor(provider: AiProviderName) {
       });
     case "anthropic":
       return parseServerEnv({ AI_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "sk-test" });
+    case "mistral":
+      return parseServerEnv({ AI_PROVIDER: "mistral", MISTRAL_API_KEY: "test-key" });
     case "mock":
       return parseServerEnv({});
   }
@@ -77,6 +79,39 @@ describe("a model on this machine", () => {
 
   it("does not pretend to know what the machine costs to run", () => {
     expect(providerNotice(envFor("local")).whatItCannotTell).toMatch(/electricity/i);
+  });
+});
+
+describe("the hosted Mistral model", () => {
+  it("says where the material goes, and exactly what the material is", () => {
+    const notice = providerNotice(envFor("mistral"));
+    expect(notice.whereItGoes).toContain("api.mistral.ai");
+    expect(notice.whereItGoes).toMatch(/European Union/);
+    expect(notice.whereItGoes).toMatch(/no name, no field value, no date, no filename/i);
+  });
+
+  it("never calls a real run simulated", () => {
+    const notice = providerNotice(envFor("mistral"));
+    expect(JSON.stringify(notice)).not.toMatch(/\bsimulated\b/i);
+  });
+
+  it("calls its cost an estimate, never an invoice", () => {
+    const notice = providerNotice(envFor("mistral"));
+    expect(notice.costLabel).toMatch(/estimat/i);
+    expect(notice.whatTheFiguresAre).toMatch(/estimate/i);
+    expect(notice.whatItCannotTell).toMatch(/invoice/i);
+  });
+
+  it("says what the model is allowed to decide, which is the wording only", () => {
+    const notice = providerNotice(envFor("mistral"));
+    expect(notice.howItIsProduced).toMatch(/not asked what the facts are/i);
+    expect(notice.howItIsProduced).toMatch(/set aside/i);
+  });
+
+  it("never claims nothing leaves the machine — something now does", () => {
+    const notice = providerNotice(envFor("mistral"));
+    expect(JSON.stringify(notice)).not.toMatch(/no request leaves/i);
+    expect(JSON.stringify(notice)).not.toMatch(/nothing leaves/i);
   });
 });
 

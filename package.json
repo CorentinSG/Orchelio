@@ -2,7 +2,7 @@
   "name": "orchelio-demo",
   "version": "0.1.0",
   "private": true,
-  "description": "Orchelio Demo \u2014 a configurable AI operating system for law firms.",
+  "description": "Orchelio Demo — a configurable AI operating system for law firms.",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -41,7 +41,8 @@
     "skills:firm-scope": "node .claude/skills/orchelio-firm-scope/scripts/audit.mjs",
     "acceptance:check": "node scripts/acceptance-check.mjs",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
-    "confidentiality:check": "node scripts/confidentiality-check.mjs"
+    "confidentiality:check": "node scripts/confidentiality-check.mjs",
+    "ai:smoke": "tsx scripts/ai-smoke.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",

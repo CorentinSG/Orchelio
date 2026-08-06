@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 186.
+Modules: 191.
 
 ## `prisma/`
 
@@ -32,6 +32,10 @@ Everything created here is fictional.
 ### `scripts/acceptance-check.mjs`
 
 `docs/ACCEPTANCE.md` names, for every phase's acceptance criterion, the tests that prove it.
+
+### `scripts/ai-smoke.mjs`
+
+Run by a person (`npm run ai:smoke`), never by the build or the tests: the build must not require the network (ADR-0027), and a test that needs a paid API is a test th…
 
 ### `scripts/codemap.mjs`
 
@@ -437,13 +441,19 @@ Exports: `parseIsoDate`, `parseWrittenDate`, `isoDateWithin`, `readDate`, `forma
 
 machine.
 
-Exports: `orchelioWroteTheSummary`, `factsMessage`, `judgeSummary`, `tidy`, `LOCAL_PROMPT_VERSION`, `MODEL_WROTE_THE_SUMMARY`, `LocalAIProvider`, `LocalModelSettings`, `SummaryVerdict`
+Exports: `LOCAL_PROMPT_VERSION`, `MODEL_WROTE_THE_SUMMARY`, `LocalAIProvider`, `LocalModelSettings`
 
 ### `src/lib/ai/loopback.ts`
 
 ## Why this module exists `npm run confidentiality:check` enforces that nothing in `src/` can make an outbound request, against an allow-list that is **empty**.
 
 Exports: `assertLoopback`, `isLoopback`, `NotLoopbackError`, `LOOPBACK_PROMISE`
+
+### `src/lib/ai/mistral-provider.ts`
+
+## The same one job This provider gives the model exactly the authority the local one does (ADR-0024): it writes the summary's wording, from figures Orchelio has alrea…
+
+Exports: `MISTRAL_PROMPT_VERSION`, `MISTRAL_WROTE_THE_SUMMARY`, `MistralAIProvider`, `MistralSettings`
 
 ### `src/lib/ai/notice.ts`
 
@@ -463,11 +473,23 @@ The Reviewer's job is to be unimpressed by the Analyst.
 
 Exports: `assertsAnOutcome`, `reviewAnalysis`
 
+### `src/lib/ai/routing.ts`
+
+The owner's requirement (docs/PLAN-V1.md, ADR-0027): the lawyer asks for a business action; the system picks the cheapest model capable of it.
+
+Exports: `estimateMicroEuros`, `microEurosToCents`, `TASK_CLASSES`, `MICRO_EUROS_PER_CENT`, `MISTRAL_MODEL_BY_CLASS`, `MISTRAL_PRICES`, `TaskClass`
+
 ### `src/lib/ai/run.ts`
 
 This is the only place an analysis is produced, and it is deliberately dull: gather the matter, open a record, ask the provider, write down what came back.
 
 Exports: `runAnalysis`, `buildInput`, `ANALYSIS_FAILURE_MESSAGE`, `RunOutcome`
+
+### `src/lib/ai/summary-rewrite.ts`
+
+that gives it.
+
+Exports: `orchelioWroteTheSummary`, `factsMessage`, `judgeSummary`, `tidy`, `readContent`, `readTokenCounts`, `MAX_SUMMARY_CHARS`, `MIN_SUMMARY_CHARS`, `REWRITE_SYSTEM_PROMPT`, `SummaryVerdict`
 
 ### `src/lib/ai/types.ts`
 
@@ -974,6 +996,10 @@ This is the module the confidentiality check leans on, so the interesting tests 
 ### `tests/unit/matter-fields.test.ts`
 
 `Matter.fields` is a JSON column, which is what makes one product serve two practice areas — and also what would let a hand-crafted form post store anything at all.
+
+### `tests/unit/mistral-provider.test.ts`
+
+No request leaves this test run.
 
 ### `tests/unit/new-firm.test.ts`
 

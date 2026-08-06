@@ -209,8 +209,16 @@ test.describe("firm settings", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/settings?section=confidentiality");
 
-    // The easy half. The page's own wording, not the check script's.
-    await expect(page.getByRole("main")).toContainText("Nothing leaves the machine");
+    // The easy half. The page's own wording, not the check script's. Since V1
+    // the sentence is governed rather than absolute (ADR-0025): destinations
+    // are listed, and under the simulation this instance runs, unused.
+    await expect(page.getByRole("main")).toContainText(
+      "Nothing leaves this machine except what is listed",
+    );
+    await expect(page.getByRole("main")).toContainText("Sent to an AI provider");
+    await expect(page.getByRole("main")).toContainText(
+      "no key is configured and the simulation opens no socket",
+    );
     await expect(page.getByText("prisma/orchelio-demo.db")).toBeVisible();
 
     // The half a supplier would leave out. A page listing only the enforced

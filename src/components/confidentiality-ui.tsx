@@ -5,6 +5,8 @@ import {
   modelsInClass,
   type ConfidentialityClass,
 } from "@/lib/confidentiality/classification";
+import { providerNotice } from "@/lib/ai/notice";
+import { serverEnv } from "@/lib/env";
 import { APP_NAME } from "@/lib/app-config";
 
 /**
@@ -66,6 +68,10 @@ function describe(models: readonly string[]): string {
 export function ConfidentialityReport({ firmName }: { firmName: string }) {
   const enforced = ENFORCEMENT.filter((entry) => entry.enforcedBy !== null);
   const notYet = ENFORCEMENT.filter((entry) => entry.enforcedBy === null);
+  // Read from the configuration rather than asserted here: "nothing is sent"
+  // was true of the only provider that existed, and would have gone on being
+  // displayed, unchanged and wrong, under a hosted one.
+  const notice = providerNotice(serverEnv());
 
   return (
     <div className="space-y-6">
@@ -88,7 +94,7 @@ export function ConfidentialityReport({ firmName }: { firmName: string }) {
         <dl className="mt-3">
           <DataRow label="Documents you upload" value="Never stored" hint="only a name, a type and a size" />
           <DataRow label="Encrypted at rest" value="No" hint="anybody with the file has everything" />
-          <DataRow label="Sent to an AI provider" value="Nothing" hint="there is no key and no transport" />
+          <DataRow label="Sent to an AI provider" value={notice.sentToProvider} hint={notice.sentToProviderHint} />
           <DataRow label="Copies elsewhere" value="None" hint="no backup, no search index" />
         </dl>
       </div>

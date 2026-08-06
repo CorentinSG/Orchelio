@@ -56,12 +56,19 @@ export type ProviderNotice = {
   analystNote: string;
   /** Said above the list of AI features, in settings and in onboarding. */
   featuresNote: string;
+  /** Value of the "Sent to an AI provider" row on the confidentiality report. */
+  sentToProvider: string;
+  /** Its hint: the one-line bound on what can ever be in that traffic. */
+  sentToProviderHint: string;
 };
 
 /**
- * How an analysis is produced, for the two providers that derive it the same
- * way. Only the simulation and the local model share this; a hosted API would
- * not, which is why it is a constant rather than a default.
+ * How an analysis is produced, for every provider that derives it the same
+ * way — the simulation, the local model and the hosted Mistral model all do:
+ * the facts come from deterministic rules, and a model (where there is one)
+ * writes only the summary's wording (ADR-0024, ADR-0027). A provider that
+ * read documents would not share this sentence, which is why it is a
+ * constant rather than a default — V1-2 will retire it deliberately.
  */
 const DERIVED_FROM_THE_RECORD =
   `The facts are produced by deterministic rules over each matter's recorded fields, intake ` +
@@ -110,6 +117,61 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
           "a model on this machine writes the wording of a summary and decides nothing. Switching " +
           "one off removes it from the workspace, and removes the dashboard card that depended on " +
           "it rather than leaving the card showing zero.",
+        sentToProvider: "Derived figures only, to 127.0.0.1",
+        sentToProviderHint:
+          "counts, disagreement subjects, missing-document kinds and the matter reference — never a name, a date, a field value or a document",
+      };
+
+    case "mistral":
+      return {
+        word: "billed per call",
+        costTitle: "Real charges — every call is billed to the firm's Mistral account",
+        workspaceTitle: "A hosted model in the EU, and only for the wording",
+        whereItGoes:
+          "One request per analysis goes to api.mistral.ai, processed in the European Union " +
+          "under the firm's Mistral agreement (paid tier — not used to train models). What is " +
+          "sent: figures Orchelio derived from the record, the subjects of any disagreements, " +
+          "the kinds of any missing documents, and the matter's reference. No name, no field " +
+          "value, no date, no filename, no document content.",
+        howItIsProduced:
+          `${DERIVED_FROM_THE_RECORD} The hosted model is asked for one thing: the summary, ` +
+          "restated in plainer words from figures Orchelio has already worked out. It is not " +
+          "asked what the facts are. What it writes is checked before it is stored, and set " +
+          "aside if it asserts an outcome, uses a figure it was not given, or does not name " +
+          "the matter. Every analysis says which of the two summaries you are reading.",
+        whatTheFiguresAre:
+          "The token counts are what Mistral's API reported for the one call an analysis makes. " +
+          "The cost is an estimate from a published price table, dated, and marked as an " +
+          "estimate until the invoice agrees — a fraction of a cent is recorded as what it is, " +
+          "never rounded to a zero that reads as free.",
+        whatItCannotTell:
+          "What this page cannot tell you is what Mistral will actually invoice. The estimate " +
+          "follows a price list copied on a date; the invoice follows the price on the day.",
+        usageCardTitle: "Usage",
+        noCharges: "Real charges are billed by Mistral, per call",
+        costLabel: "Estimated cost",
+        dashboardCostLabel: "Estimated AI cost",
+        costHint: "estimated from a dated price table; Mistral invoices the firm directly",
+        statusHint: "hosted in the EU, key server-side, billed per call",
+        bannerTitle: "The AI is Mistral, hosted in the European Union",
+        banner:
+          `${APP_NAME} sends one request per analysis to Mistral, a French AI company, processed ` +
+          "in the European Union. The model writes the wording of a summary and nothing else — " +
+          `every fact is worked out by ${APP_NAME} from the record, and what is sent contains ` +
+          "no name, no date and no document. Each call is billed to the firm's Mistral account.",
+        analystNote:
+          "A Mistral model hosted in the EU writes the summary's wording. Every fact is derived " +
+          "from the record; what is sent contains no name, no date and no document. Each call " +
+          "is billed to the firm's Mistral account.",
+        featuresNote:
+          "Every feature below is produced from this firm's own records. A hosted Mistral model " +
+          "writes the wording of a summary and decides nothing; each analysis is billed to the " +
+          "firm's Mistral account. Switching a feature off removes it from the workspace, and " +
+          "removes the dashboard card that depended on it rather than leaving the card showing " +
+          "zero.",
+        sentToProvider: "Derived figures only, to api.mistral.ai (EU)",
+        sentToProviderHint:
+          "counts, disagreement subjects, missing-document kinds and the matter reference — never a name, a date, a field value or a document",
       };
 
     case "anthropic":
@@ -141,6 +203,8 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
         featuresNote:
           "The configured provider is not implemented in this build, so none of the features " +
           "below can produce anything. The choices are still recorded against this firm.",
+        sentToProvider: "Nothing — no run can complete",
+        sentToProviderHint: "the configured provider is not implemented, so no request is ever built",
       };
 
     case "mock":
@@ -177,6 +241,8 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
           "Every feature below is simulated in this build and costs nothing to run. Switching one " +
           "off removes it from the workspace — and removes the dashboard card that depended on " +
           "it, rather than leaving the card showing zero.",
+        sentToProvider: "Nothing",
+        sentToProviderHint: "no key is configured and the simulation opens no socket",
       };
   }
 }

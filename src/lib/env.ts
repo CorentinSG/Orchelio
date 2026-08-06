@@ -13,7 +13,7 @@
 
 import { assertLoopback } from "@/lib/ai/loopback";
 
-export const AI_PROVIDERS = ["mock", "anthropic", "local"] as const;
+export const AI_PROVIDERS = ["mock", "anthropic", "local", "mistral"] as const;
 export type AiProviderName = (typeof AI_PROVIDERS)[number];
 
 export const APP_ENVIRONMENTS = ["demo", "development", "production"] as const;
@@ -62,6 +62,12 @@ export type ServerEnv = {
    */
   anthropicApiKey: string | undefined;
   /**
+   * The firm's Mistral key, required with AI_PROVIDER="mistral" (ADR-0027).
+   * Server-only, never rendered, never logged; the only module that uses it
+   * is src/lib/ai/mistral-provider.ts.
+   */
+  mistralApiKey: string | undefined;
+  /**
    * Where a model server on this machine is listening.
    *
    * Only meaningful when `aiProvider` is `"local"`, and checked here rather
@@ -93,6 +99,16 @@ export function parseServerEnv(source: EnvSource = process.env): ServerEnv {
   if (aiProvider === "anthropic" && !source["ANTHROPIC_API_KEY"]) {
     throw new EnvironmentError(
       'AI_PROVIDER is set to "anthropic" but ANTHROPIC_API_KEY is missing. ' +
+        'Set the key server-side, or switch back to AI_PROVIDER="mock".',
+    );
+  }
+
+  // Refused at startup rather than on the first matter somebody analyses. A
+  // silent fallback to the simulation would let a firm believe it was getting
+  // a real analysis — the worst failure this product could have.
+  if (aiProvider === "mistral" && !source["MISTRAL_API_KEY"]) {
+    throw new EnvironmentError(
+      'AI_PROVIDER is set to "mistral" but MISTRAL_API_KEY is missing. ' +
         'Set the key server-side, or switch back to AI_PROVIDER="mock".',
     );
   }
@@ -137,6 +153,7 @@ export function parseServerEnv(source: EnvSource = process.env): ServerEnv {
     aiProvider,
     databaseUrl,
     anthropicApiKey: source["ANTHROPIC_API_KEY"]?.trim() || undefined,
+    mistralApiKey: source["MISTRAL_API_KEY"]?.trim() || undefined,
     localModelUrl,
     localModelName,
   };

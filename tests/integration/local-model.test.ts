@@ -133,7 +133,7 @@ describe("a model server on this machine", () => {
     expect(sent.messages.map((message) => message.role)).toEqual(["system", "user"]);
 
     expect(analysis.summary).toContain(derived.summary);
-    expect(usage).toEqual({ inputTokens: 300, outputTokens: 60, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 300, outputTokens: 60, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
   it("makes one request for a whole analysis, and none for the review", async () => {

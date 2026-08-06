@@ -67,6 +67,17 @@ const EGRESS_ALLOWED = {
       "It opens one socket, to an address assertLoopback produced, and sends no document — " +
       "Orchelio holds none to send.",
   },
+  "src/lib/ai/mistral-provider.ts": {
+    hosts: ["api.mistral.ai"],
+    reason:
+      "Asks Mistral's hosted API (EU processing, paid tier contractually excluded from training " +
+      "on API traffic) to reword a summary Orchelio has already derived. What leaves: derived " +
+      "figures, disagreement subjects, missing-document kinds and the matter's reference — " +
+      "defined by factsMessage in src/lib/ai/summary-rewrite.ts. No name, no field value, no " +
+      "date, no filename, no document content. The register row in Settings → Confidentiality " +
+      "quotes the same list.",
+    decidedIn: "ADR-0027",
+  },
 };
 
 /** The one function that may produce an address for a `loopbackOnly` module. */
@@ -261,25 +272,57 @@ for (const [path, terms] of Object.entries(EGRESS_ALLOWED)) {
   }
 }
 
-// No module other than the one reviewed for a host may so much as name it.
-// A URL constant exported from a helper and imported by the provider would
-// reach the reviewed destination while the provider's own source scan sees
-// nothing — so the host string itself is confined to its module.
+// No module other than the one reviewed for a host may so much as name it —
+// except the two display surfaces that owe the firm the destination's name:
+// the register (Settings → Confidentiality) and the provider notices. Both
+// describe; neither can transport, because neither is in EGRESS_ALLOWED and
+// the fetch scan above already covers them.
+//
+// Two closures make the exception safe rather than soft:
+//
+//   - The owner module must contain each of its hosts as a literal of its
+//     own. Without this, a provider could import its endpoint from a display
+//     module and show the reviewer a file with no address in it.
+//   - The register is not merely permitted to name the destination: it is
+//     required to. A destination the check allows but the register omits
+//     would make the register a lie, which is worse than no register at all.
+const REGISTER_MODULE = "src/lib/confidentiality/classification.ts";
+const DISPLAY_MODULES = new Set([REGISTER_MODULE, "src/lib/ai/notice.ts"]);
+
 const hostToModule = new Map();
 for (const [path, terms] of Object.entries(EGRESS_ALLOWED)) {
   for (const host of terms?.hosts ?? []) hostToModule.set(host, path);
 }
 for (const [host, ownerPath] of hostToModule) {
+  const ownerSource = stripComments(readFileSync(join(ROOT, ownerPath), "utf8"));
+  if (!ownerSource.includes(host)) {
+    problems.push(
+      `${ownerPath} is allowed to reach ${host} but never writes that address itself. ` +
+        "The reviewed module must contain its own endpoint — an address imported from " +
+        "elsewhere is an address the review never saw.",
+    );
+  }
+
   const mentions = grep(host.replaceAll(".", "\\."), ["src"]).filter(
-    (path) => path !== ownerPath && !path.startsWith("src/generated/"),
+    (path) => path !== ownerPath && !DISPLAY_MODULES.has(path) && !path.startsWith("src/generated/"),
   );
   for (const path of mentions) {
     if (new RegExp(host.replaceAll(".", "\\.")).test(stripComments(readFileSync(join(ROOT, path), "utf8")))) {
       problems.push(
-        `${path} names ${host}, which belongs to ${ownerPath} alone. ` +
+        `${path} names ${host}, which belongs to ${ownerPath} alone ` +
+          `(and to the display surfaces: ${[...DISPLAY_MODULES].join(", ")}). ` +
           "The only path to a third party is the module that was reviewed for it.",
       );
     }
+  }
+
+  const register = readFileSync(join(ROOT, REGISTER_MODULE), "utf8");
+  if (!register.includes(host)) {
+    problems.push(
+      `${host} is an allowed destination but the firm-facing register (${REGISTER_MODULE}) ` +
+        "never names it. Settings → Confidentiality must tell the firm about every " +
+        "destination that exists — add the row, with its limitation.",
+    );
   }
 }
 

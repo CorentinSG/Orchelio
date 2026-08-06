@@ -8,8 +8,9 @@
  *
  * Selection is by environment variable and never by anything a user can set:
  *
- *     AI_PROVIDER=mock        # what this repository ships with
+ *     AI_PROVIDER=mock        # what this repository ships with — the test engine
  *     AI_PROVIDER=local       # a model on this machine, with LOCAL_MODEL_URL
+ *     AI_PROVIDER=mistral     # Mistral's hosted API, with MISTRAL_API_KEY (ADR-0027)
  *     AI_PROVIDER=anthropic   # later, and only with ANTHROPIC_API_KEY present
  *
  * `src/lib/env.ts` throws at startup if a provider is selected without what it
@@ -38,6 +39,8 @@ import type {
 import { analyseMatter } from "@/lib/ai/analyst";
 import { reviewAnalysis } from "@/lib/ai/reviewer";
 import { LocalAIProvider } from "@/lib/ai/local-provider";
+import { MistralAIProvider } from "@/lib/ai/mistral-provider";
+import type { TaskClass } from "@/lib/ai/routing";
 import type { AiProviderName, ServerEnv } from "@/lib/env";
 
 export interface AIProvider {
@@ -49,6 +52,13 @@ export interface AIProvider {
   readonly simulated: boolean;
   /** True when a run costs the firm money. See the note above. */
   readonly billable: boolean;
+
+  /**
+   * Which routing tier answers when this provider consults a model, recorded
+   * on the usage row. Absent when no routed model is involved — the
+   * simulation, or a provider whose one call is not routed.
+   */
+  readonly taskClass?: TaskClass;
 
   analyseMatter(input: MatterAnalysisInput): Promise<AnalystRun>;
   reviewAnalysis(input: AnalysisReviewInput): Promise<ReviewerRun>;
@@ -63,8 +73,20 @@ export interface AIProvider {
  * somebody else made up.
  */
 const SIMULATED_USAGE = {
-  analyst: { inputTokens: 8_400, outputTokens: 1_900, costCents: 4 },
-  reviewer: { inputTokens: 3_100, outputTokens: 700, costCents: 2 },
+  analyst: {
+    inputTokens: 8_400,
+    outputTokens: 1_900,
+    costCents: 4,
+    costMicroEuros: 40_000,
+    costEstimated: false,
+  },
+  reviewer: {
+    inputTokens: 3_100,
+    outputTokens: 700,
+    costCents: 2,
+    costMicroEuros: 20_000,
+    costEstimated: false,
+  },
 } as const satisfies Record<string, RunUsage>;
 
 /**
@@ -132,6 +154,18 @@ export function aiProvider(env: ServerEnv): AIProvider {
         "See prompts/ for the instructions a real provider would be given, and " +
         "docs/ARCHITECTURE.md §8.4 for what implementing it involves.",
     );
+  }
+
+  if (env.aiProvider === "mistral") {
+    // `parseServerEnv` refuses a "mistral" environment without the key, so
+    // reaching here without one is a bug rather than a configuration mistake.
+    if (!env.mistralApiKey) {
+      throw new Error(
+        'AI_PROVIDER="mistral" reached the provider without an API key. ' +
+          "parseServerEnv should have refused this environment; something has bypassed it.",
+      );
+    }
+    return new MistralAIProvider({ apiKey: env.mistralApiKey });
   }
 
   if (env.aiProvider === "local") {

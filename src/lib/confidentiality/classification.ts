@@ -208,25 +208,25 @@ export const ENFORCEMENT: readonly Enforcement[] = [
       "All three run inside the application. They protect against a programming mistake, not against a compromised process or a database administrator.",
   },
   {
-    rule: "Nothing leaves the machine that runs Orchelio.",
+    rule: "Nothing leaves this machine except what is listed, to the parties listed.",
     enforcedBy:
-      "No module in src/ can make an outbound request; scripts/confidentiality-check.mjs fails the build if one appears.",
+      "Egress is governed, not forbidden (ADR-0025, since V1). scripts/confidentiality-check.mjs fails the build unless every module that can make an outbound request is listed with its hosts and the ADR that decided it; a listed module may name only its listed hosts, and no other module may name them at all. Two destinations exist: a model on this machine at 127.0.0.1 (AI_PROVIDER=local), and Mistral's hosted API at api.mistral.ai (AI_PROVIDER=mistral, ADR-0027). Under the simulation this instance ships with, neither is used and nothing is sent anywhere.",
     limitation:
       "It checks the source, not the running process. A dependency could call out; that needs a network policy at the host.",
   },
   {
-    rule: "If a model is used, it is one running on this machine.",
+    rule: "If a model is used, it is one this firm chose, reached at a checked address.",
     enforcedBy:
-      "src/lib/ai/local-provider.ts is the one module permitted to open a socket, and only as loopback-only, which is checked rather than trusted: it must take its address from assertLoopback (src/lib/ai/loopback.ts), which returns nothing outside 127.0.0.0/8 and ::1, and it may write no address of its own. A hostname is refused too — including localhost, because a name is resolved by the machine and could be pointed elsewhere. It is used only when AI_PROVIDER=local; this instance ships with the simulation, which opens nothing.",
+      "AI_PROVIDER=local: src/lib/ai/local-provider.ts must take its address from assertLoopback (src/lib/ai/loopback.ts), which returns nothing outside 127.0.0.0/8 and ::1 and refuses hostnames — localhost included, because a name is resolved by the machine and could be pointed elsewhere. AI_PROVIDER=mistral: src/lib/ai/mistral-provider.ts may name api.mistral.ai and nothing else, and no other module may name it; the material is processed in the European Union under the firm's Mistral agreement, whose paid tier is contractually excluded from training on it. Selecting a provider without its key or address fails at startup rather than falling back silently.",
     limitation:
-      "It is the address that is checked, not the machine. A model server on 127.0.0.1 that forwarded requests onward would defeat it, and choosing what runs there is the firm's decision. Orchelio can prove where it sent something, not what the thing it sent to did next.",
+      "It is the address that is checked, not the machine behind it. A server that forwarded requests onward would defeat it — for the local case that machine is the firm's own; for the hosted case the promise rests on Mistral's contract, which Orchelio can cite but not verify.",
   },
   {
     rule: "A model is never told whose file it is.",
     enforcedBy:
-      "The message src/lib/ai/local-provider.ts sends carries counts, the subject of any disagreement, the kinds of missing document and the matter's reference — no client name, no matter title, no field value, no date and no filename. A unit test fails if any of those appear in what is sent.",
+      "The one message any model receives is built by factsMessage in src/lib/ai/summary-rewrite.ts — shared by the local and hosted providers, so the two cannot drift. It carries counts, the subject of any disagreement, the kinds of missing document and the matter's reference — no client name, no matter title, no field value, no date and no filename. A unit test fails if any of those appear in what is sent.",
     limitation:
-      "The reference itself is sent, because the summary is anchored to it. It names a file in this firm's system and nothing outside it, but it is not nothing.",
+      "The reference itself is sent, because the summary is anchored to it. It names a file in this firm's system and nothing outside it, but it is not nothing — and for the hosted provider it is the one identifying string that leaves the machine.",
   },
   {
     rule: "A platform administrator cannot read a firm's matters or documents.",

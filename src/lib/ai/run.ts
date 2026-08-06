@@ -271,6 +271,12 @@ async function recordUsage(
       inputTokens: usage.inputTokens,
       outputTokens: usage.outputTokens,
       costCents: usage.costCents,
+      costMicroEuros: usage.costMicroEuros,
+      costEstimated: usage.costEstimated,
+      // Which routing tier answered, when one did. Empty means no routed
+      // model was involved in this operation — the simulation, or the
+      // deterministic reviewer.
+      taskClass: usage.inputTokens > 0 || usage.outputTokens > 0 ? (provider.taskClass ?? "") : "",
       // A property of the stored row rather than a caption on a screen.
       isRealCharge: provider.billable,
     },

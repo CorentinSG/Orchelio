@@ -227,7 +227,7 @@ describe("what it does with what comes back", () => {
 
     expect(analysis.summary).toBe(analyseMatter(input).summary);
     expect(analysis.warnings.join(" ")).toMatch(/could not be reached/);
-    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
   it("says a slow model is slow, not absent", async () => {
@@ -363,7 +363,7 @@ describe("what a run costs", () => {
 
     const { usage } = await provider().analyseMatter(input);
 
-    expect(usage).toEqual({ inputTokens: 412, outputTokens: 88, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 412, outputTokens: 88, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
   it("records what a refused answer cost, because writing it was still work", async () => {
@@ -380,7 +380,7 @@ describe("what a run costs", () => {
     const { analysis, usage } = await provider().analyseMatter(input);
 
     expect(analysis.summary).toBe(analyseMatter(input).summary);
-    expect(usage).toEqual({ inputTokens: 300, outputTokens: 40, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 300, outputTokens: 40, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
   it("records zero when nothing came back at all", async () => {
@@ -389,7 +389,7 @@ describe("what a run costs", () => {
 
     const { usage } = await provider().analyseMatter(input);
 
-    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
   it("records zero when the server counted nothing, rather than inventing a figure", async () => {
@@ -398,7 +398,7 @@ describe("what a run costs", () => {
 
     const { usage } = await provider().analyseMatter(input);
 
-    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
   it("is not billable, though it is not simulated either", () => {
@@ -421,7 +421,7 @@ describe("the review", () => {
     // A reviewer that is the same model as the analyst agrees with itself,
     // which makes an unchecked analysis look checked.
     expect(stub).not.toHaveBeenCalled();
-    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0 });
+    expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0, costMicroEuros: 0, costEstimated: false });
     expect(review.humanReviewRequired).toBe(true);
   });
 

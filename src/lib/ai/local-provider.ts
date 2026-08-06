@@ -18,8 +18,11 @@
  * on file — are exactly the parts that need no model, and handing them to one
  * would trade something that cannot be wrong for something that can.
  *
- * Because the job is arithmetic, the model is told no client's name, no matter
- * title, no field value, no date and no filename. See `factsMessage`.
+ * The request itself — the instruction, the figures message, the judgement of
+ * what comes back — lives in `src/lib/ai/summary-rewrite.ts`, shared with the
+ * hosted provider so the two cannot drift (ADR-0024, ADR-0027). What is
+ * particular to this module is the address discipline and the wording that
+ * says where the model ran.
  *
  * ## What comes back is checked before it is stored
  *
@@ -52,8 +55,16 @@
 
 import { analyseMatter as deriveAnalysis } from "@/lib/ai/analyst";
 import { assertLoopback } from "@/lib/ai/loopback";
-import { assertsAnOutcome, reviewAnalysis } from "@/lib/ai/reviewer";
+import { reviewAnalysis } from "@/lib/ai/reviewer";
 import type { AIProvider } from "@/lib/ai/provider";
+import {
+  REWRITE_SYSTEM_PROMPT,
+  factsMessage,
+  judgeSummary,
+  orchelioWroteTheSummary,
+  readContent,
+  readTokenCounts,
+} from "@/lib/ai/summary-rewrite";
 import type {
   AnalysisReviewInput,
   AnalystRun,
@@ -62,6 +73,10 @@ import type {
   ReviewerRun,
   RunUsage,
 } from "@/lib/ai/types";
+
+// Re-exported so the module's public surface — and every test written against
+// it — survives the machinery moving to summary-rewrite.ts.
+export { factsMessage, judgeSummary, tidy, orchelioWroteTheSummary } from "@/lib/ai/summary-rewrite";
 
 /** Recorded on every analysis, so its wording can be explained years later. */
 export const LOCAL_PROMPT_VERSION = "local-summary-v1";
@@ -77,49 +92,20 @@ const CHAT_PATH = "v1/chat/completions";
 /** How long to wait for a model on a laptop before giving up. */
 const DEFAULT_TIMEOUT_MS = 30_000;
 
-/** A summary is a paragraph. Anything much longer is the model doing something else. */
-const MAX_SUMMARY_CHARS = 900;
-const MIN_SUMMARY_CHARS = 40;
-
-/**
- * The instruction, kept free of digits on purpose.
- *
- * `judgeSummary` refuses any figure the model was not given, and the set of
- * figures it was given is taken from the facts message alone. A "write 2 to 4
- * sentences" here would quietly add 2 and 4 to the numbers a model may use.
- */
-const SYSTEM_PROMPT = [
-  "You rewrite a summary of a legal matter file for a lawyer to read.",
-  "",
-  "You are given figures that have already been worked out from the firm's records.",
-  "Restate them in plain English, in two to four sentences. Reply with the summary and nothing else.",
-  "",
-  "You must not:",
-  "- say whether anyone is eligible, entitled or likely to succeed;",
-  "- recommend anything, or say what anyone should do;",
-  "- state a deadline, or say that a date is confirmed;",
-  "- use any number that is not in the figures you were given;",
-  "- add any fact, name, date or link that is not in the figures you were given.",
-  "",
-  "You are describing what a file contains. Every judgement about it belongs to the lawyer reading you.",
-].join("\n");
-
 /** Nothing was used, because no model was consulted. */
-const NOTHING_USED: RunUsage = { inputTokens: 0, outputTokens: 0, costCents: 0 };
+const NOTHING_USED: RunUsage = {
+  inputTokens: 0,
+  outputTokens: 0,
+  costCents: 0,
+  costMicroEuros: 0,
+  costEstimated: false,
+};
 
 /** Said when the model's paragraph is the one on screen. */
 export const MODEL_WROTE_THE_SUMMARY =
   "The summary's wording was written by a model running on this machine, from figures Orchelio " +
   "had already worked out. Every fact, date, disagreement and gap below was derived from the " +
   "record — the model was not asked what they are, and did not choose any of them.";
-
-/** Said when it is not, and why. Never quotes what the model wrote. */
-export function orchelioWroteTheSummary(because: string): string {
-  return (
-    `The summary's wording is Orchelio's own, derived from the record: ${because}. ` +
-    "Nothing else in this analysis is affected, because no other part of it is written by a model."
-  );
-}
 
 export type LocalModelSettings = {
   /** Checked before use, and the only place an address enters this module. */
@@ -220,7 +206,7 @@ export class LocalAIProvider implements AIProvider {
           temperature: 0,
           max_tokens: 400,
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: REWRITE_SYSTEM_PROMPT },
             { role: "user", content: facts },
           ],
         }),
@@ -258,200 +244,20 @@ export class LocalAIProvider implements AIProvider {
       console.warn("[orchelio] local model summary set aside:", verdict.because, {
         text: readContent(payload),
       });
-      return { ...verdict, usage: readUsage(payload) };
+      return { ...verdict, usage: localUsage(payload) };
     }
 
-    return { ok: true, summary: verdict.summary, usage: readUsage(payload) };
+    return { ok: true, summary: verdict.summary, usage: localUsage(payload) };
   }
-}
-
-// ---------------------------------------------------------------------------
-// What the model is sent
-// ---------------------------------------------------------------------------
-
-/**
- * The figures, as a message.
- *
- * Also the definition of what the model is allowed to say: `judgeSummary` takes
- * the numbers it may use from this text and nowhere else, so anything added
- * here widens what a model may write.
- *
- * ## What is deliberately not in it
- *
- * No client name, no matter title, no field value, no date and no document
- * filename. The model is rewording arithmetic — how many facts, how many
- * documents, how many disagreements — and arithmetic does not need to know
- * whose file it is. The matter's reference is sent because the summary is
- * anchored to it and `judgeSummary` checks the answer still names it.
- *
- * The material never leaves the machine either way. Sending less is not
- * belt-and-braces about that; it is that the smallest thing that does the job
- * is the right thing to send, and a name here would be in the model server's
- * log for no benefit at all.
- */
-export function factsMessage(
-  analysis: MatterAnalysisResult,
-  input: MatterAnalysisInput,
-): string {
-  const lines = [
-    `Matter ${input.reference}.`,
-    "",
-    "Figures worked out from the firm's records:",
-    // Counted off the derived analysis rather than off the matter, so this
-    // message and the summary beneath it can never disagree — a firm that
-    // switched a feature off has fewer facts, and both lines say so together.
-    `- ${analysis.keyFacts.length} fact(s) are listed in the analysis.`,
-    `- ${input.documents.length} document(s) are on file.`,
-  ];
-
-  lines.push(
-    analysis.contradictions.length === 0
-      ? "- Nothing on the record disagrees with anything else on the record."
-      : `- ${analysis.contradictions.length} point(s) on the record disagree with another part of the file: ${analysis.contradictions.map((item) => item.subject).join("; ")}.`,
-  );
-
-  if (analysis.missingDocuments.length > 0) {
-    lines.push(
-      `- ${analysis.missingDocuments.length} document(s) usually held on this kind of matter are not on file: ${analysis.missingDocuments.map((item) => item.label).join("; ")}.`,
-    );
-  }
-
-  lines.push(
-    analysis.sufficiency === "more_information_required"
-      ? "- There is too little on file for this to be usefully reviewed yet."
-      : "- There is enough on file for a person to review it.",
-  );
-
-  lines.push("", "Orchelio's own summary of those figures:", analysis.summary);
-  lines.push("", "Rewrite that summary in plainer words.");
-
-  return lines.join("\n");
-}
-
-// ---------------------------------------------------------------------------
-// What comes back
-// ---------------------------------------------------------------------------
-
-/** Anything that looks like a link or an address a model could have invented. */
-const LINK_LIKE = /(https?:\/\/|www\.|\S+@\S+\.\w)/i;
-
-/** Runs of digits, which is the only kind of invented figure this can catch. */
-const DIGITS = /\d+/g;
-
-export type SummaryVerdict =
-  | { ok: true; summary: string }
-  | { ok: false; because: string };
-
-/**
- * Whether a model's paragraph may be used.
- *
- * The checks are ordered by how much a reader would be harmed if the paragraph
- * got through: an asserted outcome first, then an invented figure, then the
- * rest. A refusal names its reason in words a lawyer can read, because the
- * reason is shown on the analysis.
- *
- * What it cannot catch, and the analysis does not claim otherwise: a figure
- * written in words ("three documents"), and an invented fact carrying no number
- * at all. The defence against those is that the model is only ever restating a
- * paragraph it was handed, and that the paragraph beside it is the derived one.
- */
-export function judgeSummary(raw: string, facts: string, reference: string): SummaryVerdict {
-  const summary = tidy(raw);
-
-  if (summary === "") return { ok: false, because: "the model answered with nothing" };
-  if (summary.length > MAX_SUMMARY_CHARS) {
-    return { ok: false, because: "the model's answer ran far longer than a summary" };
-  }
-  if (summary.length < MIN_SUMMARY_CHARS) {
-    return { ok: false, because: "the model's answer was too short to be a summary" };
-  }
-
-  const outcome = assertsAnOutcome(summary);
-  if (outcome) {
-    return { ok: false, because: `the model's answer read as ${outcome}, which an analysis may not contain` };
-  }
-
-  const allowed = new Set(facts.match(DIGITS) ?? []);
-  for (const figure of summary.match(DIGITS) ?? []) {
-    if (!allowed.has(figure)) {
-      return {
-        ok: false,
-        because: `the model's answer used the figure ${figure}, which is not among the ones it was given`,
-      };
-    }
-  }
-
-  if (LINK_LIKE.test(summary)) {
-    return { ok: false, because: "the model's answer contained a link or an address, which the record does not" };
-  }
-
-  if (!summary.includes(reference)) {
-    return { ok: false, because: `the model's answer did not name ${reference}` };
-  }
-
-  return { ok: true, summary };
 }
 
 /**
- * Removes the packaging a model puts around an answer, and nothing else.
- *
- * A code fence and a "Here is the summary:" label are the model failing to
- * follow "reply with the summary and nothing else", not the model saying
- * something. Both are removed mechanically. Anything past that is judged as
- * written — this does not rewrite prose, because a check that repaired its
- * input would be checking something the reader never sees.
+ * What a local run used. The token counts are whatever the server reported;
+ * the cost is zero, and true — the electricity and the machine are real costs
+ * and are not Orchelio's to estimate.
  */
-export function tidy(raw: string): string {
-  let text = raw.trim();
-
-  const fenced = /^```[a-z]*\n([\s\S]*?)\n?```$/i.exec(text);
-  if (fenced?.[1] !== undefined) text = fenced[1].trim();
-
-  const lines = text.split("\n");
-  const first = lines[0]?.trim() ?? "";
-  if (lines.length > 1 && first.endsWith(":") && !first.includes(".") && first.length < 60) {
-    text = lines.slice(1).join("\n").trim();
-  }
-
-  return text.replace(/\s+/g, " ").trim();
-}
-
-/** The assistant's text, from a response whose shape is not guaranteed. */
-function readContent(payload: unknown): string {
-  if (typeof payload !== "object" || payload === null) return "";
-  const choices = (payload as { choices?: unknown }).choices;
-  if (!Array.isArray(choices) || choices.length === 0) return "";
-  const message = (choices[0] as { message?: unknown }).message;
-  if (typeof message !== "object" || message === null) return "";
-  const content = (message as { content?: unknown }).content;
-  return typeof content === "string" ? content : "";
-}
-
-/**
- * What the run used, as the server reported it.
- *
- * A server that reports nothing is recorded as zero rather than guessed at.
- * Both screens that show these figures say they come from the model server, so
- * a zero reads as "it did not say" rather than as a measurement.
- */
-function readUsage(payload: unknown): RunUsage {
-  const usage =
-    typeof payload === "object" && payload !== null
-      ? (payload as { usage?: unknown }).usage
-      : undefined;
-  const counted = (key: string): number => {
-    if (typeof usage !== "object" || usage === null) return 0;
-    const value = (usage as Record<string, unknown>)[key];
-    return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
-  };
-
-  return {
-    inputTokens: counted("prompt_tokens"),
-    outputTokens: counted("completion_tokens"),
-    // Zero, and true. What a local model actually costs is electricity and the
-    // machine it runs on, neither of which Orchelio can see or should invent.
-    costCents: 0,
-  };
+function localUsage(payload: unknown): RunUsage {
+  return { ...readTokenCounts(payload), costCents: 0, costMicroEuros: 0, costEstimated: false };
 }
 
 function withWarning(analysis: MatterAnalysisResult, warning: string): MatterAnalysisResult {

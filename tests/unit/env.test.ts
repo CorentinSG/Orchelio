@@ -48,6 +48,19 @@ describe("parseServerEnv", () => {
     expect(env.aiProvider).toBe("anthropic");
     expect(env.anthropicApiKey).toBe("sk-test");
   });
+
+  it("refuses the Mistral provider without its key, at startup and by name", () => {
+    // A silent fallback to the simulation would let a firm believe it was
+    // getting a real analysis — the worst failure this product could have.
+    expect(() => parseServerEnv({ AI_PROVIDER: "mistral" })).toThrow(/MISTRAL_API_KEY/);
+  });
+
+  it("accepts the Mistral provider once a key is present", () => {
+    const env = parseServerEnv({ AI_PROVIDER: "mistral", MISTRAL_API_KEY: "test-key" });
+
+    expect(env.aiProvider).toBe("mistral");
+    expect(env.mistralApiKey).toBe("test-key");
+  });
 });
 
 /**

@@ -267,19 +267,24 @@ export type AnalysisReviewInput = {
  * What one run consumed, reported by whatever produced it.
  *
  * Returned from the run rather than declared once per provider, because the
- * three providers know different things: the simulation invents plausible
- * figures, a local model reports whatever its server counted, and a hosted one
- * would report what it is about to bill for. A single set of numbers on the
+ * providers know different things: the simulation invents plausible figures,
+ * a local model reports whatever its server counted, and the hosted one
+ * reports what it is about to bill for. A single set of numbers on the
  * provider would have to be a guess for at least one of them.
  *
- * `costCents` is money. A local model's is zero and that is a fact, not a
- * placeholder — the electricity and the machine are real costs and are not
- * Orchelio's to estimate.
+ * `costCents` is money, rounded for display; `costMicroEuros` carries the
+ * precision (1 cent = 10 000 µ€), because a hosted call costs a fraction of a
+ * cent and an integer-cent zero would read as "free". A local model's cost is
+ * zero and that is a fact, not a placeholder — the electricity and the
+ * machine are real costs and are not Orchelio's to estimate. `costEstimated`
+ * is true when the figure came from a price table rather than an invoice.
  */
 export type RunUsage = {
   inputTokens: number;
   outputTokens: number;
   costCents: number;
+  costMicroEuros: number;
+  costEstimated: boolean;
 };
 
 export type AnalystRun = { analysis: MatterAnalysisResult; usage: RunUsage };
