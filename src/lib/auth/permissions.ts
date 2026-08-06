@@ -20,13 +20,13 @@ export function isFirmRole(value: string): value is FirmRole {
 }
 
 export const ROLE_LABELS: Record<FirmRole, string> = {
-  firm_admin: "Firm Administrator",
-  attorney: "Attorney",
-  paralegal: "Paralegal",
-  read_only: "Read-only Reviewer",
+  firm_admin: "Administrateur du cabinet",
+  attorney: "Avocat",
+  paralegal: "Assistant juridique",
+  read_only: "Lecture seule",
 };
 
-export const PLATFORM_ADMIN_LABEL = "Platform Administrator";
+export const PLATFORM_ADMIN_LABEL = "Administrateur de la plateforme";
 
 // --- Permissions ----------------------------------------------------------
 
@@ -177,5 +177,5 @@ export function permissionsFor(actor: Actor): Permission[] {
 
 export function roleLabel(role: FirmRole | null, isPlatformAdmin: boolean): string {
   if (role) return ROLE_LABELS[role];
-  return isPlatformAdmin ? PLATFORM_ADMIN_LABEL : "No access";
+  return isPlatformAdmin ? PLATFORM_ADMIN_LABEL : "Aucun accès";
 }

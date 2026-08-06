@@ -28,7 +28,7 @@ import { prisma } from "@/lib/prisma";
 
 export type SignInState = { error: string | null };
 
-const GENERIC_FAILURE = "Incorrect email address or password.";
+const GENERIC_FAILURE = "Adresse e-mail ou mot de passe incorrect.";
 
 /** Only relative, single-slash paths are accepted, so `next` cannot send a user off-site. */
 function safeRedirectTarget(raw: FormDataEntryValue | null): string | null {
@@ -49,7 +49,7 @@ export async function signInAction(
   const correlationId = newCorrelationId();
 
   if (email.length === 0 || password.length === 0) {
-    return { error: "Enter both an email address and a password." };
+    return { error: "Saisissez une adresse e-mail et un mot de passe." };
   }
 
   const throttle = consumeAttempt(email);
@@ -61,7 +61,7 @@ export async function signInAction(
       newValue: { email, resetAt: throttle.resetAt.toISOString() },
       correlationId,
     });
-    return { error: "Too many sign-in attempts. Try again in a few minutes." };
+    return { error: "Trop de tentatives de connexion. Réessayez dans quelques minutes." };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });

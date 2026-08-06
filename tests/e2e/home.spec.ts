@@ -12,9 +12,9 @@ test.describe("Orchelio home page", () => {
     await expect(page).toHaveTitle(/Orchelio/);
     await expect(page.getByRole("img", { name: "Orchelio logo" }).first()).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "The adaptive operating system for law firms" }),
+      page.getByRole("heading", { name: "Le cockpit adaptatif des cabinets d'avocats" }),
     ).toBeVisible();
-    await expect(page.getByText("Powered by Orchelio")).toBeVisible();
+    await expect(page.getByText("Propulsé par Orchelio")).toBeVisible();
   });
 
   test("renders body copy with intact word spacing", async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe("Orchelio home page", () => {
 
     await expect(
       page.getByText(
-        "Demo environment — Do not upload real client information or confidential documents.",
+        "Environnement de démonstration — n'y saisissez jamais d'informations réelles sur un client.",
       ),
     ).toBeVisible();
   });

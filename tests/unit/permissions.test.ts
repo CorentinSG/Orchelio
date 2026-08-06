@@ -112,7 +112,7 @@ describe("platform administrator", () => {
   });
 
   it("holds no firm role of its own", () => {
-    expect(roleLabel(null, true)).toBe("Platform Administrator");
+    expect(roleLabel(null, true)).toBe("Administrateur de la plateforme");
   });
 });
 
@@ -122,6 +122,6 @@ describe("no membership", () => {
 
     expect(permissionsFor(a)).toEqual([]);
     expect(can(a, "matter.view")).toBe(false);
-    expect(roleLabel(null, false)).toBe("No access");
+    expect(roleLabel(null, false)).toBe("Aucun accès");
   });
 });

@@ -27,9 +27,9 @@ type Page = import("@playwright/test").Page;
 
 async function signIn(page: Page, email: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByLabel("Adresse e-mail").fill(email);
+  await page.getByLabel("Mot de passe").fill(PASSWORD);
+  await page.getByRole("button", { name: "Se connecter" }).click();
   await page.waitForURL((url) => !url.pathname.startsWith("/login"));
 }
 
@@ -209,7 +209,7 @@ test.describe("keyboard and focus", () => {
   test("the sign-in form can be completed and submitted by keyboard alone", async ({ page }) => {
     await page.goto("/login");
 
-    await page.getByLabel("Email address").focus();
+    await page.getByLabel("Adresse e-mail").focus();
     await page.keyboard.type("immigration.attorney@demo.local");
     await page.keyboard.press("Tab");
     await page.keyboard.type(PASSWORD);
@@ -250,7 +250,7 @@ test.describe("announcements", () => {
 
   test("the demonstration banner is not an alert", async ({ page }) => {
     await page.goto("/");
-    const banner = page.getByText(/Do not upload real client information/).first();
+    const banner = page.getByText(/n'y saisissez jamais d'informations réelles/).first();
     await expect(banner).toBeVisible();
     await expect(banner.locator("xpath=ancestor-or-self::*[@role='alert']")).toHaveCount(0);
   });

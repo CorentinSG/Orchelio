@@ -14,9 +14,9 @@ const PASSWORD = "orchelio-demo";
 
 async function signIn(page: import("@playwright/test").Page, email: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByLabel("Adresse e-mail").fill(email);
+  await page.getByLabel("Mot de passe").fill(PASSWORD);
+  await page.getByRole("button", { name: "Se connecter" }).click();
   // Wait for the sign-in to land before doing anything else: navigating on
   // while the request is in flight races it and arrives signed out.
   await page.waitForURL((url) => !url.pathname.startsWith("/login"));

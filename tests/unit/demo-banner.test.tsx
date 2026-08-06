@@ -10,7 +10,7 @@ describe("DemoBanner", () => {
 
     expect(
       screen.getByText(
-        "Demo environment — Do not upload real client information or confidential documents.",
+        "Environnement de démonstration — n'y saisissez jamais d'informations réelles sur un client.",
       ),
     ).toBeInTheDocument();
   });
@@ -20,7 +20,7 @@ describe("DemoBanner", () => {
 
     expect(
       screen.getByText(
-        "Orchelio Demo — Do not upload real client information or confidential documents.",
+        "Démonstration Orchelio — n'y saisissez jamais d'informations réelles sur un client ni de documents confidentiels.",
       ),
     ).toBeInTheDocument();
   });

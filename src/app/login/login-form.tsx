@@ -21,9 +21,9 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-md bg-brand px-4 py-2.5 text-sm font-medium text-brand-ink hover:bg-brand-strong disabled:opacity-60"
+      className="w-full rounded-md bg-brand px-4 py-3 text-base font-semibold text-brand-ink hover:bg-brand-strong disabled:opacity-60"
     >
-      {pending ? "Signing in…" : "Sign in"}
+      {pending ? "Connexion…" : "Se connecter"}
     </button>
   );
 }
@@ -48,7 +48,7 @@ export function LoginForm({
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink">
-            Email address
+            Adresse e-mail
           </label>
           <input
             id="email"
@@ -59,13 +59,13 @@ export function LoginForm({
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-subtle"
-            placeholder="name@demo.local"
+            placeholder="nom@demo.local"
           />
         </div>
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-ink">
-            Password
+            Mot de passe
           </label>
           <input
             id="password"
@@ -91,10 +91,10 @@ export function LoginForm({
       {accounts.length > 0 ? (
         <section aria-labelledby="demo-accounts" className="rounded-card border border-line bg-surface-muted p-4">
           <h2 id="demo-accounts" className="text-sm font-semibold text-ink">
-            Demonstration accounts
+            Comptes de démonstration
           </h2>
           <p className="mt-1 text-sm text-ink-muted">
-            All fictional. Select one to fill the form, then sign in.
+            Tous fictifs. Choisissez-en un pour remplir le formulaire, puis connectez-vous.
           </p>
 
           <ul className="mt-3 space-y-2">
@@ -122,7 +122,7 @@ export function LoginForm({
           </ul>
 
           <p className="mt-3 text-xs text-ink-subtle">
-            Password for every demonstration account:{" "}
+            Mot de passe de tous les comptes de démonstration :{" "}
             <code className="font-mono text-ink-muted">{accounts[0]?.password}</code>
           </p>
         </section>

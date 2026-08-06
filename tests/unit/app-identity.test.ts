@@ -19,7 +19,7 @@ describe("Orchelio identity", () => {
   it("is named Orchelio", () => {
     expect(APP_NAME).toBe("Orchelio");
     expect(APP_FULL_NAME).toBe("Orchelio Demo");
-    expect(POWERED_BY).toBe("Powered by Orchelio");
+    expect(POWERED_BY).toBe("Propulsé par Orchelio");
     expect(APP_DESCRIPTION).toBe("Orchelio is a configurable AI operating system for law firms.");
   });
 
@@ -34,10 +34,10 @@ describe("Orchelio identity", () => {
 
   it("carries both mandated demonstration warnings", () => {
     expect(DEMO_NOTICE_SHORT).toBe(
-      "Orchelio Demo — Do not upload real client information or confidential documents.",
+      "Démonstration Orchelio — n'y saisissez jamais d'informations réelles sur un client ni de documents confidentiels.",
     );
     expect(DEMO_NOTICE_LONG).toBe(
-      "Demo environment — Do not upload real client information or confidential documents.",
+      "Environnement de démonstration — n'y saisissez jamais d'informations réelles sur un client.",
     );
   });
 });

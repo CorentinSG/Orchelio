@@ -17,9 +17,9 @@ type Page = import("@playwright/test").Page;
 
 async function signIn(page: Page, email: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByLabel("Adresse e-mail").fill(email);
+  await page.getByLabel("Mot de passe").fill(PASSWORD);
+  await page.getByRole("button", { name: "Se connecter" }).click();
   // Wait for the sign-in to actually land. Navigating on before it completes
   // races the request and arrives signed out.
   await page.waitForURL((url) => !url.pathname.startsWith("/login"));

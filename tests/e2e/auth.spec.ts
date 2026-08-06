@@ -11,9 +11,9 @@ const PASSWORD = "orchelio-demo";
 
 async function signIn(page: import("@playwright/test").Page, email: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByLabel("Adresse e-mail").fill(email);
+  await page.getByLabel("Mot de passe").fill(PASSWORD);
+  await page.getByRole("button", { name: "Se connecter" }).click();
   // Wait for the sign-in to land before doing anything else: navigating on
   // while the request is in flight races it and arrives signed out.
   await page.waitForURL((url) => !url.pathname.startsWith("/login"));
@@ -24,7 +24,7 @@ test.describe("Protection of signed-out visitors", () => {
     await page.goto("/dashboard");
 
     await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
-    await expect(page.getByRole("heading", { name: "Sign in to Orchelio" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Se connecter à Orchelio" })).toBeVisible();
   });
 
   test("redirects platform administration to sign-in", async ({ page }) => {
@@ -64,29 +64,29 @@ test.describe("Protection of signed-out visitors", () => {
 test.describe("Sign-in", () => {
   test("refuses a wrong password with a message that reveals nothing", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Email address").fill("immigration.attorney@demo.local");
-    await page.getByLabel("Password").fill("not-the-password");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByLabel("Adresse e-mail").fill("immigration.attorney@demo.local");
+    await page.getByLabel("Mot de passe").fill("not-the-password");
+    await page.getByRole("button", { name: "Se connecter" }).click();
 
-    await expect(page.getByText("Incorrect email address or password.")).toBeVisible();
+    await expect(page.getByText("Adresse e-mail ou mot de passe incorrect.")).toBeVisible();
     await expect(page).toHaveURL(/\/login/);
   });
 
   test("gives an unknown address exactly the same message as a wrong password", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Email address").fill("nobody@demo.local");
-    await page.getByLabel("Password").fill("not-the-password");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByLabel("Adresse e-mail").fill("nobody@demo.local");
+    await page.getByLabel("Mot de passe").fill("not-the-password");
+    await page.getByRole("button", { name: "Se connecter" }).click();
 
     // Identical wording: the form cannot be used to discover which accounts exist.
-    await expect(page.getByText("Incorrect email address or password.")).toBeVisible();
+    await expect(page.getByText("Adresse e-mail ou mot de passe incorrect.")).toBeVisible();
   });
 
   test("fills the form from a demonstration account button", async ({ page }) => {
     await page.goto("/login");
     await page.getByRole("button", { name: /Claire Dupont/ }).click();
 
-    await expect(page.getByLabel("Email address")).toHaveValue("immigration.attorney@demo.local");
+    await expect(page.getByLabel("Adresse e-mail")).toHaveValue("immigration.attorney@demo.local");
   });
 });
 
@@ -97,7 +97,7 @@ test.describe("Workspaces", () => {
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
     await expect(page.getByText("Immigration Law").first()).toBeVisible();
-    await expect(page.getByText("Firm Administrator").first()).toBeVisible();
+    await expect(page.getByText("Administrateur du cabinet").first()).toBeVisible();
   });
 
   test("an employment paralegal lands in the employment firm with paralegal rights", async ({
