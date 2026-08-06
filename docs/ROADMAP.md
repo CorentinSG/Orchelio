@@ -5,11 +5,30 @@ tags: [reference, planning]
 
 # Orchelio — Roadmap
 
-Orchelio is built in nine phases. Each phase ends with: tests run, errors fixed, a summary of what
-changed, the main files listed, a commit, and instructions for testing it.
+The demonstration was built in nine phases, all delivered — they are the history below.
+**Version 1 — the connected cockpit — is now underway**: eight further phases that turn the
+closed demonstration into a connected product, specified in [Plan V1](PLAN-V1.md) (in French,
+because the product changes language with it). Each phase, then as now, ends with: tests run,
+errors fixed, a summary of what changed, the main files listed, a commit, and instructions for
+testing it.
 
 The application shows this progress on its home page, read from `src/lib/roadmap.ts`. Update that
 file when a phase status changes, so the product and the documentation cannot disagree.
+
+## Version 1 — the connected cockpit
+
+| # | Phase | Status |
+| - | ----- | ------ |
+| V1-1 | Foundations — written decisions, French, new design, routed AI gateway | 🔨 In progress |
+| V1-2 | Documents, finally read — extraction, OCR, classification, per-firm index | Planned |
+| V1-3 | The matter understood — typed assertions, sourced summary and timeline | Planned |
+| V1-4 | Emails — confidence-scored filing and the triage inbox | Planned |
+| V1-5 | Guided actions — five business buttons, drafts under approval | Planned |
+| V1-6 | Onboarding by clicking — adaptive questionnaire, preview, first result | Planned |
+| V1-7 | Costs under control — real centimes, caps, model comparison | Planned |
+| V1-8 | The V1 assembled — full demonstration scenario, rewritten guide | Planned |
+
+What each phase delivers, proves, and requires from the owner: [Plan V1](PLAN-V1.md).
 
 ---
 

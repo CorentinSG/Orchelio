@@ -39,7 +39,9 @@ the code — is what makes one firm's Orchelio different from another's. Each
 firm's data is isolated from every other firm's, enforced in three independent
 layers and proved by tests.
 
-Built in nine phases, all delivered; see [Roadmap](ROADMAP.md).
+The demonstration was built in nine phases, all delivered. **Version 1 — the
+connected cockpit — is underway**: see [Roadmap](ROADMAP.md) for status and
+[Plan V1](PLAN-V1.md) for the owner-approved construction plan (in French).
 
 ---
 
@@ -97,8 +99,10 @@ differently without knowing what you knew. Preferences do not need a note.
 
 - [Architecture](ARCHITECTURE.md) — how it is put together, and the procedures
   for adding a practice area, a workflow, a firm, or the Anthropic API.
-- [Roadmap](ROADMAP.md) — the nine phases, what each delivered, and the defects
-  found on the way.
+- [Roadmap](ROADMAP.md) — the nine delivered phases, the V1 phases underway,
+  and the defects found on the way.
+- [Plan V1](PLAN-V1.md) — the construction plan for Version 1, the connected
+  cockpit. In French; approved by the owner on 6 August 2026.
 - [Acceptance criteria](ACCEPTANCE.md) — every phase's criterion and the tests
   that prove it, checked rather than asserted.
 - [Giving a demonstration](DEMONSTRATION.md) — the procedure, the ten-minute
