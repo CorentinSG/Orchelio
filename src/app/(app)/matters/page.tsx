@@ -68,8 +68,8 @@ export default async function MattersPage({ searchParams }: PageProps) {
           <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Dossiers</h1>
           <p className="mt-1 text-ink-muted">
-            {matters.length} shown{activeFilters > 0 ? " (filtered)" : ""} · every matter here
-            belongs to this firm.
+            {matters.length} affiché(s){activeFilters > 0 ? " (filtrés)" : ""} · chaque dossier ici
+            appartient à ce cabinet.
           </p>
         </div>
         {canCreate ? (
@@ -77,29 +77,29 @@ export default async function MattersPage({ searchParams }: PageProps) {
             href="/matters/new"
             className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
           >
-            New matter
+            Nouveau dossier
           </Link>
         ) : null}
       </header>
 
-      <Card title="Filters" description="Applied on the server, within this firm.">
+      <Card title="Filtres" description="Appliqués sur le serveur, dans le périmètre de ce cabinet.">
         <form method="get" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <label htmlFor="q" className="block text-sm font-medium text-ink">
-              Search
+              Rechercher
             </label>
             <input
               id="q"
               name="q"
               defaultValue={filters.search ?? ""}
-              placeholder="Reference, title or client"
+              placeholder="Référence, intitulé ou client"
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-subtle"
             />
           </div>
 
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-ink">
-              Status
+              Statut
             </label>
             <select
               id="status"
@@ -107,7 +107,7 @@ export default async function MattersPage({ searchParams }: PageProps) {
               defaultValue={filters.status ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any status</option>
+              <option value="">Tous les statuts</option>
               {Object.keys(counts)
                 .sort()
                 .map((status) => (
@@ -120,7 +120,7 @@ export default async function MattersPage({ searchParams }: PageProps) {
 
           <div>
             <label htmlFor="type" className="block text-sm font-medium text-ink">
-              Matter type
+              Type de dossier
             </label>
             <select
               id="type"
@@ -128,7 +128,7 @@ export default async function MattersPage({ searchParams }: PageProps) {
               defaultValue={filters.matterTypeKey ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any type</option>
+              <option value="">Tous les types</option>
               {typeOptions.map((type) => (
                 <option key={type.key} value={type.key}>
                   {type.label}
@@ -140,7 +140,7 @@ export default async function MattersPage({ searchParams }: PageProps) {
           {isEmployment ? (
             <div>
               <label htmlFor="side" className="block text-sm font-medium text-ink">
-                Representing
+                Partie représentée
               </label>
               <select
                 id="side"
@@ -148,9 +148,9 @@ export default async function MattersPage({ searchParams }: PageProps) {
                 defaultValue={filters.representationSide ?? ""}
                 className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
               >
-                <option value="">Either side</option>
-                <option value="employee">The employee</option>
-                <option value="employer">The employer</option>
+                <option value="">Les deux</option>
+                <option value="employee">Le salarié</option>
+                <option value="employer">L’employeur</option>
               </select>
             </div>
           ) : null}
@@ -160,39 +160,39 @@ export default async function MattersPage({ searchParams }: PageProps) {
               type="submit"
               className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
             >
-              Apply
+              Appliquer
             </button>
             {activeFilters > 0 ? (
               <Link
                 href="/matters"
                 className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
               >
-                Clear
+                Effacer
               </Link>
             ) : null}
           </div>
         </form>
       </Card>
 
-      <Card title="Matter list">
+      <Card title="Liste des dossiers">
         {matters.length === 0 ? (
-          <Callout tone="neutral" title="Nothing to show">
+          <Callout tone="neutral" title="Rien à afficher">
             {activeFilters > 0
-              ? "No matter in this firm matches those filters."
-              : "This firm has no matters yet."}
+              ? "Aucun dossier de ce cabinet ne correspond à ces filtres."
+              : "Ce cabinet n’a pas encore de dossier."}
           </Callout>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[52rem] text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-ink-muted">
-                  <th className="py-2 pr-4 font-medium">Matter</th>
+                  <th className="py-2 pr-4 font-medium">Dossier</th>
                   <th className="py-2 pr-4 font-medium">Client</th>
                   <th className="py-2 pr-4 font-medium">Type</th>
-                  <th className="py-2 pr-4 font-medium">Status</th>
-                  <th className="py-2 pr-4 font-medium">Responsible</th>
-                  <th className="py-2 pr-4 font-medium">Next date</th>
-                  <th className="py-2 pr-4 font-medium">Last activity</th>
+                  <th className="py-2 pr-4 font-medium">Statut</th>
+                  <th className="py-2 pr-4 font-medium">Responsable</th>
+                  <th className="py-2 pr-4 font-medium">Prochaine date</th>
+                  <th className="py-2 pr-4 font-medium">Dernière activité</th>
                   <th className="py-2 font-medium">AI</th>
                 </tr>
               </thead>
@@ -203,14 +203,14 @@ export default async function MattersPage({ searchParams }: PageProps) {
                       <MatterLink id={matter.id} reference={matter.reference} title={matter.title} />
                     </td>
                     <td className="py-3 pr-4 text-ink">
-                      {matter.clientProfile?.displayName ?? "Unknown"}
+                      {matter.clientProfile?.displayName ?? "Inconnu"}
                     </td>
                     <td className="py-3 pr-4 text-ink-muted">{matter.matterType.label}</td>
                     <td className="py-3 pr-4">
                       <StatusBadge status={matter.status} />
                     </td>
                     <td className="py-3 pr-4 text-ink-muted">
-                      {matter.responsibleAttorney?.name ?? "Unassigned"}
+                      {matter.responsibleAttorney?.name ?? "Non attribué"}
                     </td>
                     <td className="py-3 pr-4">
                       <UnconfirmedDate value={matter.nextDeadlineAt} now={now} timezone={timezone} />
@@ -233,9 +233,10 @@ export default async function MattersPage({ searchParams }: PageProps) {
         )}
       </Card>
 
-      <Callout tone="ai" title="The AI column is a state, not a verdict">
-        A dash means no analysis has been run on that matter — not that none is needed. An
-        analysis that has run still requires a person to read it before it is used.
+      <Callout tone="ai" title="La colonne IA est un état, pas un verdict">
+        Un tiret signifie qu’aucune analyse n’a été lancée sur ce dossier — pas qu’aucune ne
+        soit utile. Une analyse effectuée doit toujours être lue par une personne avant d’être
+        utilisée.
       </Callout>
     </div>
   );

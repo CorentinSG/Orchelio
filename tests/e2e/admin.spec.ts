@@ -198,7 +198,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   await page.getByLabel("Main practice area").selectOption("immigration");
   await continueStep(page, 3);
 
-  await page.getByRole("checkbox", { name: "Family-based immigration" }).check();
+  await page.getByRole("checkbox", { name: "Regroupement familial" }).check();
   await continueStep(page, 4);
 
   await page.getByRole("checkbox", { name: "Lead intake" }).check();

@@ -50,49 +50,49 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <Link href="/matters" className="text-sm text-brand hover:underline">
-          ← All matters
+          ← Tous les dossiers
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">New matter</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">Nouveau dossier</h1>
         <p className="mt-1 text-ink-muted">
-          For {firm.name}. Use a fictional client — this is a demonstration environment.
+          Pour {firm.name}. Utilisez un client fictif — ceci est un environnement de démonstration.
         </p>
       </header>
 
       {error ? (
-        <Callout tone="danger" title="Please check this form" assertive>
+        <Callout tone="danger" title="Veuillez vérifier ce formulaire" assertive>
           {error}
         </Callout>
       ) : null}
 
       {types.length === 0 ? (
-        <Callout tone="warning" title="No matter types are enabled">
+        <Callout tone="warning" title="Aucun type de dossier n’est activé">
           <p>
-            This firm has not selected the kinds of matter it handles.{" "}
+            Ce cabinet n’a pas choisi les types de dossiers qu’il traite.{" "}
             <Link href="/onboarding/3" className="font-medium text-brand underline underline-offset-4">
-              Choose them in the firm setup
+              Choisissez-les dans l’installation du cabinet
             </Link>
             .
           </p>
         </Callout>
       ) : (
         <form method="post" action="/api/matters" className="space-y-6">
-          <Card title="The basics">
+          <Card title="L’essentiel">
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Matter title" htmlFor="title">
+              <Field label="Intitulé du dossier" htmlFor="title">
                 <input
                   id="title"
                   name="title"
                   required
-                  placeholder="Family-based petition — Alvarez"
+                  placeholder="Regroupement familial — Alvarez"
                   className={inputClass}
                 />
               </Field>
 
-              <Field label="Client name" htmlFor="clientName" hint="Fictional.">
+              <Field label="Nom du client" htmlFor="clientName" hint="Fictif.">
                 <input id="clientName" name="clientName" required className={inputClass} />
               </Field>
 
-              <Field label="Matter type" htmlFor="matterTypeKey">
+              <Field label="Type de dossier" htmlFor="matterTypeKey">
                 <select id="matterTypeKey" name="matterTypeKey" required className={inputClass}>
                   {types.map((type) => (
                     <option key={type.key} value={type.key}>
@@ -102,7 +102,7 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
                 </select>
               </Field>
 
-              <Field label="Status" htmlFor="status">
+              <Field label="Statut" htmlFor="status">
                 <select id="status" name="status" defaultValue="lead" className={inputClass}>
                   {GENERIC_MATTER_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -114,9 +114,9 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
 
               {isEmployment ? (
                 <Field
-                  label="Representing"
+                  label="Partie représentée"
                   htmlFor="representationSide"
-                  hint="Which side of the matter this firm acts for."
+                  hint="Pour quelle partie ce cabinet agit dans ce dossier."
                 >
                   <select
                     id="representationSide"
@@ -124,8 +124,8 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
                     defaultValue="employee"
                     className={inputClass}
                   >
-                    <option value="employee">The employee</option>
-                    <option value="employer">The employer</option>
+                    <option value="employee">Le salarié</option>
+                    <option value="employer">L’employeur</option>
                   </select>
                 </Field>
               ) : null}
@@ -136,7 +136,7 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
             <Card
               key={section}
               title={section}
-              description="Everything here is optional and nothing is verified."
+              description="Tout est facultatif ici, et rien n’est vérifié."
             >
               <div className="grid gap-5 sm:grid-cols-2">
                 {fields.map((field) => {
@@ -147,7 +147,7 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
                         <textarea id={id} name={id} rows={3} className={inputClass} />
                       ) : field.type === "select" ? (
                         <select id={id} name={id} className={inputClass} defaultValue="">
-                          <option value="">Unknown</option>
+                          <option value="">Inconnu</option>
                           {field.options?.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
@@ -156,9 +156,9 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
                         </select>
                       ) : field.type === "boolean" ? (
                         <select id={id} name={id} className={inputClass} defaultValue="">
-                          <option value="">Unknown</option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
+                          <option value="">Inconnu</option>
+                          <option value="true">Oui</option>
+                          <option value="false">Non</option>
                         </select>
                       ) : (
                         <input
@@ -180,16 +180,16 @@ export default async function NewMatterPage({ searchParams }: PageProps) {
               type="submit"
               className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
             >
-              Create matter
+              Créer le dossier
             </button>
             <Link
               href="/matters"
               className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
             >
-              Cancel
+              Annuler
             </Link>
             <p className="text-sm text-ink-subtle">
-              A reference is assigned automatically, sequential within this firm.
+              Une référence est attribuée automatiquement, séquentielle dans ce cabinet.
             </p>
           </div>
         </form>

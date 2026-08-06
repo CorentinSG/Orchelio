@@ -180,9 +180,9 @@ test.describe("The timeline", () => {
     // A matter no other spec analyses, so it has no timeline of its own.
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters/new");
-    await page.getByLabel("Matter title").fill("Untouched, for the timeline test");
-    await page.getByLabel("Client name").fill("Timeline Fixture");
-    await page.getByRole("button", { name: "Create matter" }).click();
+    await page.getByLabel("Intitulé du dossier").fill("Untouched, for the timeline test");
+    await page.getByLabel("Nom du client").fill("Timeline Fixture");
+    await page.getByRole("button", { name: "Créer le dossier" }).click();
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
     await page
       .getByRole("navigation", { name: "Sections du dossier" })

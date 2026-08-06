@@ -87,12 +87,12 @@ test.describe("The matter list", () => {
   }) => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/matters");
-    await expect(page.getByLabel("Representing")).toBeVisible();
+    await expect(page.getByLabel("Partie représentée")).toBeVisible();
 
     await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters");
-    await expect(page.getByLabel("Representing")).toHaveCount(0);
+    await expect(page.getByLabel("Partie représentée")).toHaveCount(0);
   });
 
   test("filters on the server, and the filter survives in the address bar", async ({ page }) => {
@@ -104,14 +104,14 @@ test.describe("The matter list", () => {
     await expect(page.getByRole("link", { name: /IMM-2026-001/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /IMM-2026-002/ })).toBeVisible();
 
-    await page.getByLabel("Search").fill("Moreau");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByLabel("Rechercher").fill("Moreau");
+    await page.getByRole("button", { name: "Appliquer" }).click();
 
     await expect(page).toHaveURL(/[?&]q=Moreau/);
     await expect(page.getByRole("link", { name: /IMM-2026-002/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /IMM-2026-001/ })).toHaveCount(0);
 
-    await page.getByRole("link", { name: "Clear" }).click();
+    await page.getByRole("link", { name: "Effacer" }).click();
     await expect(page).toHaveURL(/\/matters$/);
     await expect(page.getByRole("link", { name: /IMM-2026-001/ })).toBeVisible();
   });
@@ -120,18 +120,18 @@ test.describe("The matter list", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters");
 
-    const options = await page.getByLabel("Matter type").locator("option").allInnerTexts();
+    const options = await page.getByLabel("Type de dossier").locator("option").allInnerTexts();
 
     expect(options.length).toBeGreaterThan(1);
     // Employment types belong to the other firm's configuration entirely.
-    expect(options.join(" ")).not.toContain("Unpaid wages");
+    expect(options.join(" ")).not.toContain("Salaires impayés");
   });
 
   test("says nothing matched rather than showing an empty table", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters?q=zzzznotamatter");
 
-    await expect(page.getByText("No matter in this firm matches those filters.")).toBeVisible();
+    await expect(page.getByText("Aucun dossier de ce cabinet ne correspond à ces filtres.")).toBeVisible();
   });
 });
 
@@ -237,9 +237,9 @@ test.describe("Creating a matter", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters/new");
 
-    await page.getByLabel("Matter title").fill("Naturalisation — fictional applicant");
-    await page.getByLabel("Client name").fill("Test Client Playwright");
-    await page.getByRole("button", { name: "Create matter" }).click();
+    await page.getByLabel("Intitulé du dossier").fill("Naturalisation — fictional applicant");
+    await page.getByLabel("Nom du client").fill("Test Client Playwright");
+    await page.getByRole("button", { name: "Créer le dossier" }).click();
 
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
     await expect(
@@ -253,8 +253,8 @@ test.describe("Creating a matter", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/matters/new");
 
-    await expect(page.getByLabel("Matter title")).toBeVisible();
-    await expect(page.getByLabel("Representing", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Intitulé du dossier")).toBeVisible();
+    await expect(page.getByLabel("Partie représentée", { exact: true })).toBeVisible();
     // The immigration questions are absent entirely.
     const body = await page.locator("main").innerText();
     expect(body).not.toContain("Status expiration date");
@@ -272,17 +272,17 @@ test.describe("Creating a matter", () => {
         .querySelectorAll<HTMLElement>("[required]")
         .forEach((element) => element.removeAttribute("required"));
     });
-    await page.getByRole("button", { name: "Create matter" }).click();
+    await page.getByRole("button", { name: "Créer le dossier" }).click();
 
-    await expect(alerts(page)).toContainText("Give the matter a title.");
+    await expect(alerts(page)).toContainText("Donnez un intitulé au dossier.");
   });
 
   test("refuses a matter type this firm does not handle", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/matters/new");
 
-    await page.getByLabel("Matter title").fill("Injected type");
-    await page.getByLabel("Client name").fill("Test Client Playwright");
+    await page.getByLabel("Intitulé du dossier").fill("Injected type");
+    await page.getByLabel("Nom du client").fill("Test Client Playwright");
     // Rewrite the select to the other firm's type, exactly as somebody with
     // developer tools would.
     await page.evaluate(() => {
@@ -294,9 +294,9 @@ test.describe("Creating a matter", () => {
         select.value = "unpaid_wages";
       }
     });
-    await page.getByRole("button", { name: "Create matter" }).click();
+    await page.getByRole("button", { name: "Créer le dossier" }).click();
 
-    await expect(alerts(page)).toContainText("Choose a matter type this firm handles.");
+    await expect(alerts(page)).toContainText("Choisissez un type de dossier que ce cabinet traite.");
   });
 });
 

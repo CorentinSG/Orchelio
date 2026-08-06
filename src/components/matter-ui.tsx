@@ -12,12 +12,31 @@ import { MATTER_STATUSES } from "@/lib/constants";
  * date is never dressed up as a deadline the product has confirmed.
  */
 
-/** Turns a stored status key into the words a lawyer would use. */
+/** Turns a stored status key into the words a French lawyer would use. */
+const STATUS_LABELS: Record<string, string> = {
+  lead: "Premier contact",
+  conflict_review: "Vérification des conflits",
+  consultation_scheduled: "Consultation programmée",
+  documents_requested: "Documents demandés",
+  active: "Actif",
+  attorney_review: "Relecture par l’avocat",
+  waiting_for_client: "En attente du client",
+  negotiation: "Négociation",
+  ready_for_filing: "Prêt au dépôt",
+  closed: "Clos",
+  internal_investigation: "Enquête interne",
+  demand_preparation: "Préparation de la demande",
+  eeoc_review: "Examen EEOC",
+  agency_charge: "Plainte à l’agence",
+  settlement_discussions: "Discussions de transaction",
+  litigation_assessment: "Évaluation du contentieux",
+  employer_response_pending: "Réponse de l’employeur attendue",
+};
+
 export function statusLabel(status: string): string {
-  return status
-    .split("_")
-    .map((word, index) => (index === 0 ? word[0]?.toUpperCase() + word.slice(1) : word))
-    .join(" ");
+  // A key with no entry keeps its raw form: visibly wrong beats silently
+  // invented, and the unit test walks every known status.
+  return STATUS_LABELS[status] ?? status;
 }
 
 const STATUS_TONE: Record<string, Tone> = {
@@ -65,12 +84,12 @@ export { formatDate } from "@/lib/format/dates";
  * called with the same props.
  */
 export function relativeDays(value: Date | null | undefined, now: Date, timezone: string): string {
-  if (!value) return "Unknown";
+  if (!value) return "Inconnu";
   const days = daysBetween(value, now, timezone);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days} days ago`;
-  return `${Math.round(days / 30)} months ago`;
+  if (days <= 0) return "aujourd’hui";
+  if (days === 1) return "hier";
+  if (days < 30) return `il y a ${days} jours`;
+  return `il y a ${Math.round(days / 30)} mois`;
 }
 
 /**
@@ -88,7 +107,7 @@ export function UnconfirmedDate({
   now: Date;
   timezone: string;
 }) {
-  if (!value) return <span className="text-ink-subtle">None recorded</span>;
+  if (!value) return <span className="text-ink-subtle">Aucune enregistrée</span>;
 
   // Counted in the firm's calendar days. An instant twenty-three hours away
   // falls tomorrow, and "in 0 days" is the wrong answer for somebody reading a
@@ -100,7 +119,7 @@ export function UnconfirmedDate({
     <span className={soon ? "font-medium text-warning" : "text-ink"}>
       {formatDate(value, timezone)}
       <span className="ml-1 text-xs font-normal text-ink-subtle">
-        ({days < 0 ? "passed" : `in ${days} days`} · not confirmed)
+        ({days < 0 ? "passée" : `dans ${days} jours`} · non confirmée)
       </span>
     </span>
   );

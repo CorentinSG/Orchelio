@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 191.
+Modules: 192.
 
 ## `prisma/`
 
@@ -996,6 +996,10 @@ This is the module the confidentiality check leans on, so the interesting tests 
 ### `tests/unit/matter-fields.test.ts`
 
 `Matter.fields` is a JSON column, which is what makes one product serve two practice areas — and also what would let a hand-crafted form post store anything at all.
+
+### `tests/unit/matter-status-labels.test.ts`
+
+Until V1 the label was manufactured from the key ("conflict_review" → "Conflict review"), which cannot produce French.
 
 ### `tests/unit/mistral-provider.test.ts`
 

@@ -83,7 +83,7 @@ export async function createTwoFirmFixture(): Promise<TwoFirmFixture> {
   await client.matterType.upsert({
     where: { key: "family_based" },
     update: {},
-    create: { key: "family_based", label: "Family-based immigration", practiceAreaKey: "immigration" },
+    create: { key: "family_based", label: "Regroupement familial", practiceAreaKey: "immigration" },
   });
   await client.matterType.upsert({
     where: { key: "unpaid_wages" },
@@ -95,7 +95,7 @@ export async function createTwoFirmFixture(): Promise<TwoFirmFixture> {
   // foreign key to it, so a fixture missing one turns "this sample matter was
   // skipped" into a constraint violation — which is a different test.
   for (const type of [
-    { key: "employment_based", label: "Employment-based immigration", area: "immigration" },
+    { key: "employment_based", label: "Immigration professionnelle", area: "immigration" },
     { key: "naturalisation", label: "Naturalisation", area: "immigration" },
     { key: "retaliation", label: "Retaliation", area: "employment_law" },
     { key: "severance_review", label: "Severance review", area: "employment_law" },

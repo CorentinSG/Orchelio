@@ -133,8 +133,8 @@ test.describe("The seven-step questionnaire", () => {
     // Step 3
     await expect(page.getByText("Step 3 of 7")).toBeVisible();
     await uncheckAll(page, "matterTypes");
-    await check(page, "Family-based immigration");
-    await check(page, "Employment-based immigration");
+    await check(page, "Regroupement familial");
+    await check(page, "Immigration professionnelle");
     await check(page, "Naturalisation");
     await continueStep(page);
 
@@ -201,10 +201,10 @@ test.describe("The seven-step questionnaire", () => {
     await continueStep(page);
 
     await uncheckAll(page, "matterTypes");
-    await check(page, "Unpaid wages");
-    await check(page, "Workplace discrimination");
-    await check(page, "Retaliation");
-    await check(page, "Wrongful termination");
+    await check(page, "Salaires impayés");
+    await check(page, "Discrimination au travail");
+    await check(page, "Représailles");
+    await check(page, "Licenciement abusif");
     await continueStep(page);
 
     // Identical workflow answers to the immigration firm above.

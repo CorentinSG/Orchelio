@@ -53,17 +53,17 @@ export async function POST(request: Request) {
   const back = (problem: string) =>
     seeOther(`/matters/new?error=${encodeURIComponent(problem)}`);
 
-  if (!title) return back("Give the matter a title.");
-  if (!clientName) return back("Enter a fictional client name.");
+  if (!title) return back("Donnez un intitulé au dossier.");
+  if (!clientName) return back("Saisissez un nom de client fictif.");
 
   const configuration = await firmConfiguration(scope);
   const enabledTypes = parseStringArray(configuration?.matterTypes);
   if (!enabledTypes.includes(matterTypeKey)) {
-    return back("Choose a matter type this firm handles.");
+    return back("Choisissez un type de dossier que ce cabinet traite.");
   }
 
   if (!(GENERIC_MATTER_STATUSES as readonly string[]).includes(status)) {
-    return back("Choose a status from the list.");
+    return back("Choisissez un statut dans la liste.");
   }
 
   const submitted: Record<string, unknown> = {};

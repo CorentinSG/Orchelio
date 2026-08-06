@@ -27,40 +27,40 @@ import { DEMO_MATTERS } from "../src/lib/demo/matters";
 // --- Catalogues -----------------------------------------------------------
 
 const PRACTICE_AREAS = [
-  { key: "immigration", label: "Immigration Law", status: "available", sortOrder: 1 },
-  { key: "employment_law", label: "Employment & Labor Law", status: "available", sortOrder: 2 },
-  { key: "family_law", label: "Family Law", status: "planned", sortOrder: 3 },
-  { key: "personal_injury", label: "Personal Injury", status: "planned", sortOrder: 4 },
-  { key: "criminal_defence", label: "Criminal Defence", status: "planned", sortOrder: 5 },
-  { key: "business_law", label: "Business Law", status: "planned", sortOrder: 6 },
-  { key: "landlord_tenant", label: "Landlord–Tenant Law", status: "planned", sortOrder: 7 },
-  { key: "other", label: "Other", status: "planned", sortOrder: 8 },
+  { key: "immigration", label: "Droit de l’immigration", status: "available", sortOrder: 1 },
+  { key: "employment_law", label: "Droit du travail", status: "available", sortOrder: 2 },
+  { key: "family_law", label: "Droit de la famille", status: "planned", sortOrder: 3 },
+  { key: "personal_injury", label: "Dommage corporel", status: "planned", sortOrder: 4 },
+  { key: "criminal_defence", label: "Droit pénal", status: "planned", sortOrder: 5 },
+  { key: "business_law", label: "Droit des affaires", status: "planned", sortOrder: 6 },
+  { key: "landlord_tenant", label: "Droit des baux", status: "planned", sortOrder: 7 },
+  { key: "other", label: "Autre", status: "planned", sortOrder: 8 },
 ] as const;
 
 const MATTER_TYPES = [
   // Immigration Law
-  { key: "family_based", label: "Family-based immigration", practiceAreaKey: "immigration" },
-  { key: "employment_based", label: "Employment-based immigration", practiceAreaKey: "immigration" },
+  { key: "family_based", label: "Regroupement familial", practiceAreaKey: "immigration" },
+  { key: "employment_based", label: "Immigration professionnelle", practiceAreaKey: "immigration" },
   { key: "naturalisation", label: "Naturalisation", practiceAreaKey: "immigration" },
-  { key: "asylum", label: "Asylum", practiceAreaKey: "immigration" },
-  { key: "removal_defence", label: "Removal defence", practiceAreaKey: "immigration" },
-  { key: "consular_processing", label: "Consular processing", practiceAreaKey: "immigration" },
-  { key: "non_immigrant_visas", label: "Non-immigrant visas", practiceAreaKey: "immigration" },
-  { key: "humanitarian", label: "Humanitarian applications", practiceAreaKey: "immigration" },
+  { key: "asylum", label: "Asile", practiceAreaKey: "immigration" },
+  { key: "removal_defence", label: "Défense contre l’éloignement", practiceAreaKey: "immigration" },
+  { key: "consular_processing", label: "Procédure consulaire", practiceAreaKey: "immigration" },
+  { key: "non_immigrant_visas", label: "Visas de non-immigrant", practiceAreaKey: "immigration" },
+  { key: "humanitarian", label: "Demandes humanitaires", practiceAreaKey: "immigration" },
 
   // Employment & Labor Law
-  { key: "wage_and_hour", label: "Wage and hour", practiceAreaKey: "employment_law" },
-  { key: "unpaid_wages", label: "Unpaid wages", practiceAreaKey: "employment_law" },
-  { key: "workplace_discrimination", label: "Workplace discrimination", practiceAreaKey: "employment_law" },
-  { key: "workplace_harassment", label: "Workplace harassment", practiceAreaKey: "employment_law" },
-  { key: "retaliation", label: "Retaliation", practiceAreaKey: "employment_law" },
-  { key: "wrongful_termination", label: "Wrongful termination", practiceAreaKey: "employment_law" },
-  { key: "employment_agreement_review", label: "Employment agreement review", practiceAreaKey: "employment_law" },
-  { key: "reasonable_accommodation", label: "Reasonable accommodation", practiceAreaKey: "employment_law" },
-  { key: "family_medical_leave", label: "Family and medical leave", practiceAreaKey: "employment_law" },
+  { key: "wage_and_hour", label: "Temps de travail et salaire", practiceAreaKey: "employment_law" },
+  { key: "unpaid_wages", label: "Salaires impayés", practiceAreaKey: "employment_law" },
+  { key: "workplace_discrimination", label: "Discrimination au travail", practiceAreaKey: "employment_law" },
+  { key: "workplace_harassment", label: "Harcèlement au travail", practiceAreaKey: "employment_law" },
+  { key: "retaliation", label: "Représailles", practiceAreaKey: "employment_law" },
+  { key: "wrongful_termination", label: "Licenciement abusif", practiceAreaKey: "employment_law" },
+  { key: "employment_agreement_review", label: "Relecture de contrat de travail", practiceAreaKey: "employment_law" },
+  { key: "reasonable_accommodation", label: "Aménagement raisonnable", practiceAreaKey: "employment_law" },
+  { key: "family_medical_leave", label: "Congés familiaux et médicaux", practiceAreaKey: "employment_law" },
   { key: "contractor_classification", label: "Independent contractor classification", practiceAreaKey: "employment_law" },
   { key: "union_collective", label: "Union and collective labour matters", practiceAreaKey: "employment_law" },
-  { key: "severance_review", label: "Severance agreement review", practiceAreaKey: "employment_law" },
+  { key: "severance_review", label: "Relecture d’indemnité de départ", practiceAreaKey: "employment_law" },
 ] as const;
 
 type Step = { key: string; label: string; requiresApproval: boolean };
