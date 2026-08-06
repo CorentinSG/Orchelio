@@ -24,14 +24,14 @@ export function NotFoundNotice({ withWordmark = true }: { withWordmark?: boolean
   return (
     <div className="w-full max-w-md">
       {withWordmark ? <OrchelioWordmark size="lg" /> : null}
-      <h1 className="mt-6 text-2xl font-semibold tracking-tight text-ink">Page not found</h1>
+      <h1 className="mt-6 text-2xl font-semibold tracking-tight text-ink">Page introuvable</h1>
       <p className="mt-2 text-ink-muted">
-        The page you asked for does not exist, or you do not have access to it.
+        La page demandée n’existe pas, ou vous n’y avez pas accès.
       </p>
       <div className="mt-6">
         <Callout tone="neutral">
           <Link href="/" className="font-medium text-brand underline underline-offset-4">
-            Return to the Orchelio home page
+            Revenir à l’accueil d’Orchelio
           </Link>
         </Callout>
       </div>

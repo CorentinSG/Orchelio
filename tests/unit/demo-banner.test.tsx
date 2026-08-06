@@ -31,7 +31,7 @@ describe("OrchelioWordmark", () => {
     render(<OrchelioWordmark subtitle="Dupont Immigration Law" />);
 
     expect(screen.getByText("Orchelio")).toBeInTheDocument();
-    expect(screen.getByText("Demo")).toBeInTheDocument();
+    expect(screen.getByText("Démo")).toBeInTheDocument();
     expect(screen.getByText("Dupont Immigration Law")).toBeInTheDocument();
   });
 

@@ -85,7 +85,7 @@ test.describe("the guided demonstration", () => {
 
   test("says up front that everything in it is invented", async ({ page }) => {
     await page.goto("/guide");
-    await expect(page.getByRole("main")).toContainText(/fictional/i);
+    await expect(page.getByRole("main")).toContainText(/fictifs|fictional/i);
     await expect(page.getByRole("main")).toContainText("orchelio-demo");
   });
 

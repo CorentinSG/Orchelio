@@ -3,7 +3,7 @@ import Link from "next/link";
 import { OrchelioWordmark } from "@/components/brand";
 import { Callout } from "@/components/ui";
 
-export const metadata = { title: "Access denied" };
+export const metadata = { title: "Accès refusé" };
 
 /**
  * 403.
@@ -18,19 +18,19 @@ export default function ForbiddenPage() {
     <main id="main" tabIndex={-1} className="flex min-h-dvh items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         <OrchelioWordmark size="lg" />
-        <h1 className="mt-6 text-2xl font-semibold tracking-tight text-ink">Access denied</h1>
+        <h1 className="mt-6 text-2xl font-semibold tracking-tight text-ink">Accès refusé</h1>
         <p className="mt-2 text-ink-muted">
-          You do not have access to this page. If you believe this is a mistake, ask your firm
-          administrator to check your role.
+          Vous n’avez pas accès à cette page. Si vous pensez qu’il s’agit d’une erreur, demandez
+          à l’administrateur de votre cabinet de vérifier votre rôle.
         </p>
 
         <div className="mt-6 space-y-3">
           <Callout tone="neutral">
-            <p>This attempt has been recorded in the activity log.</p>
+            <p>Cette tentative a été consignée dans le journal d’activité.</p>
           </Callout>
           <p className="text-sm">
             <Link href="/dashboard" className="font-medium text-brand underline underline-offset-4">
-              Return to your dashboard
+              Revenir à votre tableau de bord
             </Link>
           </p>
         </div>

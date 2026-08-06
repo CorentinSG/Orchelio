@@ -1,6 +1,6 @@
 import { NotFoundNotice } from "@/components/not-found-notice";
 
-export const metadata = { title: "Page not found" };
+export const metadata = { title: "Page introuvable" };
 
 /** 404, outside the workspace. Generic on purpose — see `NotFoundNotice`. */
 export default function NotFound() {

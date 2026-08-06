@@ -17,14 +17,14 @@ export const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV?.trim() || "demo";
 export const IS_DEMO = APP_ENV === "demo";
 
 /** Shown next to the product name, e.g. "Orchelio Demo". */
-export const APP_EDITION = IS_DEMO ? "Demo" : "";
+export const APP_EDITION = IS_DEMO ? "Démo" : "";
 
 /** Full product label used in titles and headers. */
 export const APP_FULL_NAME = APP_EDITION ? `${APP_NAME} ${APP_EDITION}` : APP_NAME;
 
 export const APP_TAGLINE = "Le cockpit adaptatif des cabinets d'avocats";
 
-export const APP_DESCRIPTION = `${APP_NAME} is a configurable AI operating system for law firms.`;
+export const APP_DESCRIPTION = `${APP_NAME} est le cockpit configurable des cabinets d’avocats.`;
 
 /** Footer signature required on every firm-facing screen. */
 export const POWERED_BY = `Propulsé par ${APP_NAME}`;
@@ -41,4 +41,4 @@ export const DEMO_NOTICE_LONG =
 
 /** Every record in this build is fictional. Stated plainly wherever data is shown. */
 export const FICTIONAL_DATA_NOTICE =
-  "All firms, people, matters and documents in this environment are fictional.";
+  "Tous les cabinets, personnes, dossiers et documents de cet environnement sont fictifs.";

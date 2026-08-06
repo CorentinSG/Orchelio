@@ -131,7 +131,7 @@ test.describe("Workspaces", () => {
     await page.goto("/admin/firms");
 
     await expect(page).toHaveURL(/\/403/);
-    await expect(page.getByRole("heading", { name: "Access denied" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Accès refusé" })).toBeVisible();
   });
 
   test("the platform administrator sees the firm list but no matter content", async ({ page }) => {

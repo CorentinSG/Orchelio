@@ -103,12 +103,12 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
         dashboardCostLabel: "AI cost",
         costHint: "nothing is billed for a model on this machine",
         statusHint: "on this machine, no key, no invoice",
-        bannerTitle: "The AI runs on this computer",
+        bannerTitle: "L’IA fonctionne sur cet ordinateur",
         banner:
-          `${APP_NAME} uses a model installed on this machine, reached at 127.0.0.1. No API key is ` +
-          "required and no request leaves the computer. The model writes the wording of a summary " +
-          "and nothing else — every fact is worked out by " +
-          `${APP_NAME} from the record. Nothing is billed.`,
+          `${APP_NAME} utilise un modèle installé sur cette machine, joint à l’adresse 127.0.0.1. ` +
+          "Aucune clé d’API n’est requise et aucune requête ne quitte l’ordinateur. Le modèle rédige " +
+          "la formulation d’un résumé et rien d’autre — chaque fait est établi par " +
+          `${APP_NAME} depuis le dossier. Rien n’est facturé.`,
         analystNote:
           "A model on this machine writes the summary's wording. Every fact is derived from the " +
           "record, no request leaves the computer, and no charge is incurred.",
@@ -153,12 +153,12 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
         dashboardCostLabel: "Estimated AI cost",
         costHint: "estimated from a dated price table; Mistral invoices the firm directly",
         statusHint: "hosted in the EU, key server-side, billed per call",
-        bannerTitle: "The AI is Mistral, hosted in the European Union",
+        bannerTitle: "L’IA est Mistral, hébergée dans l’Union européenne",
         banner:
-          `${APP_NAME} sends one request per analysis to Mistral, a French AI company, processed ` +
-          "in the European Union. The model writes the wording of a summary and nothing else — " +
-          `every fact is worked out by ${APP_NAME} from the record, and what is sent contains ` +
-          "no name, no date and no document. Each call is billed to the firm's Mistral account.",
+          `${APP_NAME} envoie une requête par analyse à Mistral, entreprise française, avec un ` +
+          "traitement dans l’Union européenne. Le modèle rédige la formulation d’un résumé et rien " +
+          `d’autre — chaque fait est établi par ${APP_NAME} depuis le dossier, et ce qui est envoyé ` +
+          "ne contient ni nom, ni date, ni document. Chaque appel est facturé sur le compte Mistral du cabinet.",
         analystNote:
           "A Mistral model hosted in the EU writes the summary's wording. Every fact is derived " +
           "from the record; what is sent contains no name, no date and no document. Each call " +
@@ -195,10 +195,10 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
         dashboardCostLabel: "AI cost",
         costHint: "no run can complete",
         statusHint: "prepared for, not implemented",
-        bannerTitle: "The configured AI provider is not implemented",
+        bannerTitle: "Le moteur d’IA configuré n’est pas implémenté",
         banner:
-          "AI_PROVIDER is set to anthropic, which this build does not implement. No request is " +
-          "made, no charge is incurred, and no analysis can complete.",
+          "AI_PROVIDER vaut anthropic, que cette version n’implémente pas. Aucune requête n’est " +
+          "émise, aucun frais n’est engagé, et aucune analyse ne peut aboutir.",
         analystNote: "Not implemented in this build. Running an analysis will fail.",
         featuresNote:
           "The configured provider is not implemented in this build, so none of the features " +
@@ -232,10 +232,10 @@ export function providerNotice(env: ServerEnv): ProviderNotice {
         dashboardCostLabel: "Simulated AI cost",
         costHint: "no charge was incurred",
         statusHint: "no key, no request, no charge",
-        bannerTitle: "No live AI calls are made",
+        bannerTitle: "Aucun appel réel à une IA n’est effectué",
         banner:
-          `${APP_NAME} runs on a simulated AI provider. No Anthropic API key is required and no ` +
-          "request leaves this machine. Costs shown elsewhere in the product are simulated.",
+          `${APP_NAME} fonctionne avec un assistant simulé. Aucune clé d’API Anthropic n’est requise ` +
+          "et aucune requête ne quitte cette machine. Les coûts affichés ailleurs dans le produit sont simulés.",
         analystNote: "Simulated in this build. No API call is made and no charge is incurred.",
         featuresNote:
           "Every feature below is simulated in this build and costs nothing to run. Switching one " +

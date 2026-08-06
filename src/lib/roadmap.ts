@@ -7,6 +7,10 @@
  * what is implemented and what is not — no screen ever pretends to do more
  * than it does.
  *
+ * Titles and summaries are displayed to users, so they are in the product's
+ * language — French. docs/ROADMAP.md keeps the English record for
+ * maintainers; the statuses must agree between the two.
+ *
  * Update the `status` field as each phase lands. See docs/ROADMAP.md.
  */
 
@@ -28,98 +32,98 @@ export const PHASES: readonly Phase[] = [
   },
   {
     number: 2,
-    title: "Data & authentication",
-    summary: "Full data model, migrations, seed data, local demo sign-in, roles.",
+    title: "Données et authentification",
+    summary: "Modèle de données complet, migrations, données de démonstration, connexion locale, rôles.",
     status: "done",
   },
   {
     number: 3,
-    title: "Multi-firm",
-    summary: "Firm memberships, firmId scoping on every query, isolation tests.",
+    title: "Multi-cabinets",
+    summary: "Appartenances, périmètre firmId sur chaque requête, tests d’isolation.",
     status: "done",
   },
   {
     number: 4,
-    title: "Onboarding",
-    summary: "Seven-step questionnaire that generates the firm configuration.",
+    title: "Questionnaire d’installation",
+    summary: "Sept étapes qui produisent la configuration du cabinet.",
     status: "done",
   },
   {
     number: 5,
-    title: "Matters & documents",
-    summary: "Matter list and record, practice-area fields, simulated document upload.",
+    title: "Dossiers et documents",
+    summary: "Liste et fiche de dossier, champs par domaine de droit, dépôt simulé de documents.",
     status: "done",
   },
   {
     number: 6,
-    title: "Simulated AI",
-    summary: "AIProvider interface, MockAIProvider, Claude Analyst and Claude Reviewer.",
+    title: "IA simulée",
+    summary: "Interface AIProvider, simulation déterministe, Claude Analyst et Claude Reviewer.",
     status: "done",
   },
   {
     number: 7,
-    title: "Approvals & audit",
-    summary: "Human approval centre, decisions, append-only activity log.",
+    title: "Validations et journal",
+    summary: "Centre de validation humaine, décisions, journal d’activité inaltérable.",
     status: "done",
   },
   {
     number: 8,
-    title: "Usage & administration",
-    summary: "Simulated AI costs, firm creation, settings, guided demo.",
+    title: "Consommation et administration",
+    summary: "Coûts d’IA simulés, création de cabinets, réglages, démonstration guidée.",
     status: "done",
   },
   {
     number: 9,
-    title: "Tests & documentation",
-    summary: "Unit, integration and end-to-end tests, accessibility, final documentation.",
+    title: "Tests et documentation",
+    summary: "Tests unitaires, d’intégration et navigateur, accessibilité, documentation finale.",
     status: "done",
   },
   {
     number: 10,
-    title: "V1 — Foundations",
-    summary: "Written decisions, French interface, new design, routed AI gateway with cost counting.",
+    title: "V1 — Fondations",
+    summary: "Décisions écrites, interface en français, nouveau design, passerelle d’IA routée et comptée.",
     status: "in_progress",
   },
   {
     number: 11,
-    title: "V1 — Documents, finally read",
-    summary: "Text extraction, local OCR, classification, deduplication, per-firm index.",
+    title: "V1 — Les documents, enfin lus",
+    summary: "Extraction du texte, OCR local, classification, dédoublonnage, index par cabinet.",
     status: "planned",
   },
   {
     number: 12,
-    title: "V1 — The matter understood",
-    summary: "Typed assertions, sourced summary and timeline, content-level inconsistencies.",
+    title: "V1 — Le dossier compris",
+    summary: "Assertions typées, résumé et chronologie sourcés, incohérences de contenu.",
     status: "planned",
   },
   {
     number: 13,
-    title: "V1 — Emails",
-    summary: "Confidence-scored filing, triage inbox, corrections learned per firm.",
+    title: "V1 — Les courriels",
+    summary: "Rattachement scoré, boîte de tri, corrections apprises par cabinet.",
     status: "planned",
   },
   {
     number: 14,
-    title: "V1 — Guided actions",
-    summary: "Five business buttons, drafts under human approval, adaptable templates.",
+    title: "V1 — Les actions guidées",
+    summary: "Cinq boutons métier, brouillons sous validation humaine, modèles adaptables.",
     status: "planned",
   },
   {
     number: 15,
-    title: "V1 — Onboarding by clicking",
-    summary: "Adaptive questionnaire, free-text refinement, preview, first result before the end.",
+    title: "V1 — L’installation en cliquant",
+    summary: "Questionnaire adaptatif, précision libre, aperçu, premier résultat avant la fin.",
     status: "planned",
   },
   {
     number: 16,
-    title: "V1 — Costs under control",
-    summary: "Real centimes per firm, matter and action; caps; model comparison.",
+    title: "V1 — Les coûts sous contrôle",
+    summary: "Centimes réels par cabinet, dossier et action ; plafonds ; comparaison des modèles.",
     status: "planned",
   },
   {
     number: 17,
-    title: "V1 — The V1 assembled",
-    summary: "Full demonstration scenario, rich fictional data, rewritten guide.",
+    title: "V1 — La V1 assemblée",
+    summary: "Scénario de démonstration complet, données fictives riches, guide réécrit.",
     status: "planned",
   },
 ] as const;

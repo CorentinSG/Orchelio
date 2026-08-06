@@ -26,13 +26,13 @@ test.describe("Orchelio home page", () => {
     // regression cannot land unnoticed.
     await expect(
       page.getByText(
-        "Orchelio is a configurable platform for law firms. One codebase serves every firm;",
+        "Orchelio est une plateforme configurable pour cabinets d’avocats. Un seul code sert",
       ),
     ).toBeVisible();
 
     await expect(
       page.getByText(
-        "Orchelio runs on a simulated AI provider. No Anthropic API key is required",
+        "Orchelio fonctionne avec un assistant simulé. Aucune clé d’API Anthropic n’est requise",
       ),
     ).toBeVisible();
   });
@@ -50,21 +50,21 @@ test.describe("Orchelio home page", () => {
   test("reports live database status", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "Platform status" })).toBeVisible();
-    await expect(page.getByText("System operational")).toBeVisible();
-    await expect(page.getByText("Connected")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "État de la plateforme" })).toBeVisible();
+    await expect(page.getByText("Système opérationnel")).toBeVisible();
+    await expect(page.getByText("Connectée")).toBeVisible();
   });
 
   test("states that no live AI call is made", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByText("No live AI calls are made")).toBeVisible();
+    await expect(page.getByText("Aucun appel réel à une IA n’est effectué")).toBeVisible();
   });
 
   test("serves a branded 404 for an unknown page", async ({ page }) => {
     const response = await page.goto("/this-page-does-not-exist");
 
     expect(response?.status()).toBe(404);
-    await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
   });
 });

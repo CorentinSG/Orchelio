@@ -18,9 +18,9 @@ import { PRACTICE_AREAS, isPracticeAreaAvailable, practiceAreaLabel } from "@/li
 describe("Orchelio identity", () => {
   it("is named Orchelio", () => {
     expect(APP_NAME).toBe("Orchelio");
-    expect(APP_FULL_NAME).toBe("Orchelio Demo");
+    expect(APP_FULL_NAME).toBe("Orchelio Démo");
     expect(POWERED_BY).toBe("Propulsé par Orchelio");
-    expect(APP_DESCRIPTION).toBe("Orchelio is a configurable AI operating system for law firms.");
+    expect(APP_DESCRIPTION).toBe("Orchelio est le cockpit configurable des cabinets d’avocats.");
   });
 
   it("never uses a generic product name", () => {

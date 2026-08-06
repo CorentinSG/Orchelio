@@ -31,9 +31,9 @@ const PHASE_TONE = {
 } as const;
 
 const PHASE_LABEL = {
-  done: "Delivered",
-  in_progress: "In progress",
-  planned: "Planned",
+  done: "Livrée",
+  in_progress: "En cours",
+  planned: "Prévue",
 } as const;
 
 /**
@@ -42,10 +42,10 @@ const PHASE_LABEL = {
  * lines, which silently glues words together.
  */
 const INTRODUCTION =
-  `${APP_NAME} is a configurable platform for law firms. One codebase serves every firm; ` +
-  "a short onboarding questionnaire configures each firm’s matter types, workflows, AI " +
-  "features and human approval rules — and each firm’s data stays isolated from every " +
-  "other firm.";
+  `${APP_NAME} est une plateforme configurable pour cabinets d’avocats. Un seul code sert ` +
+  "tous les cabinets ; un court questionnaire d’installation configure les types de dossiers, " +
+  "les circuits de travail, les fonctions d’IA et les règles de validation humaine de chaque " +
+  "cabinet — et les données de chaque cabinet restent isolées de tous les autres.";
 
 
 export default async function HomePage() {
@@ -63,13 +63,13 @@ export default async function HomePage() {
           <div className="flex items-center gap-3">
             <Badge tone={databaseOk ? "success" : "danger"}>
               <StatusDot tone={databaseOk ? "success" : "danger"} />
-              {databaseOk ? "System operational" : "Setup required"}
+              {databaseOk ? "Système opérationnel" : "Installation requise"}
             </Badge>
             <Link
               href="/login"
               className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
             >
-              Sign in
+              Se connecter
             </Link>
           </div>
         </div>
@@ -86,20 +86,20 @@ export default async function HomePage() {
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
           <Card
-            title="Platform status"
-            description="Checked live against the local database on every page load."
+            title="État de la plateforme"
+            description="Vérifié en direct contre la base locale à chaque affichage de la page."
           >
             <dl>
               <DataRow
-                label="Database (SQLite)"
+                label="Base de données (SQLite)"
                 value={
                   status.database.state === "connected" ? (
                     <span className="inline-flex items-center gap-2">
-                      <StatusDot tone="success" /> Connected
+                      <StatusDot tone="success" /> Connectée
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2">
-                      <StatusDot tone="danger" /> Unavailable
+                      <StatusDot tone="danger" /> Indisponible
                     </span>
                   )
                 }
@@ -110,27 +110,27 @@ export default async function HomePage() {
                 }
               />
               <DataRow
-                label="Migrations applied"
+                label="Migrations appliquées"
                 value={
                   status.database.state === "connected" ? status.database.migrationsApplied : "—"
                 }
               />
               <DataRow
-                label="Firms registered"
+                label="Cabinets enregistrés"
                 value={status.database.state === "connected" ? status.database.firmCount : "—"}
               />
-              <DataRow label="AI provider" value={status.aiProvider} hint={status.aiProviderWord} />
-              <DataRow label="Environment" value={status.appEnv} />
+              <DataRow label="Moteur d’IA" value={status.aiProvider} hint={status.aiProviderWord} />
+              <DataRow label="Environnement" value={status.appEnv} />
               <DataRow label="Node.js" value={status.nodeVersion} />
             </dl>
 
             {status.database.state === "unavailable" ? (
               <div className="mt-4">
-                <Callout tone="danger" title="The database is not ready" assertive>
+                <Callout tone="danger" title="La base de données n’est pas prête" assertive>
                   <p>{status.database.reason}</p>
                   <p className="mt-2">
-                    Open a terminal in the project folder and run{" "}
-                    <CommandLine>{status.database.remedy}</CommandLine>, then reload this page.
+                    Ouvrez un terminal dans le dossier du projet, lancez{" "}
+                    <CommandLine>{status.database.remedy}</CommandLine>, puis rechargez cette page.
                   </p>
                 </Callout>
               </div>
@@ -144,14 +144,14 @@ export default async function HomePage() {
           </Card>
 
           <Card
-            title="Firms on this instance"
+            title="Cabinets sur cette instance"
             description={FICTIONAL_DATA_NOTICE}
           >
             {firms.length === 0 ? (
               <div className="py-2">
-                <p className="text-sm text-ink-muted">No firm has been created yet.</p>
+                <p className="text-sm text-ink-muted">Aucun cabinet n’a encore été créé.</p>
                 <p className="mt-2 text-sm text-ink-muted">
-                  Run <CommandLine>npm run seed</CommandLine> to load the two demonstration firms.
+                  Lancez <CommandLine>npm run seed</CommandLine> pour charger les deux cabinets de démonstration.
                 </p>
               </div>
             ) : (
@@ -173,21 +173,21 @@ export default async function HomePage() {
             )}
             <p className="mt-4 text-sm text-ink-subtle">
               <Link href="/login" className="font-medium text-brand underline underline-offset-4">
-                Sign in
+                Connectez-vous
               </Link>{" "}
-              with a demonstration account to open a firm workspace, or read the{" "}
+              avec un compte de démonstration pour ouvrir l’espace d’un cabinet, ou lisez d’abord la{" "}
               <Link href="/guide" className="font-medium text-brand underline underline-offset-4">
-                guided demonstration
+                démonstration guidée
               </Link>{" "}
-              first — twenty-one steps, no account needed to read them.
+              — vingt et une étapes, lisibles sans aucun compte.
             </p>
           </Card>
         </div>
 
         <div className="mt-6">
           <Card
-            title="Build progress"
-            description={`Current phase: ${phase.number} — ${phase.title}.`}
+            title="Avancement de la construction"
+            description={`Phase en cours : ${phase.number} — ${phase.title}.`}
           >
             <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {PHASES.map((item) => (
@@ -212,7 +212,7 @@ export default async function HomePage() {
       <footer className="border-t border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-sm text-ink-subtle sm:px-6">
           <p>{POWERED_BY}</p>
-          <p>Demonstration environment — fictional data only.</p>
+          <p>Environnement de démonstration — données fictives uniquement.</p>
         </div>
       </footer>
     </div>
