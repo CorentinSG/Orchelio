@@ -4,7 +4,10 @@
  * Orchelio design tokens.
  *
  * Sober, professional, high contrast. No decorative gradients, no animation
- * beyond what communicates state. Colours are declared once here and consumed
+ * beyond what communicates state. Retuned for V1 (docs/PLAN-V1.md): ink-and-
+ * paper neutrals, the V1 brand blue, larger base type. Every pair used for
+ * text was computed against WCAG AA before landing, and `npm run test:a11y`
+ * re-proves the rendered product in both themes. Colours are declared once here and consumed
  * as Tailwind utilities (bg-surface, text-ink, border-line, ...).
  *
  * Light and dark are both first-class. The theme follows the operating system
@@ -21,43 +24,43 @@
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Surfaces */
-  --color-canvas: #f6f7f9;
+  --color-canvas: #f7f7f5;
   --color-surface: #ffffff;
-  --color-surface-muted: #f1f3f6;
+  --color-surface-muted: #f1f1ee;
 
   /* Text */
-  --color-ink: #10182a;
-  --color-ink-muted: #55607a;
+  --color-ink: #1b2230;
+  --color-ink-muted: #525b6b;
   /* Darkened in Phase 9. #7b8499 measured 3.18:1 against the AI panel's
      background and 3.75:1 against white — below the 4.5:1 WCAG AA needs for
      text this size, which is every place it is used. #61697c clears 4.5 on
      all seven light surfaces. The three-level hierarchy is subtler as a
      result; unreadable is not a hierarchy. */
-  --color-ink-subtle: #61697c;
+  --color-ink-subtle: #5d6675;
 
   /* Lines */
-  --color-line: #dfe3ea;
-  --color-line-strong: #c4cbd8;
+  --color-line: #e3e5e1;
+  --color-line-strong: #c9ccc5;
 
   /* Brand — deep, calm blue. Used for primary actions and the wordmark mark. */
-  --color-brand: #1f4e79;
-  --color-brand-strong: #163a5c;
-  --color-brand-soft: #e8eef5;
+  --color-brand: #1f3a5f;
+  --color-brand-strong: #172c49;
+  --color-brand-soft: #e9eef4;
   --color-brand-ink: #ffffff;
 
   /* Semantic */
-  --color-success: #1d6f42;
-  --color-success-soft: #e6f2ea;
-  --color-warning: #955009;
-  --color-warning-soft: #fbf0e2;
-  --color-danger: #a52121;
-  --color-danger-soft: #fbeaea;
+  --color-success: #206b45;
+  --color-success-soft: #e7f2ec;
+  --color-warning: #8f5410;
+  --color-warning-soft: #faf0e0;
+  --color-danger: #9d2733;
+  --color-danger-soft: #faebec;
 
   /* AI-generated content is always visually distinct from verified content. */
-  --color-ai: #5b3fa8;
-  --color-ai-soft: #efeafb;
+  --color-ai: #5a4b9e;
+  --color-ai-soft: #edeafa;
 
-  --radius-card: 0.625rem;
+  --radius-card: 0.75rem;
 }
 
 /*
@@ -74,62 +77,62 @@
     :root:not([data-theme="light"]) {
       color-scheme: dark;
 
-      --color-canvas: #0c1017;
-      --color-surface: #141a24;
-      --color-surface-muted: #1b2230;
+      --color-canvas: #10141b;
+      --color-surface: #171c25;
+      --color-surface-muted: #1e2431;
 
-      --color-ink: #e8ecf3;
-      --color-ink-muted: #a3adc0;
-      --color-ink-subtle: #808b9f;
+      --color-ink: #e9ecf1;
+      --color-ink-muted: #a7afbd;
+      --color-ink-subtle: #97a1b0;
 
-      --color-line: #27303f;
-      --color-line-strong: #3a4557;
+      --color-line: #2a3140;
+      --color-line-strong: #3e4759;
 
-      --color-brand: #7ba7d4;
-      --color-brand-strong: #a3c3e2;
-      --color-brand-soft: #182534;
-      --color-brand-ink: #0c1017;
+      --color-brand: #88afdd;
+      --color-brand-strong: #abc7e9;
+      --color-brand-soft: #1b2939;
+      --color-brand-ink: #10141b;
 
-      --color-success: #6cc48f;
-      --color-success-soft: #14261c;
-      --color-warning: #e0a35c;
-      --color-warning-soft: #2a2015;
-      --color-danger: #e58b8b;
-      --color-danger-soft: #2b1818;
+      --color-success: #77c99a;
+      --color-success-soft: #16281f;
+      --color-warning: #dfa763;
+      --color-warning-soft: #2b2114;
+      --color-danger: #e49393;
+      --color-danger-soft: #2d1a1a;
 
-      --color-ai: #b7a2ec;
-      --color-ai-soft: #1f1a2e;
+      --color-ai: #b5a6e9;
+      --color-ai-soft: #211c33;
     }
   }
 
   :root[data-theme="dark"] {
     color-scheme: dark;
 
-    --color-canvas: #0c1017;
-    --color-surface: #141a24;
-    --color-surface-muted: #1b2230;
+    --color-canvas: #10141b;
+    --color-surface: #171c25;
+    --color-surface-muted: #1e2431;
 
-    --color-ink: #e8ecf3;
-    --color-ink-muted: #a3adc0;
-    --color-ink-subtle: #808b9f;
+    --color-ink: #e9ecf1;
+    --color-ink-muted: #a7afbd;
+    --color-ink-subtle: #97a1b0;
 
-    --color-line: #27303f;
-    --color-line-strong: #3a4557;
+    --color-line: #2a3140;
+    --color-line-strong: #3e4759;
 
-    --color-brand: #7ba7d4;
-    --color-brand-strong: #a3c3e2;
-    --color-brand-soft: #182534;
-    --color-brand-ink: #0c1017;
+    --color-brand: #88afdd;
+    --color-brand-strong: #abc7e9;
+    --color-brand-soft: #1b2939;
+    --color-brand-ink: #10141b;
 
-    --color-success: #6cc48f;
-    --color-success-soft: #14261c;
-    --color-warning: #e0a35c;
-    --color-warning-soft: #2a2015;
-    --color-danger: #e58b8b;
-    --color-danger-soft: #2b1818;
+    --color-success: #77c99a;
+    --color-success-soft: #16281f;
+    --color-warning: #dfa763;
+    --color-warning-soft: #2b2114;
+    --color-danger: #e49393;
+    --color-danger-soft: #2d1a1a;
 
-    --color-ai: #b7a2ec;
-    --color-ai-soft: #1f1a2e;
+    --color-ai: #b5a6e9;
+    --color-ai-soft: #211c33;
   }
 
   html {
@@ -140,8 +143,8 @@
     background-color: var(--color-canvas);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: 0.9375rem;
-    line-height: 1.6;
+    font-size: 1rem;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
   }
 
