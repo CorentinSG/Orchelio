@@ -771,7 +771,7 @@ Exports: `prisma`
 
 ### `src/lib/roadmap.ts`
 
-The demonstration is built in nine phases.
+The demonstration was built in nine phases, all delivered.
 
 Exports: `currentPhase`, `PHASES`, `PhaseStatus`, `Phase`
 

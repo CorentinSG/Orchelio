@@ -14,9 +14,9 @@
  *      administrator cannot read a firm's matters" stops being a property of
  *      the screens and becomes a property of the queries.
  *
- *   3. Nothing in src/ can make an outbound request. Orchelio sends nothing
- *      today; this is what keeps that true when somebody adds a feature that
- *      would like to.
+ *   3. Nothing in src/ can make an outbound request except the modules listed
+ *      in EGRESS_ALLOWED — each confined to its named hosts, its decision on
+ *      record, and its destination unnameable anywhere else (ADR-0025).
  *
  *   4. Nothing in src/ writes a file. A document is a name, a type and a size;
  *      the moment bytes are stored, encryption at rest stops being a plan and
@@ -35,29 +35,29 @@ import { join } from "node:path";
 const ROOT = process.cwd();
 
 /**
- * Modules permitted to open a socket, and on what terms.
+ * Modules permitted to open a socket, and on what terms. Governed, not
+ * forbidden — see ADR-0025, which retired the empty list when the owner
+ * approved connecting the product (docs/PLAN-V1.md).
  *
- * Empty, and that is the point: Orchelio has no transport. An entry here is a
- * decision to send something somewhere, which is exactly the kind of change
- * that should be argued for in a review rather than noticed afterwards.
+ * An entry is a decision to send something somewhere, argued for in an ADR
+ * rather than noticed afterwards. Two kinds exist, both **checked** — an
+ * allow-list widened on trust is a hole with a comment beside it:
  *
- * The day a real Anthropic provider lands, `src/lib/ai/anthropic-provider.ts`
- * belongs here with a sentence saying what it sends and under what agreement.
+ * A third-party destination names its hosts and its decision:
  *
- * An entry may instead be marked `loopbackOnly`, for a module that talks to
- * something on the firm's own machine — a model running locally. That is a
- * different promise from "we send this to a third party under an agreement",
- * and it is only worth making if it is enforced, so an entry marked that way
- * is **checked**: the module must obtain its address through `assertLoopback`
- * (`src/lib/ai/loopback.ts`), which cannot return anything but 127.0.0.0/8 or
- * ::1, and must contain no address literal of its own. Without both, the
- * allowance is void and the build fails — an allow-list widened on trust is a
- * hole with a comment beside it.
- *
- *   "src/lib/ai/local-provider.ts": {
- *     loopbackOnly: true,
- *     reason: "Sends the matter to a model running on this machine.",
+ *   "src/lib/ai/mistral-provider.ts": {
+ *     hosts: ["api.mistral.ai"],
+ *     reason: "What is sent, to whom, under what agreement.",
+ *     decidedIn: "ADR-0027",
  *   },
+ *
+ * and the checks below enforce that the module names only its listed hosts,
+ * that no other module names them at all, and that the decision exists.
+ *
+ * A `loopbackOnly` entry (ADR-0023) is for a module that talks to something
+ * on the firm's own machine: it must obtain its address through
+ * `assertLoopback` (`src/lib/ai/loopback.ts`), which cannot return anything
+ * but 127.0.0.0/8 or ::1, and must contain no address literal of its own.
  */
 const EGRESS_ALLOWED = {
   "src/lib/ai/local-provider.ts": {
@@ -187,8 +187,9 @@ const egressUsers = grep(EGRESS_PATTERNS.join("|"), ["src"])
 for (const path of egressUsers) {
   if (!(path in EGRESS_ALLOWED)) {
     problems.push(
-      `${path} can make an outbound request. Orchelio sends nothing: if this is ` +
-        "deliberate, add it to EGRESS_ALLOWED in this script with what it sends and to whom.",
+      `${path} can make an outbound request and is not in EGRESS_ALLOWED. Egress is ` +
+        "governed (ADR-0025): if this is deliberate, list the module with its hosts, " +
+        "what it sends, and the ADR that decided it.",
     );
   }
 }
@@ -197,28 +198,88 @@ for (const [path, terms] of Object.entries(EGRESS_ALLOWED)) {
     notes.push(`${path} no longer reaches the network — remove its exception`);
     continue;
   }
-  if (!terms?.loopbackOnly) continue;
 
-  // The allowance says the module only ever talks to this machine. Two things
-  // have to be true for that to be a fact rather than an intention.
-  const source = stripComments(readFileSync(join(ROOT, path), "utf8"));
+  if (terms?.loopbackOnly) {
+    // The allowance says the module only ever talks to this machine. Two
+    // things have to be true for that to be a fact rather than an intention.
+    const source = stripComments(readFileSync(join(ROOT, path), "utf8"));
 
-  if (!source.includes(`${LOOPBACK_GUARD}(`)) {
+    if (!source.includes(`${LOOPBACK_GUARD}(`)) {
+      problems.push(
+        `${path} is allowed to reach the network only on the promise that it talks to this ` +
+          `machine, but it never calls ${LOOPBACK_GUARD}(). Without it there is nothing ` +
+          "stopping the address being anywhere at all.",
+      );
+    }
+
+    // A literal address is one the guard never sees. Even a loopback one is a
+    // second way to reach the network, and the next edit to it would not be
+    // checked by anything.
+    for (const literal of source.match(URL_LITERAL) ?? []) {
+      problems.push(
+        `${path} writes the address ${literal} into its source. A module that may only ` +
+          `talk to this machine takes its address from ${LOOPBACK_GUARD}() and nowhere else.`,
+      );
+    }
+    continue;
+  }
+
+  // A third-party destination. The entry is only worth having if the review
+  // that admitted it can be found, so a missing decision is a failure, not a
+  // formatting nit.
+  if (!Array.isArray(terms?.hosts) || terms.hosts.length === 0) {
     problems.push(
-      `${path} is allowed to reach the network only on the promise that it talks to this ` +
-        `machine, but it never calls ${LOOPBACK_GUARD}(). Without it there is nothing ` +
-        "stopping the address being anywhere at all.",
+      `${path} is allowed to reach the network but its entry names no hosts. ` +
+        "An allowance without a destination allows everywhere — list the hosts.",
+    );
+    continue;
+  }
+  if (!terms.decidedIn || !/^ADR-\d{4}$/.test(terms.decidedIn)) {
+    problems.push(
+      `${path} is allowed to reach ${terms.hosts.join(", ")} but names no decision. ` +
+        "Every third-party destination is argued for in an ADR; set decidedIn.",
     );
   }
 
-  // A literal address is one the guard never sees. Even a loopback one is a
-  // second way to reach the network, and the next edit to it would not be
-  // checked by anything.
+  // Every absolute address the module writes must resolve to a listed host —
+  // a second address in the same file is a destination the review never saw.
+  const source = stripComments(readFileSync(join(ROOT, path), "utf8"));
   for (const literal of source.match(URL_LITERAL) ?? []) {
-    problems.push(
-      `${path} writes the address ${literal} into its source. A module that may only ` +
-        `talk to this machine takes its address from ${LOOPBACK_GUARD}() and nowhere else.`,
-    );
+    let host;
+    try {
+      host = new URL(literal.replace(/[.,;]$/, "")).hostname;
+    } catch {
+      problems.push(`${path} contains an address that does not parse: ${literal}`);
+      continue;
+    }
+    if (!terms.hosts.includes(host)) {
+      problems.push(
+        `${path} names ${host}, which is not on its allowed list (${terms.hosts.join(", ")}). ` +
+          "A module reaches its reviewed destinations and nowhere else.",
+      );
+    }
+  }
+}
+
+// No module other than the one reviewed for a host may so much as name it.
+// A URL constant exported from a helper and imported by the provider would
+// reach the reviewed destination while the provider's own source scan sees
+// nothing — so the host string itself is confined to its module.
+const hostToModule = new Map();
+for (const [path, terms] of Object.entries(EGRESS_ALLOWED)) {
+  for (const host of terms?.hosts ?? []) hostToModule.set(host, path);
+}
+for (const [host, ownerPath] of hostToModule) {
+  const mentions = grep(host.replaceAll(".", "\\."), ["src"]).filter(
+    (path) => path !== ownerPath && !path.startsWith("src/generated/"),
+  );
+  for (const path of mentions) {
+    if (new RegExp(host.replaceAll(".", "\\.")).test(stripComments(readFileSync(join(ROOT, path), "utf8")))) {
+      problems.push(
+        `${path} names ${host}, which belongs to ${ownerPath} alone. ` +
+          "The only path to a third party is the module that was reviewed for it.",
+      );
+    }
   }
 }
 
@@ -258,24 +319,31 @@ const counts = [...classified.values()].reduce((tally, key) => {
 
 console.log("\nOrchelio — confidentiality check\n");
 
-// The egress line has to name what is allowed. "Nothing can make an outbound
-// request" printed beside a module that can is the exact reassurance this whole
-// script exists to refuse.
+// The egress lines have to name what is allowed, destination by destination.
+// "Nothing can make an outbound request" printed beside a module that can is
+// the exact reassurance this whole script exists to refuse.
 const loopbackOnly = Object.entries(EGRESS_ALLOWED).filter(([, terms]) => terms?.loopbackOnly);
-const elsewhere = Object.keys(EGRESS_ALLOWED).length - loopbackOnly.length;
+const thirdParty = Object.entries(EGRESS_ALLOWED).filter(([, terms]) => !terms?.loopbackOnly);
 
 if (problems.length === 0) {
   console.log(`  ✓ All ${modelsInSchema.length} models classified`);
   console.log(`  ✓ ${PLATFORM_MODULE} reads no client-confidential or privileged model`);
-  if (elsewhere > 0) {
-    console.log(`  ✓ ${elsewhere} module(s) may reach a third party; each is listed with what it sends`);
-  } else if (loopbackOnly.length > 0) {
-    console.log(
-      `  ✓ Nothing in src/ can reach anywhere but this machine — ` +
-        `${loopbackOnly.length} module(s) may talk to 127.0.0.1, each checked against ${LOOPBACK_GUARD}()`,
-    );
-  } else {
+  if (thirdParty.length === 0 && loopbackOnly.length === 0) {
     console.log(`  ✓ Nothing in src/ can make an outbound request`);
+  } else {
+    for (const [path, terms] of thirdParty) {
+      console.log(
+        `  ✓ ${path} may reach ${terms.hosts.join(", ")} (${terms.decidedIn}); ` +
+          "no other module names that destination",
+      );
+    }
+    if (loopbackOnly.length > 0) {
+      console.log(
+        `  ✓ ${loopbackOnly.length} module(s) may talk to 127.0.0.1 only, ` +
+          `each checked against ${LOOPBACK_GUARD}()`,
+      );
+    }
+    console.log(`  ✓ Everything else in src/ can make no outbound request`);
   }
   console.log(`  ✓ Nothing in src/ writes a file`);
 } else {

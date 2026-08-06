@@ -187,11 +187,15 @@ exist goes on reading like evidence.
 sensitivity classes. `npm run confidentiality:check` enforces four properties
 and fails the build on each: every schema model is classified, the cross-tenant
 module `src/lib/data/platform.ts` names no client-confidential or privileged
-model, **nothing in `src/` can make an outbound request**, and nothing writes a
-file.
+model, **nothing in `src/` can make an outbound request except the modules
+listed in `EGRESS_ALLOWED`**, and nothing writes a file.
 
-The egress allow-list is **empty**. Adding to it is a decision to send client
-material somewhere and belongs in a review, not in a commit nobody reads.
+The egress allow-list is **governed, not empty** (ADR-0025, since V1). Every
+entry names its module, its hosts and the ADR that argued for it; the module
+may name only its listed hosts, and no other module may name them at all —
+all four enforced by the check, proved by planting. Adding an entry is still
+a decision to send material somewhere: it needs an ADR and a register row in
+Settings → Confidentiality, in the same commit.
 
 Settings → Confidentiality shows the firm the whole register, including the
 promises nothing enforces yet. Never add a row there without its limitation.
@@ -212,9 +216,20 @@ disability. See ADR-0017.
 
 ## Constraints from the specification
 
+**V1 note (August 2026).** The project is now building Version 1 — the
+connected cockpit — under an owner-approved plan (`docs/PLAN-V1.md`). Four of
+the constraints below are being lifted deliberately, each by an ADR: egress
+(ADR-0025), reading documents (ADR-0026), real AI (ADR-0027), hosting
+(ADR-0028). Until the phase that changes one of them lands, the old rule
+still applies; the two below marked as V1-adjusted are already adjusted.
+
 - **Fictional data only.** Demonstration warnings on every principal page.
-- **No cost to run.** No paid hosting, no cloud database, no API key. If a
-  change would require one, it is the wrong change.
+  Unchanged in V1, and holds until a specialist legal review — no real client
+  data, ever, before that.
+- **No cost to run** *(V1-adjusted)*: the accepted ceiling is now a single
+  Mistral API key (owner decision, 6 August 2026). Still no paid hosting and
+  no cloud database until the pilots; `AI_PROVIDER=mock` remains the default
+  and the build must never require the network.
 - **AI is simulated** (`AI_PROVIDER=mock`). `ANTHROPIC_API_KEY` is server-only
   and absent; selecting the Anthropic provider without it throws at startup
   rather than silently falling back. The simulation *derives* its output from

@@ -77,6 +77,10 @@ decided, and what it cost.
 | 22 | [The short way in](decisions/ADR-0022-the-short-way-in.md) | post-9 |
 | 23 | [A local model is a checked exception, not a trusted one](decisions/ADR-0023-a-local-model-is-a-checked-exception.md) | post-9 |
 | 24 | [The model writes the wording, and nothing else](decisions/ADR-0024-the-model-writes-the-wording-and-nothing-else.md) | post-9 |
+| 25 | [Egress is governed, not forbidden](decisions/ADR-0025-egress-is-governed-not-forbidden.md) | V1-1 |
+| 26 | [Documents will be read](decisions/ADR-0026-documents-will-be-read.md) | V1-1 |
+| 27 | [Real AI behind the same gate, routed by cost](decisions/ADR-0027-real-ai-behind-the-same-gate.md) | V1-1 |
+| 28 | [From a local file to European hosting, without a rewrite](decisions/ADR-0028-from-local-file-to-european-hosting.md) | V1-1 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)
