@@ -48,16 +48,16 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Documents</h1>
         <p className="mt-1 text-ink-muted">
-          {documents.length} document(s) across this firm&apos;s matters.
-          {unverified > 0 ? ` ${unverified} not yet checked by a person.` : ""}
+          {documents.length} document(s) sur les dossiers de ce cabinet.
+          {unverified > 0 ? ` ${unverified} pas encore vérifié(s) par une personne.` : ""}
         </p>
       </header>
 
-      <Card title="Filter by kind">
+      <Card title="Filtrer par type">
         <form method="get" className="flex flex-wrap items-end gap-3">
           <div className="min-w-56">
             <label htmlFor="category" className="block text-sm font-medium text-ink">
-              Document type
+              Type de document
             </label>
             <select
               id="category"
@@ -65,7 +65,7 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
               defaultValue={category ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Every type</option>
+              <option value="">Tous les types</option>
               {categories.map((entry) => (
                 <option key={entry.key} value={entry.key}>
                   {entry.label}
@@ -77,25 +77,25 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
             type="submit"
             className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
           >
-            Apply
+            Appliquer
           </button>
           {category ? (
             <Link
               href="/documents"
               className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
             >
-              Clear
+              Effacer
             </Link>
           ) : null}
         </form>
       </Card>
 
-      <Card title="All documents">
+      <Card title="Tous les documents">
         {documents.length === 0 ? (
-          <Callout tone="neutral" title="Nothing to show">
+          <Callout tone="neutral" title="Rien à afficher">
             {category
-              ? "No document of that kind is on file for this firm."
-              : "This firm has no documents yet. Add one from a matter."}
+              ? "Aucun document de ce type n’est au dossier pour ce cabinet."
+              : "Ce cabinet n’a pas encore de document. Ajoutez-en un depuis un dossier."}
           </Callout>
         ) : (
           <ul className="divide-y divide-line">
@@ -107,7 +107,7 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
                     <p className="font-medium text-ink">{document.filename}</p>
                     <p className="text-sm text-ink-muted">
                       {categoryLabel(firm.primaryPracticeArea, document.category)} ·{" "}
-                      {fileSize(document.sizeBytes)} · added {formatDate(document.receivedAt, timezone)}
+                      {fileSize(document.sizeBytes)} · ajouté le {formatDate(document.receivedAt, timezone)}
                     </p>
                     {matter ? (
                       <Link
@@ -119,9 +119,9 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
                     ) : null}
                   </div>
                   {document.verified ? (
-                    <Badge tone="success">Checked by a person</Badge>
+                    <Badge tone="success">Vérifié par une personne</Badge>
                   ) : (
-                    <Badge tone="warning">Not verified</Badge>
+                    <Badge tone="warning">Non vérifié</Badge>
                   )}
                 </li>
               );
@@ -129,8 +129,8 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
           </ul>
         )}
         <p className="mt-4 text-sm text-ink-subtle">
-          Uploads are simulated: name, type and size only. No content is stored, and nothing is
-          read — there is no OCR in this build.
+          Les dépôts sont simulés : nom, type et taille uniquement. Aucun contenu n’est stocké,
+          rien n’est lu — il n’y a pas d’OCR dans cette version.
         </p>
       </Card>
     </div>

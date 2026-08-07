@@ -30,15 +30,15 @@ export default async function TasksPage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Tâches</h1>
         <p className="mt-1 text-ink-muted">
-          {tasks.length} open across this firm&apos;s matters
-          {overdue.length > 0 ? `, ${overdue.length} past their recorded date` : ""}.
+          {tasks.length} ouverte(s) sur les dossiers de ce cabinet
+          {overdue.length > 0 ? `, dont ${overdue.length} au-delà de leur date enregistrée` : ""}.
         </p>
       </header>
 
-      <Card title="Open tasks">
+      <Card title="Tâches ouvertes">
         {tasks.length === 0 ? (
-          <Callout tone="neutral" title="Nothing open">
-            No task is outstanding for this firm.
+          <Callout tone="neutral" title="Rien d’ouvert">
+            Aucune tâche n’est en attente pour ce cabinet.
           </Callout>
         ) : (
           <ul className="divide-y divide-line">
@@ -69,7 +69,7 @@ export default async function TasksPage() {
           </ul>
         )}
         <p className="mt-4 text-sm text-ink-subtle">
-          Dates shown are what a person recorded. Orchelio never calculates or confirms a deadline.
+          Les dates affichées sont celles qu’une personne a enregistrées. Orchelio ne calcule ni ne confirme jamais une échéance.
         </p>
       </Card>
     </div>

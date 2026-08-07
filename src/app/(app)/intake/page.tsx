@@ -27,18 +27,18 @@ export default async function IntakePage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Questionnaire client</h1>
         <p className="mt-1 text-ink-muted">
-          {intakes.length} recorded for this firm.
+          {intakes.length} enregistré(s) pour ce cabinet.
         </p>
       </header>
 
-      <Callout tone="warning" title="Unverified by definition">
-        These are the client&apos;s own words. Where they disagree with a document, the
-        disagreement is the point — Orchelio records both and asks a person to resolve it.
+      <Callout tone="warning" title="Non vérifié, par définition">
+        Ce sont les mots du client. Là où ils contredisent un document, le désaccord est
+        justement le point — Orchelio enregistre les deux et demande à une personne de trancher.
       </Callout>
 
       {intakes.length === 0 ? (
-        <Card title="Nothing recorded">
-          <p className="text-sm text-ink-muted">No intake has been submitted for this firm.</p>
+        <Card title="Rien d’enregistré">
+          <p className="text-sm text-ink-muted">Aucun questionnaire n’a été transmis pour ce cabinet.</p>
         </Card>
       ) : (
         intakes.map((intake) => {
@@ -46,15 +46,15 @@ export default async function IntakePage() {
           return (
             <Card
               key={intake.id}
-              title={intake.matter.clientProfile?.displayName ?? "Unknown client"}
-              description={`${intake.matter.reference} · submitted ${formatDate(intake.submittedAt, timezone)}`}
+              title={intake.matter.clientProfile?.displayName ?? "Client inconnu"}
+              description={`${intake.matter.reference} · transmis le ${formatDate(intake.submittedAt, timezone)}`}
               action={<StatusBadge status={intake.matter.status} />}
             >
               <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
                 {Object.entries(answers).map(([key, value]) => (
                   <div key={key}>
                     <dt className="text-sm text-ink-muted">{key.split("_").join(" ")}</dt>
-                    <dd className="text-sm text-ink">{String(value ?? "Unknown")}</dd>
+                    <dd className="text-sm text-ink">{String(value ?? "Inconnu")}</dd>
                   </div>
                 ))}
               </dl>
@@ -63,7 +63,7 @@ export default async function IntakePage() {
                   href={`/matters/${intake.matter.id}?tab=intake`}
                   className="text-sm font-medium text-brand hover:underline"
                 >
-                  Open the matter →
+                  Ouvrir le dossier →
                 </Link>
               </p>
             </Card>
