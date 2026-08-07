@@ -50,7 +50,7 @@ export function UploadPanel({
     if (!(ALLOWED_DOCUMENT_EXTENSIONS as readonly string[]).includes(extension)) {
       setChosen(null);
       setProblem(
-        `Orchelio accepts ${ALLOWED_DOCUMENT_EXTENSIONS.join(", ")}. That file is .${extension || "unknown"}.`,
+        `Orchelio accepte ${ALLOWED_DOCUMENT_EXTENSIONS.join(", ")}. Ce fichier est en .${extension || "inconnu"}.`,
       );
       return;
     }
@@ -104,7 +104,7 @@ export function UploadPanel({
             .
           </p>
           <p className="mt-1 text-xs text-ink-subtle">
-            {ALLOWED_DOCUMENT_EXTENSIONS.join(", ")} · up to{" "}
+            {ALLOWED_DOCUMENT_EXTENSIONS.join(", ")} · jusqu’à{" "}
             {MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} Mo · documents fictifs uniquement
           </p>
 
@@ -121,7 +121,7 @@ export function UploadPanel({
             <p className="mt-4 text-sm font-medium text-ink">
               {chosen.name}{" "}
               <span className="font-normal text-ink-muted">
-                ({Math.max(1, Math.round(chosen.size / 1024))} KB)
+                ({Math.max(1, Math.round(chosen.size / 1024))} Ko)
               </span>
             </p>
           ) : null}
@@ -157,7 +157,7 @@ export function UploadPanel({
             disabled={!chosen}
             className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong disabled:opacity-50"
           >
-            Add document
+            Ajouter le document
           </button>
         </div>
       </form>

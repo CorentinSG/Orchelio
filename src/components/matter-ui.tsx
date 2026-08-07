@@ -8,7 +8,7 @@ import { MATTER_STATUSES } from "@/lib/constants";
  * Orchelio — shared matter presentation.
  *
  * Two rules live here so that every screen obeys them without remembering to:
- * a value that is not known reads "Unknown" rather than being left blank, and a
+ * a value that is not known reads « Inconnue » rather than being left blank, and a
  * date is never dressed up as a deadline the product has confirmed.
  */
 
@@ -66,7 +66,7 @@ export function StatusBadge({ status }: { status: string }) {
 export const ALL_STATUSES = MATTER_STATUSES;
 
 /**
- * A date, or "Unknown".
+ * A date, or « Inconnue ».
  *
  * ISO order, deliberately: an unambiguous date matters more than a familiar one
  * when the reader may be in a different country from the person who typed it.

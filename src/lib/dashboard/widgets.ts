@@ -32,7 +32,7 @@ export type DashboardWidget = {
 const SHARED_WIDGETS: readonly DashboardWidget[] = [
   { key: "active_matters", label: "Dossiers actifs", hint: "Dossiers ouverts", tone: "brand", availableFrom: 5 },
   { key: "pending_approvals", label: "Validations en attente", hint: "En attente d’une décision humaine", tone: "warning", availableFrom: 7 },
-  { key: "recent_analyses", label: "Analyses Claude effectuées", hint: "Chacune attend encore une personne", tone: "ai", availableFrom: 6 },
+  { key: "recent_analyses", label: "Analyses de l’assistant", hint: "Chacune attend encore une personne", tone: "ai", availableFrom: 6 },
   { key: "monthly_usage", label: "Jetons simulés consommés", hint: "Ce cabinet uniquement — aucun frais", tone: "neutral", availableFrom: 6 },
 ];
 

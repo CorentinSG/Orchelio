@@ -34,7 +34,7 @@ async function runAnalysis(page: import("@playwright/test").Page, reference: str
     .getByRole("navigation", { name: "Sections du dossier" })
     .getByRole("link", { name: "Analyse" })
     .click();
-  await expect(page.getByRole("region", { name: "Claude Analyst" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Analyste" })).toBeVisible();
 
   await page.getByRole("button", { name: /^Lancer l’analyse$|^Relancer l’analyse$/ }).click();
   await page.waitForURL(/tab=analysis/);
@@ -50,19 +50,19 @@ test.describe("Running an analysis", () => {
       .getByRole("link", { name: "Analyse" })
       .click();
 
-    const panel = page.getByRole("region", { name: "Claude Analyst" });
-    await expect(panel).toContainText(/Simulated in this build/i);
-    await expect(panel).toContainText(/No API call is made/i);
+    const panel = page.getByRole("region", { name: "Analyste" });
+    await expect(panel).toContainText(/Simulé dans cette version/i);
+    await expect(panel).toContainText(/Aucun appel d’API n’est émis/i);
   });
 
   test("carries every standing caution before any finding", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await runAnalysis(page, "IMM-2026-001");
 
-    const warnings = page.getByText("Read this first").locator("..");
-    await expect(warnings).toContainText(/A person must read this/i);
-    await expect(warnings).toContainText(/No document was opened/i);
-    await expect(warnings).toContainText(/no date here is confirmed/i);
+    const warnings = page.getByText("À lire d’abord").locator("..");
+    await expect(warnings).toContainText(/Une personne doit le lire/i);
+    await expect(warnings).toContainText(/Aucun document n’a été ouvert/i);
+    await expect(warnings).toContainText(/aucune date ici n’est confirmée/i);
   });
 
   test("names the features this firm asked for, and those it did not", async ({ page }) => {
@@ -73,8 +73,8 @@ test.describe("Running an analysis", () => {
       .getByRole("link", { name: "Analyse" })
       .click();
 
-    const panel = page.getByRole("region", { name: "Claude Analyst" });
-    await expect(panel).toContainText(/Ce cabinet a demandé à Claude :/);
+    const panel = page.getByRole("region", { name: "Analyste" });
+    await expect(panel).toContainText(/Ce cabinet a demandé à l’assistant :/);
     // The demonstration firms did not enable entity extraction, so the key
     // facts section is genuinely absent — and the page says why rather than
     // leaving a reader to wonder whether it broke.
@@ -92,41 +92,41 @@ test.describe("The Moreau matter — a contradiction", () => {
     const section = page.getByRole("region", { name: /^Désaccords au dossier/ });
 
     await expect(section).toBeVisible();
-    await expect(section).toContainText("Date of last entry");
-    await expect(section).toContainText("11 February 2024");
-    await expect(section).toContainText("4 March 2024");
+    await expect(section).toContainText("Date de dernière entrée");
+    await expect(section).toContainText("11 février 2024");
+    await expect(section).toContainText("4 mars 2024");
     // Each account says where it came from, so a reader can weigh them.
-    await expect(section).toContainText("Recorded on the matter");
-    await expect(section).toContainText("Document on file");
+    await expect(section).toContainText("Enregistré sur la fiche");
+    await expect(section).toContainText("Document au dossier");
     await expect(section).toContainText("i94-moreau-entry-2024-03-04.pdf");
   });
 
   test("refuses to say which is right", async ({ page }) => {
     const section = page.getByRole("region", { name: /^Désaccords au dossier/ });
 
-    await expect(section).toContainText(/a question for the client/i);
-    await expect(page.locator("main")).not.toContainText(/the correct date is/i);
+    await expect(section).toContainText(/une question pour le client/i);
+    await expect(page.locator("main")).not.toContainText(/la date correcte est|la bonne date est/i);
   });
 
   test("asks the client rather than deciding", async ({ page }) => {
     await expect(page.getByRole("region", { name: "À demander au client" })).toContainText(
-      /Date of last entry/,
+      /date de dernière entrée/i,
     );
   });
 
   test("says a person must review it, in the page and not only the schema", async ({ page }) => {
-    const review = page.getByRole("region", { name: "Independent review" });
+    const review = page.getByRole("region", { name: "Relecture indépendante" });
 
     await expect(review).toBeVisible();
-    await expect(review).toContainText("Human review required");
+    await expect(review).toContainText("À lire par une personne — obligatoire");
   });
 
   test("shows every check the reviewer ran, not only its failures", async ({ page }) => {
-    const review = page.getByRole("region", { name: "Independent review" });
+    const review = page.getByRole("region", { name: "Relecture indépendante" });
 
-    await expect(review).toContainText(/of \d+ passed/);
-    await expect(review).toContainText("Disagreements on the record are all reported");
-    await expect(review).toContainText("No legal conclusion, recommendation or confirmed deadline");
+    await expect(review).toContainText(/sur \d+ réussis/);
+    await expect(review).toContainText("Tous les désaccords du dossier sont signalés");
+    await expect(review).toContainText("Aucune conclusion juridique, recommandation ni échéance confirmée");
   });
 });
 
@@ -138,15 +138,15 @@ test.describe("The Hassan matter — not enough on file", () => {
 
   test("says more information is required, and reaches no conclusion", async ({ page }) => {
     await expect(page.getByRole("region", { name: "Résumé" })).toContainText(
-      /More information is required/i,
+      /informations supplémentaires sont requises/i,
     );
-    await expect(page.getByRole("region", { name: "Independent review" })).toContainText(
-      /More information required/i,
+    await expect(page.getByRole("region", { name: "Relecture indépendante" })).toContainText(
+      /Informations supplémentaires requises/i,
     );
   });
 
   test("says that is about the file, not about the client", async ({ page }) => {
-    await expect(page.locator("main")).toContainText(/not about the client/i);
+    await expect(page.locator("main")).toContainText(/pas sur (le client|la position du client)/i);
   });
 
   test("lists what is absent with why it matters, never what its absence proves", async ({
@@ -156,7 +156,7 @@ test.describe("The Hassan matter — not enough on file", () => {
 
     await expect(missing).toBeVisible();
     await expect(missing).toContainText("I-94");
-    await expect(missing).not.toContainText(/will fail|cannot succeed|fatal/i);
+    await expect(missing).not.toContainText(/échouera|ne peut pas réussir|fatal/i);
   });
 });
 
@@ -172,8 +172,8 @@ test.describe("The timeline", () => {
 
     const timeline = page.getByRole("region", { name: "Chronologie" });
     await expect(timeline).toContainText(/Aucune date ici n’est confirmée/i);
-    await expect(timeline).toContainText(/Stated by a person/i);
-    await expect(timeline).toContainText(/Read from a document/i);
+    await expect(timeline).toContainText(/Déclarée par une personne/i);
+    await expect(timeline).toContainText(/Lue dans le nom d’un document/i);
   });
 
   test("is empty, and says so, before anything has been run", async ({ page }) => {
@@ -201,9 +201,9 @@ test.describe("The AI workspace", () => {
     await page.goto("/ai");
 
     await expect(page.getByRole("heading", { name: "Assistant", level: 1 })).toBeVisible();
-    await expect(page.locator("main")).toContainText(/No request leaves this machine/i);
-    await expect(page.locator("main")).toContainText(/no charge is incurred/i);
-    await expect(page.locator("main")).toContainText(/No document is ever opened/i);
+    await expect(page.locator("main")).toContainText(/Aucune requête ne quitte cette machine/i);
+    await expect(page.locator("main")).toContainText(/aucun frais n’est engagé/i);
+    await expect(page.locator("main")).toContainText(/Aucun document n’est jamais ouvert/i);
   });
 
   test("lists this firm's analyses and no other firm's", async ({ page }) => {
@@ -221,18 +221,18 @@ test.describe("The AI workspace", () => {
     await runAnalysis(page, "IMM-2026-001");
     await page.goto("/ai");
 
-    const usage = page.getByRole("region", { name: "Simulated usage" });
-    await expect(usage).toContainText("every record is simulated");
+    const usage = page.getByRole("region", { name: "Consommation simulée" });
+    await expect(usage).toContainText("chaque enregistrement est simulé");
   });
 
   test("names what Claude may never do", async ({ page }) => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/ai");
 
-    const locked = page.getByRole("region", { name: "What Claude may never do here" });
-    await expect(locked).toContainText(/eligibility conclusion/i);
-    await expect(locked).toContainText(/Confirm a deadline/i);
-    await expect(locked).toContainText(/9 locked rules/i);
+    const locked = page.getByRole("region", { name: "Ce que l’assistant ne peut jamais faire ici" });
+    await expect(locked).toContainText(/Conclure sur une éligibilité/i);
+    await expect(locked).toContainText(/Confirmer une échéance/i);
+    await expect(locked).toContainText(/9 règles verrouillées/i);
   });
 });
 
@@ -251,8 +251,8 @@ test.describe("What each role may do", () => {
       .getByRole("link", { name: "Analyse" })
       .click();
 
-    await expect(page.getByRole("region", { name: "Claude Analyst" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Run analysis|Run again/ })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Analyste" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Lancer l’analyse|Relancer l’analyse/ })).toHaveCount(0);
   });
 
   test("and is refused by the server, not only by a hidden button", async ({ page }) => {
@@ -324,7 +324,7 @@ test.describe("The dashboard", () => {
     await runAnalysis(page, "IMM-2026-001");
     await page.goto("/dashboard");
 
-    const tile = page.locator("p", { hasText: /^Analyses Claude effectuées$/ }).locator("..");
+    const tile = page.locator("p", { hasText: /^Analyses de l’assistant$/ }).locator("..");
     await expect(tile.locator("p").first()).toHaveText(/^\d+$/);
     await expect(tile).toContainText(/attend encore une personne/i);
   });

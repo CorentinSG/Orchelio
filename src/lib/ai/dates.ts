@@ -15,6 +15,9 @@
  * nothing would have.
  */
 
+// Read in both languages: the fictional intake answers predate the French
+// switch, and a client may write either. Written dates come out in French —
+// the product's language — via WRITTEN_MONTHS below.
 const MONTHS: Record<string, number> = {
   january: 1,
   february: 2,
@@ -28,7 +31,38 @@ const MONTHS: Record<string, number> = {
   october: 10,
   november: 11,
   december: 12,
+  janvier: 1,
+  février: 2,
+  fevrier: 2,
+  mars: 3,
+  avril: 4,
+  mai: 5,
+  juin: 6,
+  juillet: 7,
+  août: 8,
+  aout: 8,
+  septembre: 9,
+  octobre: 10,
+  novembre: 11,
+  décembre: 12,
+  decembre: 12,
 };
+
+/** How a month is written out, in the product's language. */
+const WRITTEN_MONTHS = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+] as const;
 
 /** An ISO date, or null. Rejects anything that is not exactly YYYY-MM-DD. */
 export function parseIsoDate(value: unknown): string | null {
@@ -51,14 +85,14 @@ export function parseWrittenDate(value: unknown): string | null {
   const text = value.trim().toLowerCase().replace(/,/g, " ");
 
   // "11 february 2024"
-  const dayFirst = /(?:^|\s)(\d{1,2})\s+([a-z]+)\s+(\d{4})(?:\s|$)/.exec(text);
+  const dayFirst = /(?:^|\s)(\d{1,2})\s+([a-zà-ÿ]+)\s+(\d{4})(?:\s|$)/.exec(text);
   if (dayFirst) {
     const month = MONTHS[dayFirst[2]!];
     if (month) return build(dayFirst[3]!, month, Number(dayFirst[1]!));
   }
 
   // "february 11 2024"
-  const monthFirst = /(?:^|\s)([a-z]+)\s+(\d{1,2})\s+(\d{4})(?:\s|$)/.exec(text);
+  const monthFirst = /(?:^|\s)([a-zà-ÿ]+)\s+(\d{1,2})\s+(\d{4})(?:\s|$)/.exec(text);
   if (monthFirst) {
     const month = MONTHS[monthFirst[1]!];
     if (month) return build(monthFirst[3]!, month, Number(monthFirst[2]!));
@@ -86,8 +120,9 @@ export function formatWritten(iso: string): string {
   const parsed = parseIsoDate(iso);
   if (!parsed) return iso;
   const [year, month, day] = parsed.split("-") as [string, string, string];
-  const name = Object.keys(MONTHS).find((key) => MONTHS[key] === Number(month)) ?? month;
-  return `${Number(day)} ${name[0]!.toUpperCase()}${name.slice(1)} ${year}`;
+  const name = WRITTEN_MONTHS[Number(month) - 1] ?? month;
+  // French date convention: the month is not capitalised.
+  return `${Number(day)} ${name} ${year}`;
 }
 
 function build(year: string, month: number, day: number): string | null {

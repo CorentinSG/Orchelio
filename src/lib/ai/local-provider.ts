@@ -103,9 +103,9 @@ const NOTHING_USED: RunUsage = {
 
 /** Said when the model's paragraph is the one on screen. */
 export const MODEL_WROTE_THE_SUMMARY =
-  "The summary's wording was written by a model running on this machine, from figures Orchelio " +
-  "had already worked out. Every fact, date, disagreement and gap below was derived from the " +
-  "record — the model was not asked what they are, and did not choose any of them.";
+  "La formulation du résumé a été rédigée par un modèle fonctionnant sur cette machine, à partir " +
+  "de chiffres qu'Orchelio avait déjà établis. Chaque fait, date, désaccord et manque ci-dessous " +
+  "a été dérivé du dossier — le modèle n'a pas été interrogé sur leur contenu, et n'en a choisi aucun.";
 
 export type LocalModelSettings = {
   /** Checked before use, and the only place an address enters this module. */
@@ -215,8 +215,8 @@ export class LocalAIProvider implements AIProvider {
       return {
         ok: false,
         because: deadline.aborted
-          ? `the model on this machine did not answer within ${Math.round(this.timeoutMs / 1000)} seconds`
-          : "the model on this machine could not be reached",
+          ? `le modèle sur cette machine n’a pas répondu en ${Math.round(this.timeoutMs / 1000)} secondes`
+          : "le modèle sur cette machine n’a pas pu être joint",
         // Nothing came back, so there is nothing to record.
         usage: NOTHING_USED,
       };
@@ -225,7 +225,7 @@ export class LocalAIProvider implements AIProvider {
     if (!response.ok) {
       return {
         ok: false,
-        because: `the model server answered with an error (${response.status})`,
+        because: `le serveur du modèle a répondu par une erreur (${response.status})`,
         usage: NOTHING_USED,
       };
     }
@@ -234,7 +234,7 @@ export class LocalAIProvider implements AIProvider {
     try {
       payload = await response.json();
     } catch {
-      return { ok: false, because: "the model server's answer was not readable", usage: NOTHING_USED };
+      return { ok: false, because: "la réponse du serveur du modèle n’était pas lisible", usage: NOTHING_USED };
     }
 
     const verdict = judgeSummary(readContent(payload), facts, reference);

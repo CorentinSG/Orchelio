@@ -143,10 +143,10 @@ test.describe("A matter record", () => {
     const body = await page.locator("main").innerText();
     // Labels unique to this area — "Employer" appears in both, so it proves
     // nothing.
-    expect(body).toContain("Status expiration date");
-    expect(body).toContain("I-94 available");
-    expect(body).not.toContain("Alleged unpaid hours");
-    expect(body).not.toContain("Exempt or non-exempt");
+    expect(body).toContain("Date d’expiration du statut");
+    expect(body).toContain("I-94 disponible");
+    expect(body).not.toContain("Heures impayées alléguées");
+    expect(body).not.toContain("Exempté ou non exempté");
   });
 
   test("shows the employment fields, and none of the immigration ones", async ({ page }) => {
@@ -154,10 +154,10 @@ test.describe("A matter record", () => {
     await openMatter(page, "EMP-2026-001");
 
     const body = await page.locator("main").innerText();
-    expect(body).toContain("Alleged unpaid hours");
-    expect(body).toContain("Exempt or non-exempt");
-    expect(body).not.toContain("Status expiration date");
-    expect(body).not.toContain("I-94 available");
+    expect(body).toContain("Heures impayées alléguées");
+    expect(body).toContain("Exempté ou non exempté");
+    expect(body).not.toContain("Date d’expiration du statut");
+    expect(body).not.toContain("I-94 disponible");
   });
 
   test("moves between the tabs, all of which now exist", async ({
@@ -316,7 +316,7 @@ test.describe("Documents", () => {
     // "Other" is expected for nothing, so this upload cannot change the
     // missing-document checklist another test reads.
     await page.getByLabel("De quel type de document s’agit-il ?").selectOption("other");
-    await page.getByRole("button", { name: "Add document" }).click();
+    await page.getByRole("button", { name: "Ajouter le document" }).click();
     await page.waitForURL(/tab=documents/);
 
     await expect(page.getByText("Document enregistré")).toBeVisible();
@@ -340,8 +340,8 @@ test.describe("Documents", () => {
       buffer: Buffer.from("no"),
     });
 
-    await expect(alerts(page)).toContainText("That file is .exe");
-    await expect(page.getByRole("button", { name: "Add document" })).toBeDisabled();
+    await expect(alerts(page)).toContainText("Ce fichier est en .exe");
+    await expect(page.getByRole("button", { name: "Ajouter le document" })).toBeDisabled();
   });
 
   test("refuses a hand-crafted post that skips the browser's checks", async ({ page }) => {
@@ -384,7 +384,7 @@ test.describe("Documents", () => {
       buffer: Buffer.from("fictional"),
     });
     await page.getByLabel("De quel type de document s’agit-il ?").selectOption("other");
-    await page.getByRole("button", { name: "Add document" }).click();
+    await page.getByRole("button", { name: "Ajouter le document" }).click();
     await page.waitForURL(/tab=documents/);
 
     const row = documentRow(page, "to-be-checked.pdf");
@@ -536,7 +536,7 @@ test.describe("The firm workspace pages", () => {
     // on a later phase. Phase 7 filled the last of them. The rule it was
     // protecting (a dash, never a zero, for a figure that is not known) is
     // asserted directly in tests/unit/dashboard-widgets.test.ts.
-    for (const label of ["Validations en attente", "Analyses Claude effectuées", "Dossiers actifs"]) {
+    for (const label of ["Validations en attente", "Analyses de l’assistant", "Dossiers actifs"]) {
       const tile = page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
       await expect(tile.locator("p").first(), label).toHaveText(/^\d+$/);
       await expect(tile, label).not.toContainText(/Phase \d/);

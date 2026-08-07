@@ -18,9 +18,9 @@ export const metadata = { title: "Assistant" };
 export const dynamic = "force-dynamic";
 
 const LOCKED_RULES_NOTE =
-  `All ${LOCKED_APPROVALS.length} locked rules are stored against every firm's configuration, ` +
-  "so the guarantee is auditable in the data rather than asserted in a comment. " +
-  "The approval centre acts on them.";
+  `Les ${LOCKED_APPROVALS.length} règles verrouillées sont enregistrées dans la configuration de ` +
+  "chaque cabinet : la garantie est vérifiable dans les données plutôt qu’affirmée dans un " +
+  "commentaire. La page Validations les applique.";
 
 /**
  * Orchelio — the AI workspace.
@@ -50,30 +50,31 @@ export default async function AiWorkspacePage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Assistant</h1>
         <p className="mt-1 text-ink-muted">
-          Every analysis this firm has run, and the limits every one of them carries.
+          Toutes les analyses lancées par ce cabinet, et les limites que chacune d’elles porte.
         </p>
       </header>
 
       <Callout tone="ai" title={notice.workspaceTitle}>
         <p>
-          The provider is <code className="font-mono">{env.aiProvider}</code>. {notice.whereItGoes}
+          Le fournisseur est <code className="font-mono">{env.aiProvider}</code>. {notice.whereItGoes}
         </p>
         <p className="mt-2">{notice.howItIsProduced}</p>
       </Callout>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="What this firm asked for" description="Chosen during onboarding, step 5.">
+        <Card title="Ce que ce cabinet a demandé" description="Choisi à l’étape 5 du questionnaire d’installation.">
           {enabled.length === 0 ? (
-            <Callout tone="warning" title="Nothing is switched on">
+            <Callout tone="warning" title="Rien n’est activé">
               <p>
-                This firm has enabled no Claude features, so an analysis has nothing to produce.
+                Ce cabinet n’a activé aucune fonction de l’assistant, donc une analyse n’a rien à
+                produire.
               </p>
               <p className="mt-2">
                 <Link
                   href="/onboarding/5"
                   className="font-medium text-brand underline underline-offset-4"
                 >
-                  Choose them in the firm setup
+                  Les choisir dans l’installation du cabinet
                 </Link>
               </p>
             </Callout>
@@ -87,21 +88,21 @@ export default async function AiWorkspacePage() {
             </ul>
           )}
           <p className="mt-4 text-sm text-ink-subtle">
-            An analysis produces output only for the features on this list. One that is enabled
-            and finds nothing says so; one that is switched off is not mentioned at all.
+            Une analyse ne produit que pour les fonctions de cette liste. Une fonction activée qui
+            ne trouve rien le dit ; une fonction désactivée n’est pas mentionnée du tout.
           </p>
         </Card>
 
-        <Card title={notice.usageCardTitle} description="This firm only. No charge was incurred.">
+        <Card title={notice.usageCardTitle} description="Ce cabinet uniquement.">
           <dl>
-            <DataRow label="Analyses run" value={usage.analyses} />
-            <DataRow label="Reviews run" value={usage.reviews} />
-            <DataRow label="Input tokens" value={usage.inputTokens.toLocaleString("en-GB")} />
-            <DataRow label="Output tokens" value={usage.outputTokens.toLocaleString("en-GB")} />
+            <DataRow label="Analyses lancées" value={usage.analyses} />
+            <DataRow label="Relectures effectuées" value={usage.reviews} />
+            <DataRow label="Jetons en entrée" value={usage.inputTokens.toLocaleString("fr-FR")} />
+            <DataRow label="Jetons en sortie" value={usage.outputTokens.toLocaleString("fr-FR")} />
             <DataRow label={notice.costLabel} value={formatCost(usage.costCents)} />
             <DataRow
-              label="Real charges included"
-              value={usage.includesRealCharges ? "Yes" : notice.noCharges}
+              label="Frais réels inclus"
+              value={usage.includesRealCharges ? "Oui" : notice.noCharges}
             />
           </dl>
         </Card>
@@ -109,22 +110,22 @@ export default async function AiWorkspacePage() {
 
       <Card
         title={`Analyses (${analyses.length})`}
-        description="Most recent first. Every one requires a person to read it."
+        description="Les plus récentes d’abord. Chacune doit être lue par une personne."
       >
         {analyses.length === 0 ? (
-          <Callout tone="neutral" title="Nothing has been run yet">
-            Open a matter and use its AI Analysis tab.
+          <Callout tone="neutral" title="Rien n’a encore été lancé">
+            Ouvrez un dossier et utilisez son onglet Analyse.
           </Callout>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[44rem] text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-ink-muted">
-                  <th className="py-2 pr-4 font-medium">Matter</th>
-                  <th className="py-2 pr-4 font-medium">Run</th>
-                  <th className="py-2 pr-4 font-medium">State</th>
-                  <th className="py-2 pr-4 font-medium">Review</th>
-                  <th className="py-2 font-medium">Human review</th>
+                  <th className="py-2 pr-4 font-medium">Dossier</th>
+                  <th className="py-2 pr-4 font-medium">Lancée</th>
+                  <th className="py-2 pr-4 font-medium">État</th>
+                  <th className="py-2 pr-4 font-medium">Relecture</th>
+                  <th className="py-2 font-medium">Lecture par une personne</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -154,7 +155,7 @@ export default async function AiWorkspacePage() {
                               : "neutral"
                         }
                       >
-                        {analysis.status}
+                        {analysisStateLabel(analysis.status)}
                       </Badge>
                     </td>
                     <td className="py-3 pr-4">
@@ -175,7 +176,7 @@ export default async function AiWorkspacePage() {
                     <td className="py-3">
                       {/* Read from the row, never asserted by this page. */}
                       <Badge tone="warning">
-                        {analysis.reviews[0]?.humanReviewRequired === false ? "Not required" : "Required"}
+                        {analysis.reviews[0]?.humanReviewRequired === false ? "Non requise" : "Obligatoire"}
                       </Badge>
                     </td>
                   </tr>
@@ -187,14 +188,14 @@ export default async function AiWorkspacePage() {
       </Card>
 
       <Card
-        title="What Claude may never do here"
-        description="Nine rules that cannot be switched off, in this firm or any other."
+        title="Ce que l’assistant ne peut jamais faire ici"
+        description="Neuf règles impossibles à désactiver, dans ce cabinet comme dans tout autre."
       >
         <ul className="ml-4 list-disc space-y-1 text-sm text-ink-muted">
-          <li>Reach an eligibility conclusion, or give legal advice, without a person deciding.</li>
-          <li>Confirm a deadline. Every date shown is one somebody recorded, not one Orchelio checked.</li>
-          <li>File anything, send anything, or communicate with a client or an opposing party.</li>
-          <li>Delete anything permanently, or clear a conflict.</li>
+          <li>Conclure sur une éligibilité, ou donner un conseil juridique, sans qu’une personne décide.</li>
+          <li>Confirmer une échéance. Chaque date affichée a été enregistrée par quelqu’un, pas vérifiée par Orchelio.</li>
+          <li>Déposer quoi que ce soit, envoyer quoi que ce soit, ou communiquer avec un client ou une partie adverse.</li>
+          <li>Supprimer définitivement quoi que ce soit, ou lever un conflit d’intérêts.</li>
         </ul>
         {/* One template string, not interpolation between JSX children: JSX
             collapses the whitespace around an expression and renders
@@ -203,6 +204,20 @@ export default async function AiWorkspacePage() {
       </Card>
     </div>
   );
+}
+
+/** The stored run states, in the reader's language. An unknown value shows as stored. */
+function analysisStateLabel(status: string): string {
+  switch (status) {
+    case "completed":
+      return "terminée";
+    case "failed":
+      return "échouée";
+    case "running":
+      return "en cours";
+    default:
+      return status;
+  }
 }
 
 function featureLabel(key: string): string {

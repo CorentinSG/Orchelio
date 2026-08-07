@@ -19,8 +19,8 @@ export const metadata = { title: "Consommation et coûts" };
 export const dynamic = "force-dynamic";
 
 const OPERATION_LABELS: Record<string, string> = {
-  claude_analyst: "Claude Analyst — matter analysis",
-  claude_reviewer: "Claude Reviewer — independent check",
+  claude_analyst: "Analyste — analyse d’un dossier",
+  claude_reviewer: "Relecteur — relecture indépendante",
 };
 
 function operationLabel(operation: string): string {
@@ -28,7 +28,7 @@ function operationLabel(operation: string): string {
 }
 
 function formatTokens(value: number): string {
-  return new Intl.NumberFormat("en-US").format(value);
+  return new Intl.NumberFormat("fr-FR").format(value);
 }
 
 /**
@@ -67,45 +67,46 @@ export default async function UsagePage() {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Consommation et coûts</h1>
         <p className="mt-1 text-ink-muted">
-          Assistant usage for this firm, and this firm only.
+          La consommation de l’assistant pour ce cabinet, et lui seul.
         </p>
       </header>
 
       <Callout tone="warning" title={notice.costTitle}>
         <p>
-          The AI provider is <code className="font-mono">{env.aiProvider}</code>.{" "}
+          Le fournisseur d’IA est <code className="font-mono">{env.aiProvider}</code>.{" "}
           {notice.whereItGoes}
         </p>
       </Callout>
 
       {summary.includesRealCharges ? (
-        <Callout tone="danger" title="Some records are marked as real charges" assertive>
-          At least one usage record has <code className="font-mono">isRealCharge</code> set. That
-          should not happen in this build; treat the totals below as unexplained until it is.
+        <Callout tone="danger" title="Des frais réels figurent dans ces totaux" assertive>
+          Au moins un enregistrement est un vrai débit, facturé au cabinet par un fournisseur
+          hébergé. Chaque ligne concernée porte l’étiquette « facturé » ci-dessous ; les autres
+          n’ont rien coûté.
         </Callout>
       ) : null}
 
       {totalRuns === 0 ? (
-        <Card title="Nothing has been run yet">
+        <Card title="Rien n’a encore été lancé">
           <p className="text-sm text-ink-muted">
-            No analysis has been run for {firm.name}, so there is nothing to cost. Run one from a
-            matter&apos;s Analysis tab and this page fills in.
+            Aucune analyse n’a été lancée pour {firm.name}, donc il n’y a rien à chiffrer.
+            Lancez-en une depuis l’onglet Analyse d’un dossier et cette page se remplira.
           </p>
           <p className="mt-2 text-sm">
             <Link href="/matters" className="font-medium text-brand underline underline-offset-4">
-              Open the matter list
+              Ouvrir la liste des dossiers
             </Link>
           </p>
         </Card>
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Tile label="Analyses" value={summary.analyses} hint="Claude Analyst runs" />
-            <Tile label="Reviews" value={summary.reviews} hint="Claude Reviewer runs" />
+            <Tile label="Analyses" value={summary.analyses} hint="exécutions de l’analyste" />
+            <Tile label="Relectures" value={summary.reviews} hint="exécutions du relecteur" />
             <Tile
-              label="Tokens"
+              label="Jetons"
               value={formatTokens(summary.inputTokens + summary.outputTokens)}
-              hint={`${formatTokens(summary.inputTokens)} in / ${formatTokens(summary.outputTokens)} out`}
+              hint={`${formatTokens(summary.inputTokens)} en entrée / ${formatTokens(summary.outputTokens)} en sortie`}
             />
             <Tile
               label={notice.costLabel}
@@ -114,14 +115,14 @@ export default async function UsagePage() {
             />
           </div>
 
-          <Card title="By operation" description="What each kind of run accounts for.">
+          <Card title="Par opération" description="Ce que chaque type d’exécution représente.">
             <dl>
               {byOperation.map((row) => (
                 <DataRow
                   key={row.operation}
                   label={operationLabel(row.operation)}
                   value={formatCost(row.costCents, currency)}
-                  hint={`${row.runs} run(s), ${formatTokens(row.inputTokens + row.outputTokens)} tokens`}
+                  hint={`${row.runs} exécution(s), ${formatTokens(row.inputTokens + row.outputTokens)} jetons`}
                 />
               ))}
             </dl>
@@ -129,8 +130,8 @@ export default async function UsagePage() {
 
           {byMatter.length > 0 ? (
             <Card
-              title="By matter"
-              description="The matters that have used the assistant most."
+              title="Par dossier"
+              description="Les dossiers qui ont le plus utilisé l’assistant."
             >
               <dl>
                 {byMatter.map((row) => (
@@ -145,7 +146,7 @@ export default async function UsagePage() {
                       </Link>
                     }
                     value={formatCost(row.costCents, currency)}
-                    hint={`${row.runs} run(s)`}
+                    hint={`${row.runs} exécution(s)`}
                   />
                 ))}
               </dl>
@@ -153,8 +154,8 @@ export default async function UsagePage() {
           ) : null}
 
           <Card
-            title="Recent records"
-            description="The most recent 25, newest first."
+            title="Enregistrements récents"
+            description="Les 25 plus récents, du plus récent au plus ancien."
           >
             <ul className="divide-y divide-line">
               {records.map((record) => (
@@ -181,7 +182,7 @@ export default async function UsagePage() {
         </>
       )}
 
-      <Card title="How these figures are produced">
+      <Card title="Comment ces chiffres sont produits">
         <p className="text-sm text-ink-muted">{notice.whatTheFiguresAre}</p>
         <p className="mt-2 text-sm text-ink-muted">{notice.whatItCannotTell}</p>
       </Card>

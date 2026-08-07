@@ -69,9 +69,9 @@ describe("naming the day", () => {
   it("formats a date, a string or nothing", () => {
     expect(formatDate(EVENING_IN_PACIFIC, PACIFIC)).toBe("2026-07-30");
     expect(formatDate("2026-07-31T01:30:00Z", PACIFIC)).toBe("2026-07-30");
-    expect(formatDate(null, PACIFIC)).toBe("Unknown");
-    expect(formatDate(undefined, PACIFIC)).toBe("Unknown");
-    expect(formatDate("not a date", PACIFIC)).toBe("Unknown");
+    expect(formatDate(null, PACIFIC)).toBe("Inconnue");
+    expect(formatDate(undefined, PACIFIC)).toBe("Inconnue");
+    expect(formatDate("not a date", PACIFIC)).toBe("Inconnue");
   });
 
   it("has no default zone, so no call site can forget one", () => {
@@ -91,7 +91,7 @@ describe("naming the moment", () => {
   });
 
   it("says Unknown rather than inventing a time", () => {
-    expect(formatMoment(null, PACIFIC)).toBe("Unknown");
+    expect(formatMoment(null, PACIFIC)).toBe("Inconnue");
   });
 });
 

@@ -86,13 +86,13 @@ export function calendarDayIn(value: Date, timezone: string): string {
   }).format(value);
 }
 
-/** A date in the firm's zone, or "Unknown". */
+/** A date in the firm's zone, or « Inconnue ». */
 export function formatDate(
   value: Date | string | null | undefined,
   timezone: string,
 ): string {
   const date = toDate(value);
-  return date ? calendarDayIn(date, timezone) : "Unknown";
+  return date ? calendarDayIn(date, timezone) : "Inconnue";
 }
 
 /**
@@ -108,7 +108,7 @@ export function formatMoment(
   timezone: string,
 ): string {
   const date = toDate(value);
-  if (!date) return "Unknown";
+  if (!date) return "Inconnue";
 
   const time = new Intl.DateTimeFormat("en-GB", {
     timeZone: timezone,

@@ -150,11 +150,11 @@ test.describe("The seven-step questionnaire", () => {
     // Step 5
     await expect(page.getByText("Step 5 of 7")).toBeVisible();
     await uncheckAll(page, "aiFeatureIds");
-    await check(page, /^Summarise documents/);
-    await check(page, /^Create a factual timeline/);
-    await check(page, /^Identify missing documents/);
-    await check(page, /^Detect inconsistencies/);
-    await check(page, /^Prepare consultation questions/);
+    await check(page, /^Résumer les documents/);
+    await check(page, /^Établir une chronologie factuelle/);
+    await check(page, /^Repérer les documents manquants/);
+    await check(page, /^Détecter les incohérences/);
+    await check(page, /^Préparer les questions de consultation/);
     await continueStep(page);
 
     // Step 6 — the locked rules are visible and cannot be unticked.
@@ -216,11 +216,11 @@ test.describe("The seven-step questionnaire", () => {
     await continueStep(page);
 
     await uncheckAll(page, "aiFeatureIds");
-    await check(page, /^Summarise documents/);
-    await check(page, /^Create a factual timeline/);
-    await check(page, /^Identify missing documents/);
-    await check(page, /^Detect inconsistencies/);
-    await check(page, /^Prepare interview questions/);
+    await check(page, /^Résumer les documents/);
+    await check(page, /^Établir une chronologie factuelle/);
+    await check(page, /^Repérer les documents manquants/);
+    await check(page, /^Détecter les incohérences/);
+    await check(page, /^Préparer les questions d’entretien/);
     await continueStep(page);
 
     await uncheckAll(page, "approvalKeys");
@@ -243,7 +243,7 @@ test.describe("The seven-step questionnaire", () => {
     await signIn(page, "employment.attorney@demo.local");
 
     await page.goto("/onboarding/5");
-    await page.getByRole("checkbox", { name: /^Identify missing documents/ }).uncheck();
+    await page.getByRole("checkbox", { name: /^Repérer les documents manquants/ }).uncheck();
     await continueStep(page);
     await continueStep(page);
     await page.getByRole("button", { name: "Confirm configuration" }).click();
@@ -255,7 +255,7 @@ test.describe("The seven-step questionnaire", () => {
 
     // Restore, so the demonstration data is left as it was found.
     await page.goto("/onboarding/5");
-    await page.getByRole("checkbox", { name: /^Identify missing documents/ }).check();
+    await page.getByRole("checkbox", { name: /^Repérer les documents manquants/ }).check();
     await continueStep(page);
     await continueStep(page);
     await page.getByRole("button", { name: "Confirm configuration" }).click();

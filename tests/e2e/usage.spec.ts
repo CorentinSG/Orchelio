@@ -26,7 +26,7 @@ test.describe("usage and costs", () => {
 
     await expect(page.getByRole("heading", { name: "Consommation et coûts" })).toBeVisible();
     await expect(
-      page.getByText("Simulated cost — No API charge was incurred."),
+      page.getByText("Coût simulé — aucun frais d’API n’a été engagé."),
     ).toBeVisible();
     await expect(page.getByRole("main")).toContainText("mock");
   });
@@ -36,7 +36,7 @@ test.describe("usage and costs", () => {
     await page.goto("/usage");
 
     await expect(page.getByRole("main")).toContainText(
-      /cannot tell you is what a real deployment would cost/i,
+      /ne peut pas vous dire, c’est ce qu’un déploiement réel coûterait/i,
     );
   });
 
@@ -46,7 +46,7 @@ test.describe("usage and costs", () => {
 
     // Whatever the numbers are, the page is scoped to the open firm and says so.
     await expect(page.getByRole("main")).toContainText("Carter Employment & Labor Law");
-    await expect(page.getByRole("main")).toContainText("this firm");
+    await expect(page.getByRole("main")).toContainText("ce cabinet");
   });
 
   test("a paralegal has no permission to see costs", async ({ page }) => {

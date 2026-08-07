@@ -33,26 +33,26 @@ export const MIN_SUMMARY_CHARS = 40;
  * sentences" here would quietly add 2 and 4 to the numbers a model may use.
  */
 export const REWRITE_SYSTEM_PROMPT = [
-  "You rewrite a summary of a legal matter file for a lawyer to read.",
+  "Tu réécris le résumé d'un dossier juridique pour qu'un avocat le lise.",
   "",
-  "You are given figures that have already been worked out from the firm's records.",
-  "Restate them in plain English, in two to four sentences. Reply with the summary and nothing else.",
+  "On te donne des chiffres déjà établis depuis les enregistrements du cabinet.",
+  "Redis-les en français simple, en deux à quatre phrases. Réponds avec le résumé et rien d'autre.",
   "",
-  "You must not:",
-  "- say whether anyone is eligible, entitled or likely to succeed;",
-  "- recommend anything, or say what anyone should do;",
-  "- state a deadline, or say that a date is confirmed;",
-  "- use any number that is not in the figures you were given;",
-  "- add any fact, name, date or link that is not in the figures you were given.",
+  "Tu ne dois pas :",
+  "- dire si quelqu'un est éligible, a un droit ou a des chances de succès ;",
+  "- recommander quoi que ce soit, ni dire ce que quiconque devrait faire ;",
+  "- énoncer une échéance, ni dire qu'une date est confirmée ;",
+  "- utiliser un nombre qui n'est pas dans les chiffres fournis ;",
+  "- ajouter un fait, un nom, une date ou un lien qui n'est pas dans les chiffres fournis.",
   "",
-  "You are describing what a file contains. Every judgement about it belongs to the lawyer reading you.",
+  "Tu décris ce qu'un dossier contient. Tout jugement sur ce dossier appartient à l'avocat qui te lit.",
 ].join("\n");
 
 /** Said when the model's paragraph was refused, and why. Never quotes it. */
 export function orchelioWroteTheSummary(because: string): string {
   return (
-    `The summary's wording is Orchelio's own, derived from the record: ${because}. ` +
-    "Nothing else in this analysis is affected, because no other part of it is written by a model."
+    `La formulation du résumé est celle d'Orchelio, dérivée du dossier : ${because}. ` +
+    "Rien d'autre dans cette analyse n'est concerné, car aucune autre partie n'est rédigée par un modèle."
   );
 }
 
@@ -81,36 +81,36 @@ export function factsMessage(
   input: MatterAnalysisInput,
 ): string {
   const lines = [
-    `Matter ${input.reference}.`,
+    `Dossier ${input.reference}.`,
     "",
-    "Figures worked out from the firm's records:",
+    "Chiffres établis depuis les enregistrements du cabinet :",
     // Counted off the derived analysis rather than off the matter, so this
     // message and the summary beneath it can never disagree — a firm that
     // switched a feature off has fewer facts, and both lines say so together.
-    `- ${analysis.keyFacts.length} fact(s) are listed in the analysis.`,
-    `- ${input.documents.length} document(s) are on file.`,
+    `- ${analysis.keyFacts.length} fait(s) sont listés dans l’analyse.`,
+    `- ${input.documents.length} document(s) sont au dossier.`,
   ];
 
   lines.push(
     analysis.contradictions.length === 0
-      ? "- Nothing on the record disagrees with anything else on the record."
-      : `- ${analysis.contradictions.length} point(s) on the record disagree with another part of the file: ${analysis.contradictions.map((item) => item.subject).join("; ")}.`,
+      ? "- Rien au dossier ne contredit quoi que ce soit d’autre au dossier."
+      : `- ${analysis.contradictions.length} point(s) du dossier contredisent une autre partie du dossier : ${analysis.contradictions.map((item) => item.subject).join(" ; ")}.`,
   );
 
   if (analysis.missingDocuments.length > 0) {
     lines.push(
-      `- ${analysis.missingDocuments.length} document(s) usually held on this kind of matter are not on file: ${analysis.missingDocuments.map((item) => item.label).join("; ")}.`,
+      `- ${analysis.missingDocuments.length} document(s) habituellement présents sur ce type de dossier ne sont pas au dossier : ${analysis.missingDocuments.map((item) => item.label).join(" ; ")}.`,
     );
   }
 
   lines.push(
     analysis.sufficiency === "more_information_required"
-      ? "- There is too little on file for this to be usefully reviewed yet."
-      : "- There is enough on file for a person to review it.",
+      ? "- Il y a trop peu au dossier pour qu’une relecture soit encore utile."
+      : "- Il y a assez au dossier pour qu’une personne le relise.",
   );
 
-  lines.push("", "Orchelio's own summary of those figures:", analysis.summary);
-  lines.push("", "Rewrite that summary in plainer words.");
+  lines.push("", "Le résumé de ces chiffres par Orchelio :", analysis.summary);
+  lines.push("", "Réécris ce résumé en mots plus simples.");
 
   return lines.join("\n");
 }
@@ -145,17 +145,17 @@ export type SummaryVerdict =
 export function judgeSummary(raw: string, facts: string, reference: string): SummaryVerdict {
   const summary = tidy(raw);
 
-  if (summary === "") return { ok: false, because: "the model answered with nothing" };
+  if (summary === "") return { ok: false, because: "le modèle a répondu par du vide" };
   if (summary.length > MAX_SUMMARY_CHARS) {
-    return { ok: false, because: "the model's answer ran far longer than a summary" };
+    return { ok: false, because: "la réponse du modèle dépassait de loin la longueur d’un résumé" };
   }
   if (summary.length < MIN_SUMMARY_CHARS) {
-    return { ok: false, because: "the model's answer was too short to be a summary" };
+    return { ok: false, because: "la réponse du modèle était trop courte pour être un résumé" };
   }
 
   const outcome = assertsAnOutcome(summary);
   if (outcome) {
-    return { ok: false, because: `the model's answer read as ${outcome}, which an analysis may not contain` };
+    return { ok: false, because: `la réponse du modèle se lisait comme ${outcome}, ce qu’une analyse ne peut pas contenir` };
   }
 
   const allowed = new Set(facts.match(DIGITS) ?? []);
@@ -163,17 +163,17 @@ export function judgeSummary(raw: string, facts: string, reference: string): Sum
     if (!allowed.has(figure)) {
       return {
         ok: false,
-        because: `the model's answer used the figure ${figure}, which is not among the ones it was given`,
+        because: `la réponse du modèle utilisait le nombre ${figure}, qui n’est pas parmi ceux fournis`,
       };
     }
   }
 
   if (LINK_LIKE.test(summary)) {
-    return { ok: false, because: "the model's answer contained a link or an address, which the record does not" };
+    return { ok: false, because: "la réponse du modèle contenait un lien ou une adresse, que le dossier ne contient pas" };
   }
 
   if (!summary.includes(reference)) {
-    return { ok: false, because: `the model's answer did not name ${reference}` };
+    return { ok: false, because: `la réponse du modèle ne nommait pas ${reference}` };
   }
 
   return { ok: true, summary };

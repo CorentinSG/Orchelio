@@ -167,7 +167,7 @@ describe("what the model is told", () => {
     const input = { ...moreau(), enabledFeatures: ["document_summary"] };
     const derived = analyseMatter(input);
 
-    expect(factsMessage(derived, input)).toContain(`${derived.keyFacts.length} fact(s)`);
+    expect(factsMessage(derived, input)).toContain(`${derived.keyFacts.length} fait(s)`);
     expect(derived.keyFacts).toHaveLength(0);
   });
 });
@@ -226,7 +226,7 @@ describe("what it does with what comes back", () => {
     const { analysis, usage } = await provider().analyseMatter(input);
 
     expect(analysis.summary).toBe(analyseMatter(input).summary);
-    expect(analysis.warnings.join(" ")).toMatch(/could not be reached/);
+    expect(analysis.warnings.join(" ")).toMatch(/n’a pas pu être joint/);
     expect(usage).toEqual({ inputTokens: 0, outputTokens: 0, costCents: 0, costMicroEuros: 0, costEstimated: false });
   });
 
@@ -256,7 +256,7 @@ describe("what it does with what comes back", () => {
       timeoutMs: 50,
     }).analyseMatter(input);
 
-    expect(analysis.warnings.join(" ")).toMatch(/did not answer within \d+ seconds/);
+    expect(analysis.warnings.join(" ")).toMatch(/n’a pas répondu en \d+ secondes/);
   });
 
   it("falls back when the server answers with an error", async () => {
@@ -266,7 +266,7 @@ describe("what it does with what comes back", () => {
     const { analysis } = await provider().analyseMatter(input);
 
     expect(analysis.summary).toBe(analyseMatter(input).summary);
-    expect(analysis.warnings.join(" ")).toMatch(/answered with an error \(404\)/);
+    expect(analysis.warnings.join(" ")).toMatch(/a répondu par une erreur \(404\)/);
   });
 });
 
@@ -301,7 +301,7 @@ describe("what a paragraph has to survive to be used", () => {
 
   it("refuses a figure it was not given", () => {
     const verdict = judgeSummary(`${REFERENCE} holds 3 facts and 9 documents.`, FACTS, REFERENCE);
-    expect(verdict.ok === false && verdict.because).toMatch(/the figure 9/);
+    expect(verdict.ok === false && verdict.because).toMatch(/le nombre 9/);
   });
 
   it("refuses a link, which nothing on the record contains", () => {
@@ -310,7 +310,7 @@ describe("what a paragraph has to survive to be used", () => {
       FACTS,
       REFERENCE,
     );
-    expect(verdict.ok === false && verdict.because).toMatch(/link/);
+    expect(verdict.ok === false && verdict.because).toMatch(/lien/);
   });
 
   it("refuses an answer about some other matter", () => {
@@ -319,7 +319,7 @@ describe("what a paragraph has to survive to be used", () => {
       FACTS,
       REFERENCE,
     );
-    expect(verdict.ok === false && verdict.because).toMatch(/did not name IMM-2026-002/);
+    expect(verdict.ok === false && verdict.because).toMatch(/ne nommait pas IMM-2026-002/);
   });
 
   it("refuses nothing, and refuses an essay", () => {

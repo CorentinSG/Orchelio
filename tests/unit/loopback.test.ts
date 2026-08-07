@@ -107,14 +107,14 @@ describe("what it refuses, and why the refusal says so", () => {
 
 describe("what the firm is told", () => {
   it("says where the material goes, in words a client could be given", () => {
-    expect(LOOPBACK_PROMISE).toMatch(/never reaches a network card/i);
-    expect(LOOPBACK_PROMISE).toMatch(/no material reaches a third party/i);
+    expect(LOOPBACK_PROMISE).toMatch(/n’atteint jamais une carte réseau/i);
+    expect(LOOPBACK_PROMISE).toMatch(/aucun élément ne parvient à un tiers/i);
   });
 
   it("says the promise is checked rather than given", () => {
     // The sentence a lawyer repeats to a client has to be the one that is
     // true: not "we only call localhost" but "there is no path to anywhere
     // else, and the build fails if that stops being so".
-    expect(LOOPBACK_PROMISE).toMatch(/build fails/i);
+    expect(LOOPBACK_PROMISE).toMatch(/la compilation échoue/i);
   });
 });

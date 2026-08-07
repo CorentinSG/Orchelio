@@ -154,5 +154,5 @@ export async function listUsageRecords(scope: FirmScope, take = 50) {
 
 /** Formats cents as a currency string. Kept here so every screen agrees. */
 export function formatCost(costCents: number, currency = "USD"): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(costCents / 100);
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency }).format(costCents / 100);
 }

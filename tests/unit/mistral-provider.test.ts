@@ -183,7 +183,7 @@ describe("what is done with what comes back", () => {
     const { analysis, usage } = await provider().analyseMatter(input);
 
     expect(analysis.summary).toBe(analyseMatter(input).summary);
-    expect(JSON.stringify(analysis.warnings)).toMatch(/could not be reached/);
+    expect(JSON.stringify(analysis.warnings)).toMatch(/n’a pas pu être joint/);
     expect(usage).toEqual({
       inputTokens: 0,
       outputTokens: 0,
@@ -199,7 +199,7 @@ describe("what is done with what comes back", () => {
 
     const { analysis } = await provider().analyseMatter(input);
 
-    expect(JSON.stringify(analysis.warnings)).toMatch(/refused the API key/);
+    expect(JSON.stringify(analysis.warnings)).toMatch(/a refusé la clé d’API/);
   });
 });
 

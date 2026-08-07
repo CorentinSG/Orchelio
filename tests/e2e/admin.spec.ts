@@ -110,7 +110,7 @@ test.describe("platform administration", () => {
 
     await expect(page.getByRole("heading", { name: "Vue d’ensemble du système" })).toBeVisible();
     await expect(page.getByText("connected")).toBeVisible();
-    await expect(page.getByText("simulated")).toBeVisible();
+    await expect(page.getByText("simulé", { exact: true })).toBeVisible();
   });
 
   test("the demonstration screen offers no destructive control", async ({ page }) => {
@@ -204,7 +204,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   await page.getByRole("checkbox", { name: "Lead intake" }).check();
   await continueStep(page, 5);
 
-  await page.getByRole("checkbox", { name: "Identify missing documents" }).check();
+  await page.getByRole("checkbox", { name: "Repérer les documents manquants" }).check();
   await continueStep(page, 6);
 
   // No configurable approval rule is required — the nine locked ones are

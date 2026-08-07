@@ -383,7 +383,7 @@ Exports: `LoadingScreen`
 
 ### `src/components/matter-ui.tsx`
 
-Two rules live here so that every screen obeys them without remembering to: a value that is not known reads "Unknown" rather than being left blank, and a date is never…
+Two rules live here so that every screen obeys them without remembering to: a value that is not known reads « Inconnue » rather than being left blank, and a date is ne…
 
 Exports: `statusLabel`, `StatusBadge`, `relativeDays`, `UnconfirmedDate`, `MatterLink`, `fileSize`, `ALL_STATUSES`
 

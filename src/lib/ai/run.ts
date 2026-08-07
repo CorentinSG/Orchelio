@@ -40,7 +40,7 @@ import { serverEnv } from "@/lib/env";
 
 /** Shown to the user when a run fails. Never the underlying error. */
 export const ANALYSIS_FAILURE_MESSAGE =
-  "The analysis did not complete. Nothing was saved for this run, and no part of it should be relied on. Running it again is safe.";
+  "L’analyse ne s’est pas terminée. Rien n’a été enregistré pour cette exécution, et rien ne doit en être retenu. La relancer est sans risque.";
 
 export type RunOutcome =
   | { ok: true; analysisId: string; result: MatterAnalysisResult; reviewStatus: string }
@@ -227,22 +227,22 @@ function summariseForApproval(
   result: MatterAnalysisResult,
   reviewStatus: string,
 ): string {
-  const parts = [`Analysis of ${reference}.`];
+  const parts = [`Analyse de ${reference}.`];
 
   parts.push(
     result.contradictions.length === 0
-      ? "Nothing on the record disagrees with anything else."
-      : `${result.contradictions.length} disagreement${result.contradictions.length === 1 ? "" : "s"} on the record, unresolved.`,
+      ? "Rien au dossier ne contredit quoi que ce soit d’autre."
+      : `${result.contradictions.length} désaccord${result.contradictions.length === 1 ? "" : "s"} au dossier, non tranché${result.contradictions.length === 1 ? "" : "s"}.`,
   );
 
   if (result.missingDocuments.length > 0) {
-    parts.push(`${result.missingDocuments.length} expected document(s) not on file.`);
+    parts.push(`${result.missingDocuments.length} document(s) attendu(s) absent(s) du dossier.`);
   }
   if (result.sufficiency === "more_information_required") {
-    parts.push("The reviewer found too little on file for the analysis to say much.");
+    parts.push("Le relecteur a trouvé trop peu au dossier pour que l’analyse dise grand-chose.");
   }
 
-  parts.push(`Independent review: ${reviewStatus.split("_").join(" ")}.`);
+  parts.push(`Relecture indépendante : ${reviewStatus.split("_").join(" ")}.`);
   return parts.join(" ");
 }
 

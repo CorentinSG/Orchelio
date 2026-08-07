@@ -55,6 +55,20 @@ const CONCLUSION_PATTERNS: readonly { pattern: RegExp; what: string }[] = [
   { pattern: /\bhas\s+a\s+(strong|good|weak|poor)\s+case\b/i, what: "an assessment of merits" },
   { pattern: /\bthe\s+deadline\s+is\b/i, what: "a confirmed deadline" },
   { pattern: /\bstatute\s+of\s+limitations\s+(expires|expired|runs)\b/i, what: "a confirmed limitation date" },
+  // The same conclusions, in the product's own language. The screens now write
+  // French, and a hosted or local model may too — either way the sentence is
+  // refused, in whichever language it arrives.
+  { pattern: /\b(est|sont|était|étaient)\s+(éligible|inéligible|admissible)s?\b/i, what: "une conclusion d’éligibilité" },
+  { pattern: /\bremplit\s+les\s+conditions\b/i, what: "une conclusion d’éligibilité" },
+  { pattern: /\b(est|sont|était|étaient)\s+(illégal|illégale|illégaux|illégales|illicite|illicites|discriminatoire|discriminatoires)\b/i, what: "une constatation d’illégalité" },
+  { pattern: /\bnous\s+(recommandons|conseillons)\b/i, what: "une recommandation" },
+  { pattern: /\b(vous|le\s+client|le\s+cabinet)\s+(devriez|devrait|devez|doit)\s+(déposer|signer|accepter|poursuivre|saisir)\b/i, what: "un conseil d’agir" },
+  { pattern: /\b(susceptible|probable)\s+de\s+(gagner|réussir|l’emporter|échouer)\b/i, what: "une prédiction d’issue" },
+  { pattern: /\baura\s+gain\s+de\s+cause\b/i, what: "une prédiction d’issue" },
+  { pattern: /\bconstitue\s+(une\s+discrimination|des\s+représailles|un\s+manquement|une\s+violation)\b/i, what: "une qualification juridique" },
+  { pattern: /\bdossier\s+(solide|faible)\b/i, what: "une appréciation des mérites" },
+  { pattern: /\b(l’échéance|la\s+date\s+limite)\s+est\b/i, what: "une échéance confirmée" },
+  { pattern: /\bprescription\s+(expire|expirée|acquise|court)\b/i, what: "une date de prescription confirmée" },
 ];
 
 /**
@@ -85,17 +99,17 @@ export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult
   for (const fact of unsourced) {
     issues.push({
       category: "unsupported_statement",
-      where: `Key fact — ${fact.label}`,
-      detail: "Stated with no source. A reader cannot check it or weigh it.",
+      where: `Fait clé — ${fact.label}`,
+      detail: "Affirmé sans source. Un lecteur ne peut ni le vérifier ni le peser.",
     });
   }
   checks.push({
-    name: "Every stated fact names a source",
+    name: "Chaque fait affirmé nomme une source",
     passed: unsourced.length === 0,
     note:
       unsourced.length === 0
-        ? `${analysis.keyFacts.length} fact${analysis.keyFacts.length === 1 ? "" : "s"} checked, each citing at least one source.`
-        : `${unsourced.length} fact(s) cite nothing.`,
+        ? `${analysis.keyFacts.length} fait${analysis.keyFacts.length === 1 ? "" : "s"} contrôlé${analysis.keyFacts.length === 1 ? "" : "s"}, chacun citant au moins une source.`
+        : `${unsourced.length} fait(s) ne citent rien.`,
   });
 
   // --- 2. Contradictions, re-derived from the matter -----------------------
@@ -109,17 +123,17 @@ export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult
       category: "missed_contradiction",
       where: contradiction.subject,
       detail:
-        "The record holds more than one version of this and the analysis does not say so. " +
+        "Le dossier contient plusieurs versions de ceci et l’analyse ne le dit pas. " +
         contradiction.statements.map((statement) => `${statement.source.label}: ${statement.value}`).join(" · "),
     });
   }
   checks.push({
-    name: "Disagreements on the record are all reported",
+    name: "Tous les désaccords du dossier sont signalés",
     passed: missed.length === 0,
     note:
       expected.length === 0
-        ? "Nothing on this matter disagrees with anything else."
-        : `${expected.length} found independently, ${expected.length - missed.length} reported by the analysis.`,
+        ? "Rien sur ce dossier ne contredit quoi que ce soit d’autre."
+        : `${expected.length} trouvé(s) indépendamment, ${expected.length - missed.length} signalé(s) par l’analyse.`,
   });
 
   // --- 3. No legal conclusion ----------------------------------------------
@@ -140,17 +154,17 @@ export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult
   for (const conclusion of conclusions) {
     issues.push({
       category: "premature_legal_conclusion",
-      where: "Analysis text",
-      detail: `Reads as ${conclusion.what}: "${trim(conclusion.text)}"`,
+      where: "Texte de l’analyse",
+      detail: `Se lit comme ${conclusion.what} : « ${trim(conclusion.text)} »`,
     });
   }
   checks.push({
-    name: "No legal conclusion, recommendation or confirmed deadline",
+    name: "Aucune conclusion juridique, recommandation ni échéance confirmée",
     passed: conclusions.length === 0,
     note:
       conclusions.length === 0
-        ? `${prose.length} passages checked against ${CONCLUSION_PATTERNS.length} patterns.`
-        : `${conclusions.length} passage(s) assert an outcome.`,
+        ? `${prose.length} passages contrôlés contre ${CONCLUSION_PATTERNS.length} motifs.`
+        : `${conclusions.length} passage(s) affirment une issue.`,
   });
 
   // --- 4. A remembered date is not a confirmed one -------------------------
@@ -159,17 +173,17 @@ export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult
   for (const event of mislabelled) {
     issues.push({
       category: "date_presented_as_confirmed",
-      where: `Timeline — ${event.label}`,
-      detail: "Marked as stated by a person but sourced to a document, or the reverse.",
+      where: `Chronologie — ${event.label}`,
+      detail: "Marquée comme déclarée par une personne mais sourcée à un document, ou l’inverse.",
     });
   }
   checks.push({
-    name: "Every date says whether a person stated it",
+    name: "Chaque date dit si une personne l’a déclarée",
     passed: mislabelled.length === 0,
     note:
       analysis.timeline.length === 0
-        ? "No dates in this analysis."
-        : `${analysis.timeline.length} event(s): ${statedDates.length} stated by a person, ${analysis.timeline.length - statedDates.length} read from a document's name or filing date.`,
+        ? "Aucune date dans cette analyse."
+        : `${analysis.timeline.length} événement(s) : ${statedDates.length} déclaré(s) par une personne, ${analysis.timeline.length - statedDates.length} lu(s) dans le nom d’un document ou sa date d’ajout.`,
   });
 
   // --- 5. The caveats are still attached -----------------------------------
@@ -179,17 +193,17 @@ export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult
   for (const warning of missingWarnings) {
     issues.push({
       category: "unsupported_statement",
-      where: "Warnings",
-      detail: `A standing caution is absent: "${trim(warning)}"`,
+      where: "Avertissements",
+      detail: `Une mise en garde permanente est absente : « ${trim(warning)} »`,
     });
   }
   checks.push({
-    name: "Standing cautions are attached",
+    name: "Les mises en garde permanentes sont jointes",
     passed: missingWarnings.length === 0,
     note:
       missingWarnings.length === 0
-        ? `All ${STANDING_WARNINGS.length} present, including that no document was opened.`
-        : `${missingWarnings.length} missing.`,
+        ? `Les ${STANDING_WARNINGS.length} présentes, y compris qu’aucun document n’a été ouvert.`
+        : `${missingWarnings.length} manquante(s).`,
   });
 
   // --- 6. Is there enough on file at all? ----------------------------------
@@ -197,18 +211,18 @@ export function reviewAnalysis(input: AnalysisReviewInput): AnalysisReviewResult
   if (insufficient) {
     issues.push({
       category: "insufficient_information",
-      where: "The matter",
+      where: "Le dossier",
       detail:
-        "Too little is on file for this analysis to describe the matter rather than the gaps in it. " +
-        "This is a statement about the file, not about the client's position.",
+        "Il y a trop peu au dossier pour que cette analyse décrive l’affaire plutôt que ses manques. " +
+        "C’est un constat sur le dossier, pas sur la position du client.",
     });
   }
   checks.push({
-    name: "Enough on file to be worth reviewing",
+    name: "Assez au dossier pour qu’une relecture vaille la peine",
     passed: !insufficient,
     note: insufficient
-      ? "Most fields are unknown, or no document has been added."
-      : "Enough recorded for a person to read this usefully.",
+      ? "La plupart des champs sont inconnus, ou aucun document n’a été ajouté."
+      : "Assez d’éléments enregistrés pour qu’une personne lise ceci utilement.",
   });
 
   // A defective analysis needs correcting whether or not the file is thin, so
@@ -235,15 +249,15 @@ function buildSummary(
   defectCount: number,
 ): string {
   const passed = checks.filter((check) => check.passed).length;
-  const ran = `${passed} of ${checks.length} checks passed.`;
+  const ran = `${passed} contrôle(s) sur ${checks.length} passés.`;
 
   switch (status) {
     case "corrections_required":
-      return `${ran} ${defectCount} problem${defectCount === 1 ? "" : "s"} with the analysis itself must be corrected before a person relies on it.`;
+      return `${ran} ${defectCount} problème${defectCount === 1 ? "" : "s"} de l’analyse elle-même ${defectCount === 1 ? "doit être corrigé" : "doivent être corrigés"} avant qu’une personne s’y fie.`;
     case "insufficient_information":
-      return `${ran} The analysis is sound, but there is too little on file for it to say much. Building the file out would do more than reviewing it now.`;
+      return `${ran} L’analyse est saine, mais il y a trop peu au dossier pour qu’elle dise grand-chose. Étoffer le dossier servirait plus qu’une relecture maintenant.`;
     case "approved_for_human_review":
-      return `${ran} Nothing in the analysis overstates what the file supports. It is ready for a person to read — which is still required.`;
+      return `${ran} Rien dans l’analyse n’excède ce que le dossier permet d’affirmer. Elle est prête à être lue par une personne — ce qui reste obligatoire.`;
   }
 }
 

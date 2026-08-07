@@ -106,8 +106,8 @@ describe("an analysis that is sound", () => {
   });
 
   it("does not call itself an approval", () => {
-    expect(review.summary).toMatch(/ready for a person to read/i);
-    expect(review.summary).not.toMatch(/\bapproved\b(?! for human)/i);
+    expect(review.summary).toMatch(/prête à être lue par une personne/i);
+    expect(review.summary).not.toMatch(/approuv|\bvalidée?\b/i);
   });
 });
 
@@ -121,14 +121,14 @@ describe("an analysis that missed a disagreement", () => {
     const missed = review.issues.filter((issue) => issue.category === "missed_contradiction");
 
     expect(missed).toHaveLength(1);
-    expect(missed[0]!.where).toBe("Date of last entry");
+    expect(missed[0]!.where).toBe("Date de dernière entrée");
   });
 
   it("says what the analysis should have said", () => {
     const missed = review.issues.find((i) => i.category === "missed_contradiction")!;
 
-    expect(missed.detail).toContain("11 February 2024");
-    expect(missed.detail).toContain("4 March 2024");
+    expect(missed.detail).toContain("11 février 2024");
+    expect(missed.detail).toContain("4 mars 2024");
   });
 
   it("demands corrections", () => {
@@ -146,6 +146,10 @@ describe("an analysis that reached a legal conclusion", () => {
     { text: "The deadline is 30 September 2026.", what: "a confirmed deadline" },
     { text: "The employer's conduct constitutes retaliation.", what: "a characterisation" },
     { text: "The client has a strong case.", what: "merits" },
+    { text: "Le client est éligible au regroupement familial.", what: "une conclusion d’éligibilité" },
+    { text: "Nous recommandons de déposer avant la fin du mois.", what: "une recommandation" },
+    { text: "La prescription expire le 30 septembre 2026.", what: "une prescription confirmée" },
+    { text: "Le licenciement constitue une discrimination.", what: "une qualification juridique" },
   ];
 
   for (const { text, what } of cases) {
@@ -211,15 +215,15 @@ describe("an analysis that stated something with no source", () => {
 
 describe("an analysis that lost its cautions", () => {
   const analysis = damage(CONFLICTED, (result) => {
-    result.warnings = result.warnings.filter((warning) => !warning.startsWith("No document"));
+    result.warnings = result.warnings.filter((warning) => !warning.startsWith("Aucun document"));
   });
   const review = reviewAnalysis({ analysis, matter: CONFLICTED });
 
   it("is caught, because the caveat is the honest part", () => {
     expect(review.status).toBe("corrections_required");
-    expect(review.issues.some((issue) => issue.detail.includes("No document was opened"))).toBe(
-      true,
-    );
+    expect(
+      review.issues.some((issue) => issue.detail.includes("Aucun document n’a été ouvert")),
+    ).toBe(true);
   });
 });
 
@@ -248,7 +252,7 @@ describe("a matter with too little on it", () => {
   it("is reported as a fact about the file, not about the client", () => {
     expect(review.status).toBe("insufficient_information");
     const issue = review.issues.find((i) => i.category === "insufficient_information")!;
-    expect(issue.detail).toMatch(/not about the client's position/i);
+    expect(issue.detail).toMatch(/pas sur la position du client/i);
   });
 
   it("still requires a human", () => {

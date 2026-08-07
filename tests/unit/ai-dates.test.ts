@@ -99,8 +99,8 @@ describe("reading either form", () => {
 
 describe("writing a date back out", () => {
   it("is unambiguous in any country", () => {
-    expect(formatWritten("2024-03-04")).toBe("4 March 2024");
-    expect(formatWritten("2026-06-19")).toBe("19 June 2026");
+    expect(formatWritten("2024-03-04")).toBe("4 mars 2024");
+    expect(formatWritten("2026-06-19")).toBe("19 juin 2026");
   });
 
   it("leaves something it cannot read alone", () => {

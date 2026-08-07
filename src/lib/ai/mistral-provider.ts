@@ -83,11 +83,11 @@ const NOTHING_USED: RunUsage = {
 
 /** Said when the model's paragraph is the one on screen. */
 export const MISTRAL_WROTE_THE_SUMMARY =
-  "The summary's wording was written by a Mistral model hosted in the European Union, from " +
-  "figures Orchelio had already worked out. Every fact, date, disagreement and gap below was " +
-  "derived from the record — the model was not asked what they are, and did not choose any of " +
-  "them. What was sent: those figures and the matter's reference. No name, no field value, no " +
-  "date, no document.";
+  "La formulation du résumé a été rédigée par un modèle Mistral hébergé dans l'Union européenne, " +
+  "à partir de chiffres qu'Orchelio avait déjà établis. Chaque fait, date, désaccord et manque " +
+  "ci-dessous a été dérivé du dossier — le modèle n'a pas été interrogé sur leur contenu, et n'en " +
+  "a choisi aucun. Ce qui a été envoyé : ces chiffres et la référence du dossier. Aucun nom, " +
+  "aucune valeur de champ, aucune date, aucun document.";
 
 export type MistralSettings = {
   /** Server-side only, never rendered, never logged. */
@@ -185,8 +185,8 @@ export class MistralAIProvider implements AIProvider {
       return {
         ok: false,
         because: deadline.aborted
-          ? `Mistral did not answer within ${Math.round(this.timeoutMs / 1000)} seconds`
-          : "Mistral could not be reached from this machine",
+          ? `Mistral n’a pas répondu en ${Math.round(this.timeoutMs / 1000)} secondes`
+          : "Mistral n’a pas pu être joint depuis cette machine",
         usage: NOTHING_USED,
       };
     }
@@ -199,8 +199,8 @@ export class MistralAIProvider implements AIProvider {
         ok: false,
         because:
           response.status === 401
-            ? "Mistral refused the API key this instance is configured with"
-            : `Mistral answered with an error (${response.status})`,
+            ? "Mistral a refusé la clé d’API configurée sur cette instance"
+            : `Mistral a répondu par une erreur (${response.status})`,
         usage: NOTHING_USED,
       };
     }
@@ -209,7 +209,7 @@ export class MistralAIProvider implements AIProvider {
     try {
       payload = await response.json();
     } catch {
-      return { ok: false, because: "Mistral's answer was not readable", usage: NOTHING_USED };
+      return { ok: false, because: "la réponse de Mistral n’était pas lisible", usage: NOTHING_USED };
     }
 
     const verdict = judgeSummary(readContent(payload), facts, reference);

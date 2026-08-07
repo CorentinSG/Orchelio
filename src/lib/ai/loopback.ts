@@ -126,4 +126,4 @@ export function isLoopback(value: string | null | undefined): boolean {
  * for somebody who will be asked by a client where their file went.
  */
 export const LOOPBACK_PROMISE =
-  "The model runs on this machine. Orchelio connects to 127.0.0.1, which is the machine talking to itself — the request never reaches a network card, and no material reaches a third party. Orchelio will not open a connection to any other address; the address it uses is checked before the connection is made, and the build fails if that check is removed.";
+  "Le modèle fonctionne sur cette machine. Orchelio se connecte à 127.0.0.1, c’est-à-dire la machine qui se parle à elle-même — la requête n’atteint jamais une carte réseau, et aucun élément ne parvient à un tiers. Orchelio n’ouvrira de connexion vers aucune autre adresse ; l’adresse utilisée est vérifiée avant que la connexion soit établie, et la compilation échoue si cette vérification est retirée.";

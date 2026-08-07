@@ -227,7 +227,7 @@ describe("a run that fails", () => {
   it("says nothing about why, to the browser", () => {
     // The real error goes to the server console. What is stored is fixed text.
     expect(run.ANALYSIS_FAILURE_MESSAGE).not.toMatch(/error|exception|stack|prisma|sql/i);
-    expect(run.ANALYSIS_FAILURE_MESSAGE).toMatch(/did not complete/i);
+    expect(run.ANALYSIS_FAILURE_MESSAGE).toMatch(/ne s’est pas terminée/i);
   });
 
   it("cannot be failed from another firm", async () => {

@@ -509,8 +509,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           {analysisProblem === "no_features" ? (
             <Callout tone="warning" title="Aucune fonction d’IA n’est activée" assertive>
               <p>
-                Ce cabinet n’a activé aucune fonction de Claude, donc une analyse n’aurait rien à
-                produire. En lancer une remplirait la page de sections vides.
+                Ce cabinet n’a activé aucune fonction de l’assistant, donc une analyse n’aurait
+                rien à produire. En lancer une remplirait la page de sections vides.
               </p>
               <p className="mt-2">
                 <Link
@@ -530,7 +530,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           ) : (
             <>
               <Card
-                title="Claude Analyst"
+                title="Analyste"
                 description={providerNotice(serverEnv()).analystNote}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -563,7 +563,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
                 {enabledAiFeatures.length > 0 ? (
                   <p className="mt-4 text-sm text-ink-subtle">
-                    Ce cabinet a demandé à Claude : {enabledAiFeatures.map(aiFeatureLabel).join(", ")}.
+                    Ce cabinet a demandé à l’assistant : {enabledAiFeatures.map(aiFeatureLabel).join(", ")}.
                     Une analyse ne produit que cela.
                   </p>
                 ) : null}

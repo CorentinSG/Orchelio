@@ -74,16 +74,18 @@ describe("the Moreau matter — a contradiction on the record", () => {
     const entry = result.contradictions.find((c) => c.key === "last_entry");
 
     expect(entry).toBeDefined();
-    expect(entry!.subject).toBe("Date of last entry");
+    expect(entry!.subject).toBe("Date de dernière entrée");
   });
 
   it("shows both dates, and says where each came from", () => {
     const entry = result.contradictions.find((c) => c.key === "last_entry")!;
     const values = entry.statements.map((statement) => statement.value).join(" ");
 
-    // The record says 11 February; the I-94's filename says 4 March.
-    expect(values).toContain("11 February 2024");
-    expect(values).toContain("4 March 2024");
+    // The record says 11 February; the I-94's filename says 4 March. The
+    // client's own intake words are quoted verbatim, so the raw string is
+    // still there beside the formatted date.
+    expect(values).toContain("11 février 2024");
+    expect(values).toContain("4 mars 2024");
     expect(entry.statements.some((s) => s.source.kind === "matter_field")).toBe(true);
     expect(entry.statements.some((s) => s.source.kind === "document")).toBe(true);
   });
@@ -91,9 +93,9 @@ describe("the Moreau matter — a contradiction on the record", () => {
   it("refuses to resolve it", () => {
     const entry = result.contradictions.find((c) => c.key === "last_entry")!;
 
-    expect(entry.note).toMatch(/question for the client/i);
+    expect(entry.note).toMatch(/question pour le client/i);
     // No version is nominated as the right one.
-    expect(entry.note).not.toMatch(/\bcorrect date is\b|\bthe correct one\b|\bshould be treated as\b/i);
+    expect(entry.note).not.toMatch(/la date (correcte|exacte) est|la bonne (date|version)|doit être (retenue|privilégiée)/i);
   });
 
   it("marks the disputed fact as disputed rather than merely stating it", () => {
@@ -108,7 +110,7 @@ describe("the Moreau matter — a contradiction on the record", () => {
 
   it("asks the client rather than deciding", () => {
     const asked = result.clientQuestions.map((question) => question.question).join(" ");
-    expect(asked.toLowerCase()).toContain("date of last entry");
+    expect(asked.toLowerCase()).toContain("date de dernière entrée");
   });
 
   it("still has enough on file to be worth reviewing", () => {
@@ -124,17 +126,17 @@ describe("the Hassan matter — not enough on file", () => {
   });
 
   it("says so in the summary, in plain words", () => {
-    expect(result.summary).toMatch(/More information is required/i);
+    expect(result.summary).toMatch(/informations supplémentaires sont requises/i);
   });
 
   it("says it is describing the gaps, not the client's position", () => {
-    expect(result.warnings.join(" ")).toMatch(/says nothing about the client's position/i);
+    expect(result.warnings.join(" ")).toMatch(/ne dit rien de la position du client/i);
   });
 
   it("reaches no conclusion of any kind", () => {
     const review = reviewAnalysis({ analysis: result, matter: inputFor("IMM-2026-003") });
     const conclusionCheck = review.checks.find((check) =>
-      check.name.startsWith("No legal conclusion"),
+      check.name.startsWith("Aucune conclusion juridique"),
     );
 
     expect(conclusionCheck?.passed).toBe(true);
@@ -163,7 +165,7 @@ describe("the Vasquez matter — the control", () => {
   });
 
   it("says plainly that nothing disagrees, rather than staying quiet", () => {
-    expect(result.summary).toMatch(/Nothing on the record disagrees/i);
+    expect(result.summary).toMatch(/Rien au dossier ne contredit/i);
   });
 
   it("reports the sequence of events without characterising it", () => {
@@ -199,7 +201,7 @@ describe("every demonstration matter", () => {
       it("says no document was opened", () => {
         // There is no upload and no OCR. An analysis citing "the I-94" without
         // this caveat would imply a capability the product does not have.
-        expect(result.warnings.join(" ")).toMatch(/No document was opened/);
+        expect(result.warnings.join(" ")).toMatch(/Aucun document n’a été ouvert/);
       });
 
       it("sources every fact it states", () => {
@@ -253,7 +255,7 @@ describe("features the firm switched off", () => {
     const quiet = result.featuresQuiet.find((f) => f.feature === "inconsistency_detection");
 
     expect(quiet).toBeDefined();
-    expect(quiet!.because).toMatch(/Nothing on the record disagrees/i);
+    expect(quiet!.because).toMatch(/Rien au dossier ne contredit/i);
   });
 
   it("uses the employment firm's name for the timeline feature", () => {
@@ -319,8 +321,8 @@ describe("how well supported a fact is", () => {
       expect(supportCaveat(level).length).toBeGreaterThan(20);
     }
     // The two document levels must both say the contents were not read.
-    expect(supportCaveat("document_agrees")).toMatch(/have not been read/i);
-    expect(supportCaveat("document_on_file")).toMatch(/have not been read/i);
+    expect(supportCaveat("document_agrees")).toMatch(/n’a pas été lu/i);
+    expect(supportCaveat("document_on_file")).toMatch(/n’a pas été lu/i);
   });
 
   it("never scores anything as certain", () => {
@@ -346,7 +348,7 @@ describe("what an analysis may never contain", () => {
   it("never confirms a date", () => {
     const result = analyseMatter(inputFor("IMM-2026-002"));
 
-    expect(result.warnings.join(" ")).toMatch(/no date here is confirmed/i);
+    expect(result.warnings.join(" ")).toMatch(/aucune date ici n’est confirmée/i);
     // A date read from a document's name is not "stated by a person"; a date
     // from the record is. Every event says which.
     for (const event of result.timeline) {

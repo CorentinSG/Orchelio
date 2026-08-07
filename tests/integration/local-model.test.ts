@@ -171,8 +171,8 @@ describe("a model server on this machine", () => {
     }).analyseMatter(input);
 
     expect(analysis.summary).toBe(analyseMatter(input).summary);
-    expect(analysis.warnings.join(" ")).toMatch(/did not answer within/);
-    expect(analysis.warnings.join(" ")).not.toMatch(/could not be reached/);
+    expect(analysis.warnings.join(" ")).toMatch(/n’a pas répondu en/);
+    expect(analysis.warnings.join(" ")).not.toMatch(/n’a pas pu être jointhed/);
   });
 
   it("keeps the analysis whole when the server answers with nonsense", async () => {
@@ -184,6 +184,6 @@ describe("a model server on this machine", () => {
 
     expect(analysis.summary).toBe(derived.summary);
     expect(analysis.contradictions).toEqual(derived.contradictions);
-    expect(analysis.warnings.join(" ")).toMatch(/not readable/);
+    expect(analysis.warnings.join(" ")).toMatch(/n’était pas lisible/);
   });
 });

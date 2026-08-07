@@ -137,7 +137,7 @@ test.describe("firm settings", () => {
     await expect(card, "the fixture assumes this firm starts with the feature on").toBeVisible();
 
     await page.goto("/settings?section=ai");
-    await page.getByRole("checkbox", { name: /Identify missing documents/ }).uncheck();
+    await page.getByRole("checkbox", { name: /Repérer les documents manquants/ }).uncheck();
     await page.getByRole("button", { name: "Save changes" }).click();
     await page.waitForURL(/saved=1/);
 
@@ -148,7 +148,7 @@ test.describe("firm settings", () => {
     await expect(page.getByText("Documents d’immigration manquants")).toHaveCount(0);
 
     await page.goto("/settings?section=ai");
-    await page.getByRole("checkbox", { name: /Identify missing documents/ }).check();
+    await page.getByRole("checkbox", { name: /Repérer les documents manquants/ }).check();
     await page.getByRole("button", { name: "Save changes" }).click();
     await page.waitForURL(/saved=1/);
   });
@@ -217,7 +217,7 @@ test.describe("firm settings", () => {
     );
     await expect(page.getByRole("main")).toContainText("Sent to an AI provider");
     await expect(page.getByRole("main")).toContainText(
-      "no key is configured and the simulation opens no socket",
+      "aucune clé n’est configurée et la simulation n’ouvre aucune connexion",
     );
     await expect(page.getByText("prisma/orchelio-demo.db")).toBeVisible();
 

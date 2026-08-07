@@ -113,28 +113,28 @@ type DateSubject = {
 const DATE_SUBJECTS: readonly DateSubject[] = [
   {
     key: "last_entry",
-    subject: "Date of last entry",
+    subject: "Date de dernière entrée",
     fieldKey: "last_entry_date",
     documentCategories: ["i94"],
     intakePattern: /entry|entered|arriv/i,
   },
   {
     key: "termination",
-    subject: "Date employment ended",
+    subject: "Date de fin d’emploi",
     fieldKey: "termination_date",
     documentCategories: ["termination_letter"],
     intakePattern: /terminat|dismiss|let_go|end_of_employment/i,
   },
   {
     key: "internal_complaint",
-    subject: "Date the complaint was made",
+    subject: "Date de la plainte",
     fieldKey: "complaint_date",
     documentCategories: ["internal_complaint"],
     intakePattern: /complaint|raised|reported/i,
   },
   {
     key: "employment_end",
-    subject: "Last day of employment",
+    subject: "Dernier jour d’emploi",
     fieldKey: "employment_end_date",
     documentCategories: ["termination_letter"],
     intakePattern: /last_day|final_day/i,
@@ -154,9 +154,9 @@ const AVAILABILITY_CLAIMS: Record<string, string> = {
 
 /** Standing cautions. Every analysis carries all of them, every time. */
 export const STANDING_WARNINGS: readonly string[] = [
-  "AI-generated. A person must read this before it is used or relied on.",
-  "No document was opened. Orchelio records a document's name, type and size only — nothing in this analysis comes from inside a file.",
-  "Nothing here is legal advice, an eligibility assessment or a conclusion, and no date here is confirmed.",
+  "Produit par une IA. Une personne doit le lire avant tout usage ou toute confiance.",
+  "Aucun document n’a été ouvert. Orchelio n’enregistre que le nom, le type et la taille d’un document — rien dans cette analyse ne provient de l’intérieur d’un fichier.",
+  "Rien ici n’est un conseil juridique, une appréciation d’éligibilité ou une conclusion, et aucune date ici n’est confirmée.",
 ];
 
 export function analyseMatter(input: MatterAnalysisInput): MatterAnalysisResult {
@@ -203,20 +203,20 @@ export function analyseMatter(input: MatterAnalysisInput): MatterAnalysisResult 
     else featuresQuiet.push({ feature, because });
   };
 
-  record("entity_extraction", keyFacts.length > 0, "No field on this matter has a value yet.");
-  record(timelineFeature, timeline.length > 0, "No date on this matter could be read.");
+  record("entity_extraction", keyFacts.length > 0, "Aucun champ de ce dossier n’a encore de valeur.");
+  record(timelineFeature, timeline.length > 0, "Aucune date de ce dossier n’a pu être lue.");
   record(
     "missing_documents",
     missingDocuments.length > 0,
-    "Every document expected for this type of matter is on file.",
+    "Chaque document attendu pour ce type de dossier est au dossier.",
   );
   record(
     "inconsistency_detection",
     contradictions.length > 0,
-    "Nothing on the record disagrees with anything else on the record.",
+    "Rien au dossier ne contredit quoi que ce soit d’autre au dossier.",
   );
-  record("consultation_questions", clientQuestions.length > 0, "Nothing outstanding to ask.");
-  record("interview_questions", clientQuestions.length > 0, "Nothing outstanding to ask.");
+  record("consultation_questions", clientQuestions.length > 0, "Rien d’en attente à demander.");
+  record("interview_questions", clientQuestions.length > 0, "Rien d’en attente à demander.");
   record("document_summary", true, "");
 
   return {
@@ -315,13 +315,13 @@ function intakeEcho(value: unknown, intake: Record<string, string>): string | nu
 
   for (const [key, answer] of Object.entries(intake)) {
     if (asDate) {
-      if (readDate(answer) === asDate) return `Client intake — ${humanise(key)}`;
+      if (readDate(answer) === asDate) return `Questionnaire client — ${humanise(key)}`;
       continue;
     }
     if (typeof value !== "string" || value.length < 3) continue;
     const a = answer.toLowerCase();
     const b = value.toLowerCase();
-    if (a.includes(b) || b.includes(a)) return `Client intake — ${humanise(key)}`;
+    if (a.includes(b) || b.includes(a)) return `Questionnaire client — ${humanise(key)}`;
   }
   return null;
 }
@@ -361,14 +361,14 @@ function buildTimeline(input: MatterAnalysisInput): TimelineEvent[] {
     if (inName) {
       events.push({
         date: inName,
-        label: `Date in the name of ${document.filename}`,
+        label: `Date dans le nom de ${document.filename}`,
         source: { kind: "document", label: document.filename, verified: document.verified },
         stated: false,
       });
     }
     events.push({
       date: document.receivedAt.slice(0, 10),
-      label: `${document.filename} added to the matter`,
+      label: `${document.filename} ajouté au dossier`,
       source: { kind: "document", label: document.filename, verified: document.verified },
       stated: false,
     });
@@ -380,7 +380,7 @@ function buildTimeline(input: MatterAnalysisInput): TimelineEvent[] {
     events.push({
       date,
       label: humanise(key),
-      source: { kind: "intake", label: `Client intake — ${humanise(key)}` },
+      source: { kind: "intake", label: `Questionnaire client — ${humanise(key)}` },
       stated: true,
     });
   }
@@ -408,7 +408,7 @@ function findMissingDocuments(input: MatterAnalysisInput): MissingDocument[] {
       key: category.key,
       label: category.label,
       whyItMatters:
-        category.whyItMatters ?? "Usually part of a complete file for this kind of matter.",
+        category.whyItMatters ?? "Fait d’habitude partie d’un dossier complet de ce type.",
     }),
   );
 }
@@ -448,7 +448,7 @@ function dateContradictions(input: MatterAnalysisInput): Contradiction[] {
       const wording = answer.trim();
       statements.push({
         value: wording === written ? written : `${written} — "${wording}"`,
-        source: { kind: "intake", label: `Client intake — ${humanise(key)}` },
+        source: { kind: "intake", label: `Questionnaire client — ${humanise(key)}` },
       });
     }
 
@@ -471,9 +471,9 @@ function dateContradictions(input: MatterAnalysisInput): Contradiction[] {
       subject: subject.subject,
       statements,
       note:
-        "Both versions are on the record and both are shown. Which one is correct is a question " +
-        "for the client, not something Orchelio can settle — and the answer may change what the " +
-        "rest of the file means.",
+        "Les deux versions sont au dossier et les deux sont montrées. Laquelle est exacte est une " +
+        "question pour le client, pas quelque chose qu’Orchelio peut trancher — et la réponse peut " +
+        "changer le sens du reste du dossier.",
     });
   }
 
@@ -490,14 +490,14 @@ function availabilityContradictions(input: MatterAnalysisInput): Contradiction[]
 
     found.push({
       key: `availability_${fieldKey}`,
-      subject: `${labelOf(input, fieldKey)} — record says no, a document of that kind is on file`,
+      subject: `${labelOf(input, fieldKey)} — la fiche dit non, un document de ce type est au dossier`,
       statements: [
         {
-          value: "Recorded as not available",
+          value: "Enregistré comme non disponible",
           source: { kind: "matter_field", label: labelOf(input, fieldKey) },
         },
         ...onFile.map((document) => ({
-          value: "A document of this kind is attached to the matter",
+          value: "Un document de ce type est joint au dossier",
           source: {
             kind: "document" as const,
             label: document.filename,
@@ -506,8 +506,8 @@ function availabilityContradictions(input: MatterAnalysisInput): Contradiction[]
         })),
       ],
       note:
-        "Either the record is out of date or the attached document is filed under the wrong kind. " +
-        "A person should look at which.",
+        "Soit la fiche n’est plus à jour, soit le document joint est classé sous le mauvais type. " +
+        "Une personne doit regarder lequel des deux.",
     });
   }
 
@@ -538,30 +538,30 @@ function buildAttorneyQuestions(
 
   for (const contradiction of contradictions) {
     questions.push({
-      question: `${contradiction.subject}: which account should the file proceed on?`,
-      why: "Two versions are on the record. Choosing between them is a judgement about the client's account, not a calculation.",
+      question: `${contradiction.subject} : sur quelle version le dossier doit-il avancer ?`,
+      why: "Deux versions sont au dossier. Choisir entre elles est un jugement sur le récit du client, pas un calcul.",
     });
   }
 
   if (sufficiency === "more_information_required") {
     questions.push({
-      question: "Is there enough on file to be worth reviewing yet, or should the file be built out first?",
-      why: "Most of this matter is still unknown, so a review now would be a review of the gaps.",
+      question: "Y a-t-il assez au dossier pour qu’une relecture vaille la peine, ou faut-il d’abord l’étoffer ?",
+      why: "L’essentiel de ce dossier est encore inconnu ; une relecture maintenant serait une relecture des manques.",
     });
   }
 
   const unverified = input.documents.filter((document) => !document.verified);
   if (unverified.length > 0) {
     questions.push({
-      question: `Should ${unverified.length === 1 ? "the document" : `the ${unverified.length} documents`} nobody has checked yet be confirmed before this file is relied on?`,
-      why: `Not yet checked by a person: ${unverified.map((document) => document.filename).join(", ")}.`,
+      question: `${unverified.length === 1 ? "Le document que personne n’a encore vérifié doit-il" : `Les ${unverified.length} documents que personne n’a encore vérifiés doivent-ils`} être confirmés avant de s’appuyer sur ce dossier ?`,
+      why: `Pas encore vérifié par une personne : ${unverified.map((document) => document.filename).join(", ")}.`,
     });
   }
 
   if (parseIsoDate(input.fields["status_expiration_date"])) {
     questions.push({
-      question: "Should the recorded status expiration date be confirmed against the underlying notice?",
-      why: "Orchelio never confirms a date. The one on file is what somebody typed.",
+      question: "La date d’expiration de statut enregistrée doit-elle être confirmée contre l’avis d’origine ?",
+      why: "Orchelio ne confirme jamais une date. Celle au dossier est ce que quelqu’un a saisi.",
     });
   }
 
@@ -577,14 +577,14 @@ function buildClientQuestions(
 
   for (const contradiction of contradictions) {
     questions.push({
-      question: `${contradiction.subject}: we have two different versions on file — can you help us settle it?`,
-      why: "Asked of the client rather than resolved internally.",
+      question: `${contradiction.subject} : nous avons deux versions différentes au dossier — pouvez-vous nous aider à trancher ?`,
+      why: "Demandé au client plutôt que tranché en interne.",
     });
   }
 
   for (const document of missing) {
     questions.push({
-      question: `Do you have a copy of the ${document.label}?`,
+      question: `Avez-vous une copie de ce document : ${document.label} ?`,
       why: document.whyItMatters,
     });
   }
@@ -592,8 +592,8 @@ function buildClientQuestions(
   // The four most significant unknowns, so the list stays usable at a meeting.
   for (const field of unknownFields.slice(0, 4)) {
     questions.push({
-      question: `Can you tell us: ${field.label}?`,
-      why: "Recorded as unknown on this matter.",
+      question: `Pouvez-vous nous préciser : ${field.label} ?`,
+      why: "Enregistré comme inconnu sur ce dossier.",
     });
   }
 
@@ -608,14 +608,14 @@ function buildWarnings(
 
   if (sufficiency === "more_information_required") {
     warnings.push(
-      "This file is mostly unknown. What follows describes the gaps more than the matter, and says nothing about the client's position.",
+      "Ce dossier est en grande partie inconnu. Ce qui suit décrit les manques plus que l’affaire, et ne dit rien de la position du client.",
     );
   }
 
   const unverified = input.documents.filter((document) => !document.verified);
   if (unverified.length > 0) {
     warnings.push(
-      `${unverified.length} document${unverified.length === 1 ? " has" : "s have"} not been checked by a person: ${unverified
+      `${unverified.length} document${unverified.length === 1 ? " n’a" : "s n’ont"} pas été vérifié${unverified.length === 1 ? "" : "s"} par une personne : ${unverified
         .map((document) => document.filename)
         .join(", ")}.`,
     );
@@ -635,25 +635,25 @@ function buildSummary(
   const parts: string[] = [];
 
   parts.push(
-    `${input.reference} has ${knownCount} of ${fieldCount} recorded fields filled in and ${input.documents.length} document${input.documents.length === 1 ? "" : "s"} on file.`,
+    `${input.reference} compte ${knownCount} champ(s) renseigné(s) sur ${fieldCount} et ${input.documents.length} document${input.documents.length === 1 ? "" : "s"} au dossier.`,
   );
 
   if (contradictions.length > 0) {
     parts.push(
-      `${contradictions.length === 1 ? "One point" : `${contradictions.length} points`} on the record disagree${contradictions.length === 1 ? "s" : ""} with ${contradictions.length === 1 ? "another" : "other"} part of the file; ${contradictions.length === 1 ? "it is" : "they are"} set out below without being resolved.`,
+      `${contradictions.length === 1 ? "Un point" : `${contradictions.length} points`} du dossier ${contradictions.length === 1 ? "contredit" : "contredisent"} une autre partie du dossier ; ${contradictions.length === 1 ? "il est présenté" : "ils sont présentés"} ci-dessous sans être tranché${contradictions.length === 1 ? "" : "s"}.`,
     );
   } else {
-    parts.push("Nothing on the record disagrees with anything else on the record.");
+    parts.push("Rien au dossier ne contredit quoi que ce soit d’autre au dossier.");
   }
 
   if (missing.length > 0) {
     parts.push(
-      `${missing.length} document${missing.length === 1 ? "" : "s"} usually held on this kind of matter ${missing.length === 1 ? "is" : "are"} not on file.`,
+      `${missing.length} document${missing.length === 1 ? "" : "s"} habituellement présent${missing.length === 1 ? "" : "s"} sur ce type de dossier ${missing.length === 1 ? "n’est pas" : "ne sont pas"} au dossier.`,
     );
   }
 
   if (sufficiency === "more_information_required") {
-    parts.push("More information is required before this file can usefully be reviewed.");
+    parts.push("Des informations supplémentaires sont requises avant qu’une relecture de ce dossier soit utile.");
   }
 
   return parts.join(" ");

@@ -46,10 +46,10 @@ export function SourceList({ sources }: { sources: readonly FactSource[] }) {
     <ul className="mt-1 space-y-0.5">
       {sources.map((source, index) => (
         <li key={`${source.label}-${index}`} className="text-xs text-ink-subtle">
-          <span className="font-medium">{sourceKindLabel(source.kind)}:</span> {source.label}
+          <span className="font-medium">{sourceKindLabel(source.kind)} :</span> {source.label}
           {source.kind === "document" ? (
             <span className="ml-1">
-              {source.verified ? "(checked by a person)" : "(not checked)"}
+              {source.verified ? "(vérifié par une personne)" : "(non vérifié)"}
             </span>
           ) : null}
         </li>
@@ -61,17 +61,17 @@ export function SourceList({ sources }: { sources: readonly FactSource[] }) {
 function sourceKindLabel(kind: FactSource["kind"]): string {
   switch (kind) {
     case "intake":
-      return "Client intake";
+      return "Questionnaire client";
     case "document":
-      return "Document on file";
+      return "Document au dossier";
     case "matter_field":
-      return "Recorded on the matter";
+      return "Enregistré sur la fiche";
   }
 }
 
 export function AnalysisWarnings({ warnings }: { warnings: readonly string[] }) {
   return (
-    <Callout tone="ai" title="Read this first">
+    <Callout tone="ai" title="À lire d’abord">
       <ul className="ml-4 list-disc space-y-1">
         {warnings.map((warning) => (
           <li key={warning}>{warning}</li>
@@ -122,7 +122,7 @@ export function KeyFactRow({ fact }: { fact: MatterAnalysisResult["keyFacts"][nu
           {/* Small, and always labelled. It is a restatement of the band, not
               a measurement, and nothing should be decided on it. */}
           <span className="text-xs text-ink-subtle">
-            {Math.round(fact.simulatedConfidence * 100)}% simulated
+            {Math.round(fact.simulatedConfidence * 100)}% simulé
           </span>
         </div>
       </div>
@@ -147,8 +147,8 @@ export function TimelineList({ events }: { events: MatterAnalysisResult["timelin
           <p className="text-sm font-medium text-ink">{event.label}</p>
           <p className="text-xs text-ink-subtle">
             {event.stated
-              ? "Stated by a person — not confirmed against anything"
-              : "Read from a document's name or its filing date"}
+              ? "Déclarée par une personne — rien ne la confirme"
+              : "Lue dans le nom d’un document ou dans sa date de dépôt"}
           </p>
           <SourceList sources={[event.source]} />
         </li>
@@ -162,13 +162,13 @@ export function ReviewPanel({ review }: { review: AnalysisReviewResult }) {
 
   return (
     <Card
-      title="Independent review"
-      description="A second pass over the same matter, looking for what the first one overstated."
+      title="Relecture indépendante"
+      description="Un second passage sur le même dossier, qui cherche ce que le premier a affirmé de trop."
     >
       <div className="flex flex-wrap items-center gap-3">
         <Badge tone={REVIEW_TONE[review.status]}>{reviewStatusLabel(review.status)}</Badge>
         {/* Stored on the row, not asserted here. It has no other value. */}
-        <Badge tone="warning">Human review required</Badge>
+        <Badge tone="warning">À lire par une personne — obligatoire</Badge>
       </div>
 
       <p className="mt-3 text-sm text-ink-muted">{review.summary}</p>
@@ -193,8 +193,8 @@ export function ReviewPanel({ review }: { review: AnalysisReviewResult }) {
           if you can see what was looked at. */}
       <details className="mt-4" open={failed.length > 0}>
         <summary className="cursor-pointer text-sm font-medium text-brand">
-          What was checked ({review.checks.filter((check) => check.passed).length} of{" "}
-          {review.checks.length} passed)
+          Ce qui a été vérifié ({review.checks.filter((check) => check.passed).length} sur{" "}
+          {review.checks.length} réussis)
         </summary>
         <ul className="mt-2 divide-y divide-line">
           {review.checks.map((check) => (
@@ -204,7 +204,7 @@ export function ReviewPanel({ review }: { review: AnalysisReviewResult }) {
                 <p className="text-xs text-ink-subtle">{check.note}</p>
               </div>
               <Badge tone={check.passed ? "success" : "warning"}>
-                {check.passed ? "Passed" : "Not passed"}
+                {check.passed ? "Réussi" : "Non réussi"}
               </Badge>
             </li>
           ))}
@@ -248,19 +248,19 @@ export function AnalysisStatus({
 }) {
   if (status === "running") {
     return (
-      <Callout tone="brand" title="Running">
-        Started {formatDate(startedAt, timezone)}. Reload this page to see the result.
+      <Callout tone="brand" title="En cours">
+        Lancée le {formatDate(startedAt, timezone)}. Rechargez cette page pour voir le résultat.
       </Callout>
     );
   }
 
   if (status === "failed") {
     return (
-      <Callout tone="danger" title="This analysis did not finish" assertive>
-        <p>{errorMessage ?? "The run did not complete."}</p>
+      <Callout tone="danger" title="Cette analyse ne s’est pas terminée" assertive>
+        <p>{errorMessage ?? "L’exécution ne s’est pas terminée."}</p>
         <p className="mt-2">
-          Nothing partial was kept. A matter that shows no analysis and a matter whose analysis
-          failed are different things, and this is the second.
+          Rien de partiel n’a été conservé. Un dossier sans analyse et un dossier dont l’analyse a
+          échoué sont deux choses différentes, et ceci est la seconde.
         </p>
       </Callout>
     );
@@ -268,8 +268,8 @@ export function AnalysisStatus({
 
   return (
     <p className="text-sm text-ink-subtle">
-      Run {formatDate(startedAt, timezone)}
-      {completedAt ? `, finished ${formatDate(completedAt, timezone)}` : null}.
+      Lancée le {formatDate(startedAt, timezone)}
+      {completedAt ? `, terminée le ${formatDate(completedAt, timezone)}` : null}.
     </p>
   );
 }

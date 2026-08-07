@@ -203,8 +203,9 @@ describe("usage and cost", () => {
   });
 
   it("formats a simulated cost as currency", () => {
-    expect(usage.formatCost(19)).toBe("$0.19");
-    expect(usage.formatCost(1842)).toBe("$18.42");
+    // \u00a0 is the non-breaking space fr-FR puts before the currency symbol.
+    expect(usage.formatCost(19)).toBe("0,19\u00a0$US");
+    expect(usage.formatCost(1842)).toBe("18,42\u00a0$US");
   });
 });
 

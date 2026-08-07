@@ -124,9 +124,9 @@ describe("fields a column already holds", () => {
   it("leaves its section out of a form once it is the section's only field", () => {
     const sections = editableSectionsFor("employment_law").map((section) => section.section);
 
-    expect(sections).not.toContain("Representation");
+    expect(sections).not.toContain("Représentation");
     expect(sectionsFor("employment_law").map((section) => section.section)).toContain(
-      "Representation",
+      "Représentation",
     );
   });
 
@@ -200,7 +200,7 @@ describe("displaying values", () => {
 
   it("says Unknown rather than leaving a blank", () => {
     for (const missing of [undefined, null, ""]) {
-      expect(displayValue(status, missing)).toBe("Unknown");
+      expect(displayValue(status, missing)).toBe("Inconnu");
     }
   });
 
@@ -209,8 +209,8 @@ describe("displaying values", () => {
   });
 
   it("shows booleans as words", () => {
-    expect(displayValue(i94, true)).toBe("Yes");
-    expect(displayValue(i94, false)).toBe("No");
+    expect(displayValue(i94, true)).toBe("Oui");
+    expect(displayValue(i94, false)).toBe("Non");
   });
 });
 

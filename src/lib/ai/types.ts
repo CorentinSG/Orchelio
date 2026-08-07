@@ -305,17 +305,17 @@ export const CONFIDENCE_BY_SUPPORT: Record<SupportLevel, number> = {
 export function supportLabel(level: SupportLevel): string {
   switch (level) {
     case "document_agrees":
-      return "A document's name agrees";
+      return "Le nom d’un document concorde";
     case "document_on_file_checked":
-      return "Checked document of that kind on file";
+      return "Document vérifié de ce type au dossier";
     case "document_on_file":
-      return "Unchecked document of that kind on file";
+      return "Document non vérifié de ce type au dossier";
     case "stated_twice":
-      return "Stated twice, both by the client";
+      return "Déclaré deux fois, les deux par le client";
     case "stated_only":
-      return "Stated once, nothing on file";
+      return "Déclaré une fois, rien au dossier";
     case "disputed":
-      return "Sources disagree";
+      return "Les sources se contredisent";
   }
 }
 
@@ -329,41 +329,41 @@ export function supportLabel(level: SupportLevel): string {
 export function supportCaveat(level: SupportLevel): string {
   switch (level) {
     case "document_agrees":
-      return "The document's filename carries this value. Its contents have not been read.";
+      return "Le nom du fichier porte cette valeur. Son contenu n’a pas été lu.";
     case "document_on_file_checked":
     case "document_on_file":
-      return "A document of the kind this is usually read from is attached. Its contents have not been read.";
+      return "Un document du type dont cela se lit d’habitude est joint. Son contenu n’a pas été lu.";
     case "stated_twice":
-      return "Both the record and the intake say this. Both came from the client.";
+      return "La fiche et le questionnaire le disent tous deux. Les deux viennent du client.";
     case "stated_only":
-      return "Nothing on file supports or contradicts this.";
+      return "Rien au dossier ne l’appuie ni ne le contredit.";
     case "disputed":
-      return "More than one version is on the record. Orchelio does not choose between them.";
+      return "Plusieurs versions sont au dossier. Orchelio ne choisit pas entre elles.";
   }
 }
 
 export function reviewIssueLabel(category: ReviewIssueCategory): string {
   switch (category) {
     case "unsupported_statement":
-      return "Statement without a source";
+      return "Affirmation sans source";
     case "missed_contradiction":
-      return "Disagreement not flagged";
+      return "Désaccord non signalé";
     case "premature_legal_conclusion":
-      return "Reads as a legal conclusion";
+      return "Se lit comme une conclusion juridique";
     case "insufficient_information":
-      return "Not enough on file";
+      return "Pas assez au dossier";
     case "date_presented_as_confirmed":
-      return "Unconfirmed date shown as confirmed";
+      return "Date non confirmée présentée comme confirmée";
   }
 }
 
 export function reviewStatusLabel(status: ReviewStatus): string {
   switch (status) {
     case "approved_for_human_review":
-      return "Ready for a person to read";
+      return "Prêt à être lu par une personne";
     case "corrections_required":
-      return "Corrections required";
+      return "Corrections requises";
     case "insufficient_information":
-      return "More information required";
+      return "Informations supplémentaires requises";
   }
 }

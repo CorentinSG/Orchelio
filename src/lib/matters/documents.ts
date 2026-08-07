@@ -26,55 +26,55 @@ export type DocumentCategory = {
 };
 
 export const IMMIGRATION_CATEGORIES: readonly DocumentCategory[] = [
-  { key: "passport", label: "Passport", expectedFor: ["*"], whyItMatters: "Establishes identity, nationality and the validity dates the rest of the file is read against." },
-  { key: "i94", label: "I-94", expectedFor: ["*"], whyItMatters: "Records the date, place and class of the last admission — the dates a status calculation starts from." },
+  { key: "passport", label: "Passeport", expectedFor: ["*"], whyItMatters: "Établit l’identité, la nationalité et les dates de validité contre lesquelles tout le dossier se lit." },
+  { key: "i94", label: "I-94", expectedFor: ["*"], whyItMatters: "Consigne la date, le lieu et la catégorie de la dernière admission — les dates d’où part tout calcul de statut." },
   { key: "visa", label: "Visa" },
-  { key: "uscis_notice", label: "USCIS Notice" },
-  { key: "birth_certificate", label: "Birth Certificate", expectedFor: ["family_based", "naturalisation"], whyItMatters: "Evidences the family relationship a petition is built on." },
-  { key: "marriage_certificate", label: "Marriage Certificate", expectedFor: ["family_based"], whyItMatters: "Evidences the marriage a family-based petition relies on." },
-  { key: "employment_letter", label: "Employment Letter", expectedFor: ["employment_based"], whyItMatters: "Sets out the role, salary and terms the petitioning employer is offering." },
-  { key: "tax_record", label: "Tax Record", expectedFor: ["naturalisation"], whyItMatters: "Shows the filing history a naturalisation application is assessed against." },
-  { key: "prior_filing", label: "Prior Filing" },
-  { key: "police_certificate", label: "Police Certificate" },
-  { key: "other", label: "Other" },
+  { key: "uscis_notice", label: "Avis USCIS" },
+  { key: "birth_certificate", label: "Acte de naissance", expectedFor: ["family_based", "naturalisation"], whyItMatters: "Atteste le lien familial sur lequel une pétition repose." },
+  { key: "marriage_certificate", label: "Acte de mariage", expectedFor: ["family_based"], whyItMatters: "Atteste le mariage sur lequel repose une pétition familiale." },
+  { key: "employment_letter", label: "Attestation d’emploi", expectedFor: ["employment_based"], whyItMatters: "Décrit le poste, le salaire et les conditions que l’employeur pétitionnaire propose." },
+  { key: "tax_record", label: "Justificatif fiscal", expectedFor: ["naturalisation"], whyItMatters: "Montre l’historique de déclarations contre lequel une demande de naturalisation est examinée." },
+  { key: "prior_filing", label: "Dépôt antérieur" },
+  { key: "police_certificate", label: "Certificat de police" },
+  { key: "other", label: "Autre" },
 ] as const;
 
 export const EMPLOYMENT_CATEGORIES: readonly DocumentCategory[] = [
-  { key: "employment_agreement", label: "Employment Agreement", expectedFor: ["*"], whyItMatters: "Sets out the agreed terms — pay, hours, classification and any clauses that bind the parties." },
-  { key: "offer_letter", label: "Offer Letter" },
-  { key: "employee_handbook", label: "Employee Handbook" },
-  { key: "pay_stub", label: "Pay Stub", expectedFor: ["unpaid_wages", "wage_and_hour"], whyItMatters: "Shows what was actually paid, period by period." },
-  { key: "time_record", label: "Time Record", expectedFor: ["unpaid_wages", "wage_and_hour"], whyItMatters: "Shows the hours actually recorded, to compare against what was paid." },
-  { key: "payroll_record", label: "Payroll Record" },
+  { key: "employment_agreement", label: "Contrat de travail", expectedFor: ["*"], whyItMatters: "Fixe les conditions convenues — paie, heures, classification et toute clause qui lie les parties." },
+  { key: "offer_letter", label: "Lettre d’embauche" },
+  { key: "employee_handbook", label: "Règlement intérieur" },
+  { key: "pay_stub", label: "Bulletin de paie", expectedFor: ["unpaid_wages", "wage_and_hour"], whyItMatters: "Montre ce qui a réellement été payé, période par période." },
+  { key: "time_record", label: "Relevé d’heures", expectedFor: ["unpaid_wages", "wage_and_hour"], whyItMatters: "Montre les heures réellement consignées, à comparer avec ce qui a été payé." },
+  { key: "payroll_record", label: "Registre de paie" },
   {
     key: "performance_review",
-    label: "Performance Review",
+    label: "Évaluation",
     expectedFor: ["wrongful_termination", "retaliation", "workplace_discrimination"],
-    whyItMatters: "Records how the employer assessed the employee, and when.",
+    whyItMatters: "Consigne comment l’employeur a évalué le salarié, et quand.",
   },
-  { key: "disciplinary_notice", label: "Disciplinary Notice" },
+  { key: "disciplinary_notice", label: "Avertissement disciplinaire" },
   {
     key: "termination_letter",
-    label: "Termination Letter",
+    label: "Lettre de licenciement",
     expectedFor: ["wrongful_termination", "retaliation"],
-    whyItMatters: "Records the stated reason for the ending of employment, and its date.",
+    whyItMatters: "Consigne le motif déclaré de la fin d’emploi, et sa date.",
   },
-  { key: "severance_agreement", label: "Severance Agreement", expectedFor: ["severance_review"], whyItMatters: "Contains the release, the consideration and any deadline for acceptance." },
+  { key: "severance_agreement", label: "Accord d’indemnité de départ", expectedFor: ["severance_review"], whyItMatters: "Contient la renonciation, la contrepartie et tout délai d’acceptation." },
   {
     key: "internal_complaint",
-    label: "Internal Complaint",
+    label: "Plainte interne",
     expectedFor: ["retaliation", "workplace_discrimination", "workplace_harassment"],
-    whyItMatters: "Records what was raised with the employer, and on what date.",
+    whyItMatters: "Consigne ce qui a été signalé à l’employeur, et à quelle date.",
   },
-  { key: "hr_correspondence", label: "HR Correspondence" },
-  { key: "email", label: "Email" },
-  { key: "text_message", label: "Text Message" },
-  { key: "medical_or_accommodation_request", label: "Medical or Accommodation Request" },
-  { key: "leave_request", label: "Leave Request" },
-  { key: "agency_charge", label: "Agency Charge" },
-  { key: "right_to_sue", label: "Right-to-Sue Notice" },
-  { key: "witness_statement", label: "Witness Statement" },
-  { key: "other", label: "Other" },
+  { key: "hr_correspondence", label: "Échanges avec les RH" },
+  { key: "email", label: "Courriel" },
+  { key: "text_message", label: "SMS" },
+  { key: "medical_or_accommodation_request", label: "Demande médicale ou d’aménagement" },
+  { key: "leave_request", label: "Demande de congé" },
+  { key: "agency_charge", label: "Plainte à l’agence" },
+  { key: "right_to_sue", label: "Avis de droit d’agir" },
+  { key: "witness_statement", label: "Déclaration de témoin" },
+  { key: "other", label: "Autre" },
 ] as const;
 
 const BY_PRACTICE_AREA: Record<string, readonly DocumentCategory[]> = {
@@ -100,7 +100,7 @@ export const IDENTITY_CATEGORIES: readonly string[] = [
 export const WAGE_CATEGORIES: readonly string[] = ["pay_stub", "time_record", "payroll_record"];
 
 export function categoriesFor(practiceArea: string): readonly DocumentCategory[] {
-  return BY_PRACTICE_AREA[practiceArea] ?? [{ key: "other", label: "Other" }];
+  return BY_PRACTICE_AREA[practiceArea] ?? [{ key: "other", label: "Autre" }];
 }
 
 export function categoryLabel(practiceArea: string, key: string): string {

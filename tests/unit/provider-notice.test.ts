@@ -45,15 +45,17 @@ describe("every provider has something to say", () => {
 
 describe("the simulation", () => {
   it("still says the exact sentence the specification asks for", () => {
+    // The V1 pivot re-agreed this sentence in French (owner decision:
+    // French-first product). Same claim, same placement, same test.
     expect(providerNotice(envFor("mock")).costTitle).toBe(
-      "Simulated cost — No API charge was incurred.",
+      "Coût simulé — aucun frais d’API n’a été engagé.",
     );
   });
 
   it("does not describe a model that did not run", () => {
     const notice = providerNotice(envFor("mock"));
-    expect(notice.howItIsProduced).toMatch(/No model is involved/i);
-    expect(notice.word).toBe("simulated");
+    expect(notice.howItIsProduced).toMatch(/Aucun modèle n’intervient/i);
+    expect(notice.word).toBe("simulé");
   });
 });
 
@@ -68,17 +70,17 @@ describe("a model on this machine", () => {
 
   it("never calls a real run simulated", () => {
     const notice = providerNotice(envFor("local"));
-    expect(JSON.stringify(notice)).not.toMatch(/simulat/i);
+    expect(JSON.stringify(notice)).not.toMatch(/simul/i);
   });
 
   it("says what the model is allowed to decide, which is the wording only", () => {
     const notice = providerNotice(envFor("local"));
-    expect(notice.howItIsProduced).toMatch(/not asked what the facts are/i);
-    expect(notice.howItIsProduced).toMatch(/set aside/i);
+    expect(notice.howItIsProduced).toMatch(/n’est pas interrogé sur les faits/i);
+    expect(notice.howItIsProduced).toMatch(/écarté/i);
   });
 
   it("does not pretend to know what the machine costs to run", () => {
-    expect(providerNotice(envFor("local")).whatItCannotTell).toMatch(/electricity/i);
+    expect(providerNotice(envFor("local")).whatItCannotTell).toMatch(/électricité/i);
   });
 });
 
@@ -86,32 +88,34 @@ describe("the hosted Mistral model", () => {
   it("says where the material goes, and exactly what the material is", () => {
     const notice = providerNotice(envFor("mistral"));
     expect(notice.whereItGoes).toContain("api.mistral.ai");
-    expect(notice.whereItGoes).toMatch(/European Union/);
-    expect(notice.whereItGoes).toMatch(/no name, no field value, no date, no filename/i);
+    expect(notice.whereItGoes).toMatch(/Union européenne/);
+    expect(notice.whereItGoes).toMatch(
+      /Aucun nom, aucune valeur de champ, aucune date, aucun nom de fichier/i,
+    );
   });
 
   it("never calls a real run simulated", () => {
     const notice = providerNotice(envFor("mistral"));
-    expect(JSON.stringify(notice)).not.toMatch(/\bsimulated\b/i);
+    expect(JSON.stringify(notice)).not.toMatch(/simul/i);
   });
 
   it("calls its cost an estimate, never an invoice", () => {
     const notice = providerNotice(envFor("mistral"));
-    expect(notice.costLabel).toMatch(/estimat/i);
-    expect(notice.whatTheFiguresAre).toMatch(/estimate/i);
-    expect(notice.whatItCannotTell).toMatch(/invoice/i);
+    expect(notice.costLabel).toMatch(/estimé/i);
+    expect(notice.whatTheFiguresAre).toMatch(/estimation/i);
+    expect(notice.whatItCannotTell).toMatch(/factur/i);
   });
 
   it("says what the model is allowed to decide, which is the wording only", () => {
     const notice = providerNotice(envFor("mistral"));
-    expect(notice.howItIsProduced).toMatch(/not asked what the facts are/i);
-    expect(notice.howItIsProduced).toMatch(/set aside/i);
+    expect(notice.howItIsProduced).toMatch(/n’est pas interrogé sur les faits/i);
+    expect(notice.howItIsProduced).toMatch(/écarté/i);
   });
 
   it("never claims nothing leaves the machine — something now does", () => {
     const notice = providerNotice(envFor("mistral"));
-    expect(JSON.stringify(notice)).not.toMatch(/no request leaves/i);
-    expect(JSON.stringify(notice)).not.toMatch(/nothing leaves/i);
+    expect(JSON.stringify(notice)).not.toMatch(/ne quitte/i);
+    expect(JSON.stringify(notice)).not.toMatch(/rien ne (part|sort)/i);
   });
 });
 
@@ -120,13 +124,13 @@ describe("what a stored run is called", () => {
     // A firm that ran ten analyses under the simulation and then installed a
     // model has both kinds on one page. Labelling them all by the current
     // provider would relabel history.
-    expect(runLabel("mock", false)).toBe("simulated");
-    expect(runLabel("local", false)).toBe("on this machine");
+    expect(runLabel("mock", false)).toBe("simulé");
+    expect(runLabel("local", false)).toBe("sur cette machine");
   });
 
   it("calls a charge a charge, whatever produced it", () => {
     for (const provider of AI_PROVIDERS) {
-      expect(runLabel(provider, true), provider).toBe("billed");
+      expect(runLabel(provider, true), provider).toBe("facturé");
     }
   });
 });
