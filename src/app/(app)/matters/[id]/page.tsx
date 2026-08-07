@@ -207,7 +207,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <Link href="/matters" className="text-sm text-brand hover:underline">
-          ← All matters
+          ← Tous les dossiers
         </Link>
         <p className="mt-2 font-mono text-sm text-ink-subtle">{matter.reference}</p>
         <h1 className="mt-0.5 text-2xl font-semibold tracking-tight text-ink">{matter.title}</h1>
@@ -215,26 +215,26 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           <StatusBadge status={matter.status} />
           <Badge tone="neutral">{matter.matterType.label}</Badge>
           {matter.representationSide ? (
-            <Badge tone="brand">Representing the {matter.representationSide}</Badge>
+            <Badge tone="brand">{matter.representationSide === "employer" ? "Représente l’employeur" : "Représente le salarié"}</Badge>
           ) : null}
-          <Badge tone="warning">Not verified</Badge>
+          <Badge tone="warning">Non vérifié</Badge>
         </div>
       </header>
 
       {justOpened ? (
-        <Callout tone="success" title="The matter is open">
+        <Callout tone="success" title="Le dossier est ouvert">
           <p>
-            {`${matter.reference} exists, ${
-              filesRecorded === 1 ? "1 file is listed on it" : `${filesRecorded} files are listed on it`
+            {`${matter.reference} existe, ${
+              filesRecorded === 1 ? "1 fichier y est répertorié" : `${filesRecorded} fichiers y sont répertoriés`
             }${
               Number.isFinite(filesRefused) && filesRefused > 0
-                ? `, and ${filesRefused} ${filesRefused === 1 ? "was" : "were"} not a kind Orchelio accepts`
+                ? `, et ${filesRefused} ${filesRefused === 1 ? "n’était pas" : "n’étaient pas"} d’un type qu’Orchelio accepte`
                 : ""
             }.`}
           </p>
           <p className="mt-2">
             {
-              "Nothing has been decided. If an analysis ran, it is a draft nobody has stood behind until you read it."
+              "Rien n’a été décidé. Si une analyse a été lancée, c’est un brouillon derrière lequel personne ne s’est rangé tant que vous ne l’avez pas lu."
             }
           </p>
         </Callout>
@@ -264,55 +264,55 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
         <div className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <Card
-              title="Matter"
-              description={`Recorded by the firm. Nothing here is verified. ${timezoneNotice(timezone)}`}
+              title="Dossier"
+              description={`Enregistré par le cabinet. Rien ici n’est vérifié. ${timezoneNotice(timezone)}`}
             >
               <dl>
-                <DataRow label="Client" value={matter.clientProfile?.displayName ?? "Unknown"} />
+                <DataRow label="Client" value={matter.clientProfile?.displayName ?? "Inconnu"} />
                 <DataRow label="Type" value={matter.matterType.label} />
                 <DataRow
-                  label="Responsible attorney"
-                  value={matter.responsibleAttorney?.name ?? "Unassigned"}
+                  label="Avocat responsable"
+                  value={matter.responsibleAttorney?.name ?? "Non attribué"}
                 />
-                <DataRow label="Opened" value={formatDate(matter.openedAt, timezone)} />
+                <DataRow label="Ouvert le" value={formatDate(matter.openedAt, timezone)} />
                 <DataRow
-                  label="Next date"
+                  label="Prochaine date"
                   value={<UnconfirmedDate value={matter.nextDeadlineAt} now={now} timezone={timezone} />}
                 />
-                <DataRow label="Last activity" value={relativeDays(matter.lastActivityAt, now, timezone)} />
+                <DataRow label="Dernière activité" value={relativeDays(matter.lastActivityAt, now, timezone)} />
                 <DataRow label="Documents" value={matter.documents.length} />
-                <DataRow label="Open tasks" value={openTasks.length} />
+                <DataRow label="Tâches ouvertes" value={openTasks.length} />
               </dl>
             </Card>
 
             <Card
-              title="Expected documents not yet received"
-              description="A checklist, not a judgement."
+              title="Documents attendus non reçus"
+              description="Une liste de contrôle, pas un jugement."
             >
               {missing.length === 0 ? (
                 <p className="text-sm text-ink-muted">
-                  Every document expected for this type of matter is on file.
+                  Chaque document attendu pour ce type de dossier est au dossier.
                 </p>
               ) : (
                 <ul className="space-y-2">
                   {missing.map((category) => (
                     <li key={category.key} className="flex items-center justify-between gap-3">
                       <span className="text-sm text-ink">{category.label}</span>
-                      <Badge tone="warning">Not received</Badge>
+                      <Badge tone="warning">Non reçu</Badge>
                     </li>
                   ))}
                 </ul>
               )}
               <p className="mt-4 text-sm text-ink-subtle">
-                This compares what is on file against what this type of matter usually needs.{" "}
+                Ceci compare ce qui est au dossier avec ce que ce type de dossier requiert d’habitude.{" "}
                 <Link
                   href={`/matters/${matter.id}?tab=analysis`}
                   className="font-medium text-brand underline underline-offset-4"
                 >
-                  The analysis
+                  L’analyse
                 </Link>{" "}
-                says why each one matters — and, like everything else it produces, is read by a
-                person before it is used.
+                dit pourquoi chacun compte — et, comme tout ce qu’elle produit, elle est lue par une
+                personne avant d’être utilisée.
               </p>
             </Card>
           </div>
@@ -338,25 +338,25 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
           title="Questionnaire client"
           description={
             matter.intakeResponses[0]
-              ? `Submitted ${formatDate(matter.intakeResponses[0].submittedAt, timezone)}.`
-              : "No intake has been recorded for this matter."
+              ? `Transmis le ${formatDate(matter.intakeResponses[0].submittedAt, timezone)}.`
+              : "Aucun questionnaire n’a été enregistré pour ce dossier."
           }
         >
           {Object.keys(intake).length === 0 ? (
-            <p className="text-sm text-ink-muted">Nothing recorded yet.</p>
+            <p className="text-sm text-ink-muted">Rien d’enregistré pour l’instant.</p>
           ) : (
             <>
-              <Callout tone="warning" title="What the client said">
-                These are the client&apos;s own words as recorded at intake. They are not
-                verified, and where they disagree with a document the disagreement is the point —
-                it is not resolved here.
+              <Callout tone="warning" title="Ce que le client a déclaré">
+                Ce sont les mots du client, tels qu’enregistrés au questionnaire. Ils ne sont pas
+                vérifiés, et là où ils contredisent un document, le désaccord est justement le
+                point — il n’est pas tranché ici.
               </Callout>
               <dl className="mt-4">
                 {Object.entries(intake).map(([key, value]) => (
                   <DataRow
                     key={key}
                     label={key.split("_").join(" ")}
-                    value={String(value ?? "Unknown")}
+                    value={String(value ?? "Inconnu")}
                   />
                 ))}
               </dl>
@@ -368,13 +368,13 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "documents" ? (
         <div className="space-y-6">
           {uploadError ? (
-            <Callout tone="danger" title="That document was not added" assertive>
+            <Callout tone="danger" title="Ce document n’a pas été ajouté" assertive>
               {uploadError}
             </Callout>
           ) : null}
           {justAdded && !uploadError ? (
-            <Callout tone="success" title="Document recorded">
-              Its name, type and size were recorded. The file itself stayed on your computer.
+            <Callout tone="success" title="Document enregistré">
+              Son nom, son type et sa taille ont été enregistrés. Le fichier lui-même est resté sur votre ordinateur.
             </Callout>
           ) : null}
 
@@ -384,14 +384,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
               categories={categoriesFor(matter.practiceAreaKey)}
             />
           ) : (
-            <Callout tone="neutral" title="Read only">
-              Your role does not allow adding documents to a matter.
+            <Callout tone="neutral" title="Lecture seule">
+              Votre rôle ne permet pas d’ajouter des documents à un dossier.
             </Callout>
           )}
 
           <Card title={`Documents (${matter.documents.length})`}>
             {matter.documents.length === 0 ? (
-              <p className="text-sm text-ink-muted">No document has been added yet.</p>
+              <p className="text-sm text-ink-muted">Aucun document n’a encore été ajouté.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {matter.documents.map((document) => (
@@ -400,14 +400,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                       <p className="font-medium text-ink">{document.filename}</p>
                       <p className="text-sm text-ink-muted">
                         {categoryLabel(matter.practiceAreaKey, document.category)} ·{" "}
-                        {fileSize(document.sizeBytes)} · added {formatDate(document.receivedAt, timezone)}
+                        {fileSize(document.sizeBytes)} · ajouté le {formatDate(document.receivedAt, timezone)}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       {document.verified ? (
-                        <Badge tone="success">Checked by a person</Badge>
+                        <Badge tone="success">Vérifié par une personne</Badge>
                       ) : (
-                        <Badge tone="warning">Not verified</Badge>
+                        <Badge tone="warning">Non vérifié</Badge>
                       )}
                       {canClassify && !document.verified ? (
                         <form method="post" action="/api/documents/verify">
@@ -417,7 +417,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                             type="submit"
                             className="rounded-md border border-line px-3 py-1 text-sm font-medium text-ink hover:bg-surface-muted"
                           >
-                            Mark as checked
+                            Marquer comme vérifié
                           </button>
                         </form>
                       ) : null}
@@ -427,8 +427,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
               </ul>
             )}
             <p className="mt-4 text-sm text-ink-subtle">
-              Uploads are simulated: only the file&apos;s name, type and size are recorded. No
-              content is stored and nothing is read — there is no OCR in this build.
+              Les dépôts sont simulés : seuls le nom, le type et la taille du fichier sont
+              enregistrés. Aucun contenu n’est stocké ni lu — il n’y a pas d’OCR dans cette version.
             </p>
           </Card>
         </div>
@@ -437,7 +437,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "tasks" ? (
         <Card title={`Tâches (${openTasks.length} ouvertes)`}>
           {matter.tasks.length === 0 ? (
-            <p className="text-sm text-ink-muted">No task on this matter.</p>
+            <p className="text-sm text-ink-muted">Aucune tâche sur ce dossier.</p>
           ) : (
             <ul className="divide-y divide-line">
               {matter.tasks.map((task) => (
@@ -464,36 +464,37 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "timeline" ? (
         <Card
           title="Chronologie"
-          description="Every date on this matter, in order, with where each one came from."
+          description="Chaque date de ce dossier, dans l’ordre, avec la provenance de chacune."
         >
           {!canSeeResults ? (
-            <Callout tone="neutral" title="Not available to your role">
-              Your role does not include viewing analysis results.
+            <Callout tone="neutral" title="Indisponible pour votre rôle">
+              Votre rôle n’inclut pas la consultation des résultats d’analyse.
             </Callout>
           ) : !result ? (
-            <Callout tone="neutral" title="No timeline yet">
+            <Callout tone="neutral" title="Pas encore de chronologie">
               <p>
-                The timeline is built when an analysis runs. Nothing has been run on this matter
-                yet.
+                La chronologie se construit quand une analyse est lancée. Aucune ne l’a encore été
+                sur ce dossier.
               </p>
               <p className="mt-2">
                 <Link
                   href={`/matters/${matter.id}?tab=analysis`}
                   className="font-medium text-brand underline underline-offset-4"
                 >
-                  Go to AI Analysis
+                  Aller à l’analyse
                 </Link>
               </p>
             </Callout>
           ) : result.timeline.length === 0 ? (
             <p className="text-sm text-ink-muted">
-              No date on this matter could be read from the record or from a document&apos;s name.
+              Aucune date de ce dossier n’a pu être lue depuis la fiche ou depuis le nom d’un document.
             </p>
           ) : (
             <>
-              <Callout tone="warning" title="No date here is confirmed">
-                A date somebody remembered and a date printed on a notice are different evidence.
-                Each entry says which it is, and Orchelio confirms neither.
+              <Callout tone="warning" title="Aucune date ici n’est confirmée">
+                Une date dont quelqu’un se souvient et une date imprimée sur un avis sont des
+                preuves différentes. Chaque entrée dit laquelle elle est, et Orchelio ne confirme
+                ni l’une ni l’autre.
               </Callout>
               <div className="mt-5">
                 <TimelineList events={result.timeline} />
@@ -506,25 +507,25 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "analysis" ? (
         <div className="space-y-6">
           {analysisProblem === "no_features" ? (
-            <Callout tone="warning" title="No AI features are switched on" assertive>
+            <Callout tone="warning" title="Aucune fonction d’IA n’est activée" assertive>
               <p>
-                This firm has not enabled any Claude features, so there is nothing for an analysis
-                to produce. Running one anyway would fill the page with empty sections.
+                Ce cabinet n’a activé aucune fonction de Claude, donc une analyse n’aurait rien à
+                produire. En lancer une remplirait la page de sections vides.
               </p>
               <p className="mt-2">
                 <Link
                   href="/onboarding/5"
                   className="font-medium text-brand underline underline-offset-4"
                 >
-                  Choose the features this firm wants
+                  Choisir les fonctions que ce cabinet souhaite
                 </Link>
               </p>
             </Callout>
           ) : null}
 
           {!canSeeResults ? (
-            <Callout tone="neutral" title="Not available to your role">
-              Your role does not include viewing analysis results.
+            <Callout tone="neutral" title="Indisponible pour votre rôle">
+              Votre rôle n’inclut pas la consultation des résultats d’analyse.
             </Callout>
           ) : (
             <>
@@ -543,7 +544,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     />
                   ) : (
                     <p className="text-sm text-ink-muted">
-                      No analysis has been run on this matter.
+                      Aucune analyse n’a été lancée sur ce dossier.
                     </p>
                   )}
 
@@ -554,7 +555,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                         type="submit"
                         className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
                       >
-                        {analysis ? "Run again" : "Run analysis"}
+                        {analysis ? "Relancer l’analyse" : "Lancer l’analyse"}
                       </button>
                     </form>
                   ) : null}
@@ -562,9 +563,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
                 {enabledAiFeatures.length > 0 ? (
                   <p className="mt-4 text-sm text-ink-subtle">
-                    This firm asked Claude for:{" "}
-                    {enabledAiFeatures.map(aiFeatureLabel).join(", ")}. An analysis produces only
-                    those.
+                    Ce cabinet a demandé à Claude : {enabledAiFeatures.map(aiFeatureLabel).join(", ")}.
+                    Une analyse ne produit que cela.
                   </p>
                 ) : null}
 
@@ -576,13 +576,12 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     and the honest answer is that nobody asked for it. */}
                 {unusedAiFeatures.length > 0 ? (
                   <p className="mt-2 text-sm text-ink-subtle">
-                    Not asked for, and so not produced:{" "}
-                    {unusedAiFeatures.map(aiFeatureLabel).join(", ")}.{" "}
+                    Non demandé, donc non produit : {unusedAiFeatures.map(aiFeatureLabel).join(", ")}.{" "}
                     <Link
                       href="/onboarding/5"
                       className="font-medium text-brand underline underline-offset-4"
                     >
-                      Change what this firm asks for
+                      Changer ce que ce cabinet demande
                     </Link>
                   </p>
                 ) : null}
@@ -593,17 +592,17 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                   {/* Whether anybody has taken responsibility for this, said
                       before the analysis rather than after it. */}
                   {pendingForAnalysis ? (
-                    <Callout tone="warning" title="Nobody has approved this yet">
+                    <Callout tone="warning" title="Personne n’a encore validé ceci">
                       <p>
-                        A decision is waiting. Until somebody takes responsibility for this
-                        analysis, it is a draft nobody has stood behind.
+                        Une décision attend. Tant que personne ne prend la responsabilité de cette
+                        analyse, c’est un brouillon derrière lequel personne ne s’est rangé.
                       </p>
                       <p className="mt-2">
                         <Link
                           href={`/matters/${matter.id}?tab=approvals`}
                           className="font-medium text-brand underline underline-offset-4"
                         >
-                          Go to the decision
+                          Aller à la décision
                         </Link>
                       </p>
                     </Callout>
@@ -615,29 +614,29 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                           ? "danger"
                           : "success"
                       }
-                      title={`${decisionLabel(decidedForAnalysis.status)} by ${decidedForAnalysis.decidedBy?.name ?? "a person"}`}
+                      title={`${decisionLabel(decidedForAnalysis.status)} par ${decidedForAnalysis.decidedBy?.name ?? "une personne"}`}
                     >
                       {decidedForAnalysis.decisionNote ??
-                        "Approved without a note — a plain approval needs none."}
+                        "Validé sans note — une validation simple n’en demande pas."}
                     </Callout>
                   ) : null}
 
                   <AnalysisWarnings warnings={result.warnings} />
 
-                  <Card title="Summary" description="Factual. It reaches no conclusion.">
+                  <Card title="Résumé" description="Factuel. Il ne conclut rien.">
                     <p className="text-ink">{result.summary}</p>
                     {result.sufficiency === "more_information_required" ? (
-                      <Callout tone="warning" title="More information required">
-                        Too little is on file for this to describe the matter rather than the gaps
-                        in it. That is a statement about the file, not about the client.
+                      <Callout tone="warning" title="Informations supplémentaires requises">
+                        Il y a trop peu au dossier pour décrire l’affaire plutôt que ses manques.
+                        C’est un constat sur le dossier, pas sur le client.
                       </Callout>
                     ) : null}
                   </Card>
 
                   {result.contradictions.length > 0 ? (
                     <Card
-                      title={`Disagreements on the record (${result.contradictions.length})`}
-                      description="Both accounts are shown. Orchelio does not choose between them."
+                      title={`Désaccords au dossier (${result.contradictions.length})`}
+                      description="Les deux versions sont montrées. Orchelio ne choisit pas entre elles."
                     >
                       <div className="space-y-4">
                         {result.contradictions.map((contradiction) => (
@@ -649,8 +648,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
                   {result.keyFacts.length > 0 ? (
                     <Card
-                      title={`Key facts (${result.keyFacts.length})`}
-                      description="Each with where it came from and how well it is supported."
+                      title={`Faits clés (${result.keyFacts.length})`}
+                      description="Chacun avec sa provenance et son niveau d’appui."
                     >
                       <ul className="divide-y divide-line">
                         {result.keyFacts.map((fact) => (
@@ -662,8 +661,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
                   {result.missingDocuments.length > 0 ? (
                     <Card
-                      title={`Documents not on file (${result.missingDocuments.length})`}
-                      description="What this kind of matter usually holds, and why."
+                      title={`Documents absents du dossier (${result.missingDocuments.length})`}
+                      description="Ce que ce type de dossier contient d’habitude, et pourquoi."
                     >
                       <ul className="divide-y divide-line">
                         {result.missingDocuments.map((document) => (
@@ -679,14 +678,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                   <div className="grid gap-6 lg:grid-cols-2">
                     {result.attorneyQuestions.length > 0 ? (
                       <Card
-                        title="For the attorney"
-                        description="Judgements Orchelio must not make."
+                        title="Pour l’avocat"
+                        description="Les jugements qu’Orchelio ne doit pas porter."
                       >
                         <QuestionList questions={result.attorneyQuestions} />
                       </Card>
                     ) : null}
                     {result.clientQuestions.length > 0 ? (
-                      <Card title="To ask the client" description="Draft questions, not a script.">
+                      <Card title="À demander au client" description="Des questions rédigées, pas un script.">
                         <QuestionList questions={result.clientQuestions} />
                       </Card>
                     ) : null}
@@ -696,8 +695,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
                   {result.featuresQuiet.length > 0 ? (
                     <Card
-                      title="Features that found nothing"
-                      description="Enabled by this firm, and silent on this matter."
+                      title="Fonctions restées silencieuses"
+                      description="Activées par ce cabinet, sans rien trouver sur ce dossier."
                     >
                       <ul className="divide-y divide-line">
                         {result.featuresQuiet.map((quiet) => (
@@ -710,8 +709,8 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                         ))}
                       </ul>
                       <p className="mt-4 text-sm text-ink-subtle">
-                        Listed rather than hidden: &quot;nothing disagreed&quot; and &quot;it never
-                        ran&quot; are different answers.
+                        Listées plutôt que cachées : « rien ne se contredit » et « elle n’a jamais
+                        tourné » sont deux réponses différentes.
                       </p>
                     </Card>
                   ) : null}
@@ -724,28 +723,28 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
       {tab === "communications" ? (
         <div className="space-y-6">
-          <Callout tone="warning" title="Orchelio sends nothing">
-            A draft is text somebody copies out and sends themselves, from their own system, under
-            their own name. There is no recipient field, no &quot;sent&quot; status and no
-            transport anywhere in this product — and approving a draft does not add one.
+          <Callout tone="warning" title="Orchelio n’envoie rien">
+            Un brouillon est un texte que quelqu’un copie et envoie lui-même, depuis son propre
+            système, sous son propre nom. Il n’y a ni champ destinataire, ni statut « envoyé »,
+            ni transport nulle part dans ce produit — et valider un brouillon n’en ajoute pas.
           </Callout>
 
           {communicationProblem ? (
-            <Callout tone="danger" title="That draft was not prepared" assertive>
+            <Callout tone="danger" title="Ce brouillon n’a pas été préparé" assertive>
               {communicationProblem}
             </Callout>
           ) : null}
           {query["prepared"] === "1" ? (
-            <Callout tone="success" title="Draft prepared, and waiting for a decision">
-              Nobody may use these words until an attorney has read them and approved them. That
-              rule cannot be switched off.
+            <Callout tone="success" title="Brouillon préparé, en attente d’une décision">
+              Personne ne peut utiliser ces mots tant qu’un avocat ne les a pas lus et validés.
+              Cette règle ne peut pas être désactivée.
             </Callout>
           ) : null}
 
           {canDraft ? (
             <Card
-              title="Prepare a draft"
-              description="Fictional recipients only. This is a demonstration environment."
+              title="Préparer un brouillon"
+              description="Destinataires fictifs uniquement. Ceci est un environnement de démonstration."
             >
               <form method="post" action="/api/communications" className="space-y-4">
                 <input type="hidden" name="matterId" value={matter.id} />
@@ -753,21 +752,21 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label htmlFor="channel" className="block text-sm font-medium text-ink">
-                      Kind
+                      Nature
                     </label>
                     <select
                       id="channel"
                       name="channel"
                       className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
                     >
-                      <option value="email">Email</option>
-                      <option value="letter">Letter</option>
-                      <option value="note">Internal note</option>
+                      <option value="email">Courriel</option>
+                      <option value="letter">Courrier</option>
+                      <option value="note">Note interne</option>
                     </select>
                   </div>
                   <div className="sm:col-span-2">
                     <label htmlFor="subject" className="block text-sm font-medium text-ink">
-                      Subject
+                      Objet
                     </label>
                     <input
                       id="subject"
@@ -780,14 +779,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
                 <div>
                   <label htmlFor="body" className="block text-sm font-medium text-ink">
-                    Text
+                    Texte
                   </label>
                   {result && result.clientQuestions.length > 0 ? (
                     <p className="text-xs text-ink-subtle">
-                      The analysis prepared {result.clientQuestions.length} question
-                      {result.clientQuestions.length === 1 ? "" : "s"} for the client. They are
-                      below to copy from — edit them into your own words rather than sending them
-                      as they are.
+                      L’analyse a préparé {result.clientQuestions.length} question
+                      {result.clientQuestions.length === 1 ? "" : "s"} pour le client. Elles sont
+                      ci-dessous pour vous en inspirer — réécrivez-les dans vos propres mots plutôt
+                      que de les envoyer telles quelles.
                     </p>
                   ) : null}
                   <textarea
@@ -810,19 +809,19 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                   type="submit"
                   className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
                 >
-                  Prepare draft
+                  Préparer le brouillon
                 </button>
               </form>
             </Card>
           ) : (
-            <Callout tone="neutral" title="Read only">
-              Your role does not allow preparing a draft.
+            <Callout tone="neutral" title="Lecture seule">
+              Votre rôle ne permet pas de préparer un brouillon.
             </Callout>
           )}
 
-          <Card title={`Drafts (${drafts.length})`}>
+          <Card title={`Brouillons (${drafts.length})`}>
             {drafts.length === 0 ? (
-              <p className="text-sm text-ink-muted">No draft has been prepared on this matter.</p>
+              <p className="text-sm text-ink-muted">Aucun brouillon n’a été préparé sur ce dossier.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {drafts.map((draft) => (
@@ -831,14 +830,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                       <div className="min-w-0">
                         <p className="font-medium text-ink">{draft.subject}</p>
                         <p className="text-sm text-ink-muted">
-                          {draft.channel} · prepared by {draft.createdBy?.name ?? "Orchelio"} on{" "}
+                          {draft.channel} · préparé par {draft.createdBy?.name ?? "Orchelio"} le{" "}
                           {formatDate(draft.createdAt, timezone)}
                         </p>
                       </div>
                       <Badge tone={draft.status === "approved_for_use" ? "success" : "warning"}>
                         {draft.status === "approved_for_use"
-                          ? "Approved for use"
-                          : "Not approved — do not use"}
+                          ? "Validé pour usage"
+                          : "Non validé — ne pas utiliser"}
                       </Badge>
                     </div>
                     <pre className="mt-2 whitespace-pre-wrap rounded-md border border-line bg-surface-muted px-3 py-2 font-sans text-sm text-ink">
@@ -855,14 +854,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "approvals" ? (
         <div className="space-y-6">
           {raisedId ? (
-            <Callout tone="success" title="Raised, and waiting for a person">
-              Nothing has happened yet. It will not, until somebody decides.
+            <Callout tone="success" title="Demandé, en attente d’une personne">
+              Rien ne s’est encore produit. Rien ne se produira tant que personne n’a décidé.
             </Callout>
           ) : null}
 
           <Card
-            title="What can be asked for on this matter"
-            description="Each goes to a person. Two of them cannot be switched off by any firm."
+            title="Ce qui peut être demandé sur ce dossier"
+            description="Chaque demande va à une personne. Deux d’entre elles ne peuvent être désactivées par aucun cabinet."
           >
             <div className="flex flex-wrap gap-3">
               {can(actor, "matter.close") && !matter.closedAt ? (
@@ -873,7 +872,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     type="submit"
                     className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
                   >
-                    Ask to close this matter
+                    Demander la clôture de ce dossier
                   </button>
                 </form>
               ) : null}
@@ -886,7 +885,7 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
                     type="submit"
                     className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
                   >
-                    Ask a person to confirm {formatDate(matter.nextDeadlineAt, timezone)}
+                    Demander à une personne de confirmer le {formatDate(matter.nextDeadlineAt, timezone)}
                   </button>
                 </form>
               ) : null}
@@ -894,28 +893,28 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
 
             {matter.closedAt ? (
               <p className="mt-3 text-sm text-ink-muted">
-                This matter was closed on {formatDate(matter.closedAt, timezone)}.
+                Ce dossier a été clos le {formatDate(matter.closedAt, timezone)}.
               </p>
             ) : null}
             {!matter.nextDeadlineAt ? (
               <p className="mt-3 text-sm text-ink-subtle">
-                No date is recorded on this matter, so there is nothing to confirm. Orchelio never
-                calculates one.
+                Aucune date n’est enregistrée sur ce dossier, il n’y a donc rien à confirmer.
+                Orchelio n’en calcule jamais.
               </p>
             ) : null}
           </Card>
 
           <Card
-            title={`Approvals on this matter (${approvals.total})`}
+            title={`Validations sur ce dossier (${approvals.total})`}
             description={
               approvals.total > approvals.shown.length
-                ? `Showing the ${approvals.shown.length} most recent. The full queue is on the approvals screen.`
+                ? `Les ${approvals.shown.length} plus récentes. La file complète est sur l’écran des validations.`
                 : undefined
             }
           >
             {approvals.shown.length === 0 ? (
-              <Callout tone="neutral" title="Nothing has been asked for">
-                No decision has been requested on this matter.
+              <Callout tone="neutral" title="Rien n’a été demandé">
+                Aucune décision n’a été sollicitée sur ce dossier.
               </Callout>
             ) : (
               <ul className="space-y-4">
@@ -940,14 +939,14 @@ export default async function MatterPage({ params, searchParams }: PageProps) {
       {tab === "activity" ? (
         <Card
           title="Activité"
-          description="Everything recorded about this matter, most recent first."
+          description="Tout ce qui a été enregistré sur ce dossier, du plus récent au plus ancien."
         >
           {!can(actor, "firm.audit.view") ? (
-            <Callout tone="neutral" title="Not available to your role">
-              The activity log is held by firm administrators.
+            <Callout tone="neutral" title="Indisponible pour votre rôle">
+              Le journal d’activité est réservé aux administrateurs du cabinet.
             </Callout>
           ) : matterActivity.length === 0 ? (
-            <p className="text-sm text-ink-muted">Nothing recorded about this matter yet.</p>
+            <p className="text-sm text-ink-muted">Rien d’enregistré sur ce dossier pour l’instant.</p>
           ) : (
             <ul className="divide-y divide-line">
               {matterActivity.map((event) => (

@@ -57,7 +57,7 @@ export function UploadPanel({
     if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
       setChosen(null);
       setProblem(
-        `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB. The limit is ${MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} MB.`,
+        `Ce fichier fait ${(file.size / 1024 / 1024).toFixed(1)} Mo. La limite est de ${MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} Mo.`,
       );
       return;
     }
@@ -68,8 +68,8 @@ export function UploadPanel({
 
   return (
     <Card
-      title="Add a document"
-      description="Simulated: the file stays on your computer. Only its name, type and size are recorded."
+      title="Ajouter un document"
+      description="Simulé : le fichier est resté sur votre ordinateur. Seuls son nom, son type et sa taille sont enregistrés."
     >
       <form method="post" action="/api/documents" className="space-y-4">
         <input type="hidden" name="matterId" value={matterId} />
@@ -93,19 +93,19 @@ export function UploadPanel({
           }`}
         >
           <p className="text-sm text-ink">
-            Drag a file here, or{" "}
+            Glissez un fichier ici, ou{" "}
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               className="font-medium text-brand underline underline-offset-4"
             >
-              choose one
+              choisissez-en un
             </button>
             .
           </p>
           <p className="mt-1 text-xs text-ink-subtle">
             {ALLOWED_DOCUMENT_EXTENSIONS.join(", ")} · up to{" "}
-            {MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} MB · fictional documents only
+            {MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} Mo · documents fictifs uniquement
           </p>
 
           <input
@@ -113,7 +113,7 @@ export function UploadPanel({
             type="file"
             accept={ACCEPT}
             className="sr-only"
-            aria-label="Choose a document"
+            aria-label="Choisir un document"
             onChange={(event) => accept(event.target.files?.[0])}
           />
 
@@ -136,7 +136,7 @@ export function UploadPanel({
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-56 flex-1">
             <label htmlFor="category" className="block text-sm font-medium text-ink">
-              What kind of document is it?
+              De quel type de document s’agit-il ?
             </label>
             <select
               id="category"

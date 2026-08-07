@@ -31,7 +31,7 @@ export function FirmSwitcher({
   return (
     <section aria-labelledby="firm-switcher" className="border-b border-line px-2 py-3">
       <h2 id="firm-switcher" className="px-2 text-xs font-semibold uppercase tracking-wide text-ink-subtle">
-        Your firms
+        Vos cabinets
       </h2>
       <ul className="mt-2 space-y-1">
         {firms.map((firm) => {
@@ -55,7 +55,7 @@ export function FirmSwitcher({
                   </span>
                   {isActive ? (
                     <span className="mt-0.5 block text-xs font-medium text-brand">
-                      Currently open
+                      Actuellement ouvert
                     </span>
                   ) : null}
                 </button>

@@ -191,8 +191,8 @@ test.describe("A matter record", () => {
       .getByRole("link", { name: "Questionnaire client" })
       .click();
 
-    await expect(page.getByText("What the client said")).toBeVisible();
-    await expect(page.getByText(/not verified/)).toBeVisible();
+    await expect(page.getByText("Ce que le client a déclaré")).toBeVisible();
+    await expect(page.getByText(/ne sont pas vérifiés/)).toBeVisible();
   });
 
   test("lists expected documents that are not on file, without calling it a problem", async ({
@@ -202,13 +202,13 @@ test.describe("A matter record", () => {
     await openMatter(page, "IMM-2026-003");
 
     const checklist = page.getByRole("region", {
-      name: "Expected documents not yet received",
+      name: "Documents attendus non reçus",
     });
     await expect(checklist).toBeVisible();
-    await expect(checklist).toContainText("Not received");
+    await expect(checklist).toContainText("Non reçu");
     // A checklist, not a conclusion — and it says so, pointing at the analysis
     // for the reasons rather than stating them here.
-    await expect(checklist).toContainText(/read by a person before it is used/i);
+    await expect(checklist).toContainText(/lue par une personne avant d’être utilisée/i);
     await expect(checklist).not.toContainText(/will fail|cannot succeed|fatal/i);
   });
 
@@ -306,7 +306,7 @@ test.describe("Documents", () => {
     await openMatter(page, "IMM-2026-001");
     await openDocumentsTab(page);
 
-    await page.getByLabel("Choose a document").setInputFiles({
+    await page.getByLabel("Choisir un document").setInputFiles({
       name: "fictional-passport.pdf",
       mimeType: "application/pdf",
       buffer: Buffer.from("fictional content, never uploaded"),
@@ -315,18 +315,18 @@ test.describe("Documents", () => {
 
     // "Other" is expected for nothing, so this upload cannot change the
     // missing-document checklist another test reads.
-    await page.getByLabel("What kind of document is it?").selectOption("other");
+    await page.getByLabel("De quel type de document s’agit-il ?").selectOption("other");
     await page.getByRole("button", { name: "Add document" }).click();
     await page.waitForURL(/tab=documents/);
 
-    await expect(page.getByText("Document recorded")).toBeVisible();
+    await expect(page.getByText("Document enregistré")).toBeVisible();
 
     // `.first()` throughout: this test adds a row every time it runs, and the
     // demonstration database is not reset between runs.
     const row = documentRow(page, "fictional-passport.pdf");
     await expect(row).toBeVisible();
     // A new document has been seen by nobody yet.
-    await expect(row.getByText("Not verified")).toBeVisible();
+    await expect(row.getByText("Non vérifié")).toBeVisible();
   });
 
   test("refuses a file type the specification does not allow", async ({ page }) => {
@@ -334,7 +334,7 @@ test.describe("Documents", () => {
     await openMatter(page, "IMM-2026-001");
     await openDocumentsTab(page);
 
-    await page.getByLabel("Choose a document").setInputFiles({
+    await page.getByLabel("Choisir un document").setInputFiles({
       name: "script.exe",
       mimeType: "application/octet-stream",
       buffer: Buffer.from("no"),
@@ -364,7 +364,7 @@ test.describe("Documents", () => {
       form.submit();
     });
 
-    await expect(alerts(page)).toContainText("That document was not added");
+    await expect(alerts(page)).toContainText("Ce document n’a pas été ajouté");
     await expect(alerts(page)).toContainText("pdf");
     const body = await page.locator("main").innerText();
     expect(body).not.toContain("malware.exe");
@@ -378,22 +378,22 @@ test.describe("Documents", () => {
     // Add the document this test will then verify, rather than verifying one
     // from the seed: verifying is permanent, so a test that consumed a seeded
     // document would pass once and fail on every later run.
-    await page.getByLabel("Choose a document").setInputFiles({
+    await page.getByLabel("Choisir un document").setInputFiles({
       name: "to-be-checked.pdf",
       mimeType: "application/pdf",
       buffer: Buffer.from("fictional"),
     });
-    await page.getByLabel("What kind of document is it?").selectOption("other");
+    await page.getByLabel("De quel type de document s’agit-il ?").selectOption("other");
     await page.getByRole("button", { name: "Add document" }).click();
     await page.waitForURL(/tab=documents/);
 
     const row = documentRow(page, "to-be-checked.pdf");
-    await expect(row.getByText("Not verified")).toBeVisible();
+    await expect(row.getByText("Non vérifié")).toBeVisible();
 
-    await row.getByRole("button", { name: "Mark as checked" }).click();
+    await row.getByRole("button", { name: "Marquer comme vérifié" }).click();
     await page.waitForURL(/tab=documents/);
 
-    await expect(documentRow(page, "to-be-checked.pdf").getByText("Checked by a person")).toBeVisible();
+    await expect(documentRow(page, "to-be-checked.pdf").getByText("Vérifié par une personne")).toBeVisible();
   });
 
   test("states plainly that nothing is uploaded or read", async ({ page }) => {
@@ -401,8 +401,8 @@ test.describe("Documents", () => {
     await openMatter(page, "IMM-2026-001");
     await openDocumentsTab(page);
 
-    await expect(page.getByText(/the file stays on your computer/i)).toBeVisible();
-    await expect(page.getByText(/there is no OCR in this build/i)).toBeVisible();
+    await expect(page.getByText(/le fichier est resté sur votre ordinateur/i)).toBeVisible();
+    await expect(page.getByText(/pas d’OCR dans cette version/i)).toBeVisible();
   });
 });
 
@@ -413,7 +413,7 @@ test.describe("What each role may do", () => {
 
     // The button is absent — but that is decoration, so the page itself is
     // requested directly.
-    await expect(page.getByRole("link", { name: "New matter" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Nouveau dossier" })).toHaveCount(0);
 
     await page.goto("/matters/new");
     await expect(page).toHaveURL(/\/403/);
@@ -424,13 +424,13 @@ test.describe("What each role may do", () => {
     await openMatter(page, "IMM-2026-001");
     await openDocumentsTab(page);
 
-    await expect(page.getByRole("region", { name: "Add a document" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Ajouter un document" })).toBeVisible();
   });
 
   test("a read-only reviewer sees the matter but is not offered an upload", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -438,9 +438,9 @@ test.describe("What each role may do", () => {
     await openMatter(page, "IMM-2026-001");
     await openDocumentsTab(page);
 
-    await expect(page.getByRole("region", { name: "Add a document" })).toHaveCount(0);
-    await expect(page.getByText("Read only")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Mark as checked" })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Ajouter un document" })).toHaveCount(0);
+    await expect(page.getByText("Votre rôle ne permet pas d’ajouter des documents")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Marquer comme vérifié" })).toHaveCount(0);
   });
 
   test("the read-only reviewer's upload is refused by the server, not only hidden", async ({
@@ -448,7 +448,7 @@ test.describe("What each role may do", () => {
   }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();

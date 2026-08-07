@@ -36,9 +36,9 @@ async function runAnalysis(page: import("@playwright/test").Page, reference: str
     .click();
   await expect(page.getByRole("region", { name: "Claude Analyst" })).toBeVisible();
 
-  await page.getByRole("button", { name: /^Run analysis$|^Run again$/ }).click();
+  await page.getByRole("button", { name: /^Lancer l’analyse$|^Relancer l’analyse$/ }).click();
   await page.waitForURL(/tab=analysis/);
-  await expect(page.getByRole("region", { name: "Summary" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Résumé" })).toBeVisible();
 }
 
 test.describe("Running an analysis", () => {
@@ -74,11 +74,11 @@ test.describe("Running an analysis", () => {
       .click();
 
     const panel = page.getByRole("region", { name: "Claude Analyst" });
-    await expect(panel).toContainText(/This firm asked Claude for:/);
+    await expect(panel).toContainText(/Ce cabinet a demandé à Claude :/);
     // The demonstration firms did not enable entity extraction, so the key
     // facts section is genuinely absent — and the page says why rather than
     // leaving a reader to wonder whether it broke.
-    await expect(panel).toContainText(/Not asked for, and so not produced:/);
+    await expect(panel).toContainText(/Non demandé, donc non produit :/);
   });
 });
 
@@ -89,7 +89,7 @@ test.describe("The Moreau matter — a contradiction", () => {
   });
 
   test("shows both dates side by side, with where each came from", async ({ page }) => {
-    const section = page.getByRole("region", { name: /^Disagreements on the record/ });
+    const section = page.getByRole("region", { name: /^Désaccords au dossier/ });
 
     await expect(section).toBeVisible();
     await expect(section).toContainText("Date of last entry");
@@ -102,14 +102,14 @@ test.describe("The Moreau matter — a contradiction", () => {
   });
 
   test("refuses to say which is right", async ({ page }) => {
-    const section = page.getByRole("region", { name: /^Disagreements on the record/ });
+    const section = page.getByRole("region", { name: /^Désaccords au dossier/ });
 
     await expect(section).toContainText(/a question for the client/i);
     await expect(page.locator("main")).not.toContainText(/the correct date is/i);
   });
 
   test("asks the client rather than deciding", async ({ page }) => {
-    await expect(page.getByRole("region", { name: "To ask the client" })).toContainText(
+    await expect(page.getByRole("region", { name: "À demander au client" })).toContainText(
       /Date of last entry/,
     );
   });
@@ -137,7 +137,7 @@ test.describe("The Hassan matter — not enough on file", () => {
   });
 
   test("says more information is required, and reaches no conclusion", async ({ page }) => {
-    await expect(page.getByRole("region", { name: "Summary" })).toContainText(
+    await expect(page.getByRole("region", { name: "Résumé" })).toContainText(
       /More information is required/i,
     );
     await expect(page.getByRole("region", { name: "Independent review" })).toContainText(
@@ -152,7 +152,7 @@ test.describe("The Hassan matter — not enough on file", () => {
   test("lists what is absent with why it matters, never what its absence proves", async ({
     page,
   }) => {
-    const missing = page.getByRole("region", { name: /^Documents not on file/ });
+    const missing = page.getByRole("region", { name: /^Documents absents du dossier/ });
 
     await expect(missing).toBeVisible();
     await expect(missing).toContainText("I-94");
@@ -171,7 +171,7 @@ test.describe("The timeline", () => {
       .click();
 
     const timeline = page.getByRole("region", { name: "Chronologie" });
-    await expect(timeline).toContainText(/No date here is confirmed/i);
+    await expect(timeline).toContainText(/Aucune date ici n’est confirmée/i);
     await expect(timeline).toContainText(/Stated by a person/i);
     await expect(timeline).toContainText(/Read from a document/i);
   });
@@ -191,7 +191,7 @@ test.describe("The timeline", () => {
 
     // A matter with no analysis says so, rather than showing a blank panel.
     const timeline = page.getByRole("region", { name: "Chronologie" });
-    await expect(timeline).toContainText(/No timeline yet|No date on this matter/i);
+    await expect(timeline).toContainText(/Pas encore de chronologie|Aucune date de ce dossier/i);
   });
 });
 
@@ -240,7 +240,7 @@ test.describe("What each role may do", () => {
   test("a read-only reviewer may look but not run", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -258,7 +258,7 @@ test.describe("What each role may do", () => {
   test("and is refused by the server, not only by a hidden button", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -286,7 +286,7 @@ test.describe("What each role may do", () => {
     await signIn(page, "immigration.paralegal@demo.local");
     await runAnalysis(page, "IMM-2026-001");
 
-    await expect(page.getByRole("region", { name: "Summary" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Résumé" })).toBeVisible();
   });
 });
 

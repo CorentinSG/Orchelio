@@ -45,7 +45,7 @@ function tabs(page: import("@playwright/test").Page) {
 async function runAnalysis(page: import("@playwright/test").Page, reference: string) {
   await openMatter(page, reference);
   await tabs(page).getByRole("link", { name: "Analyse" }).click();
-  await page.getByRole("button", { name: /^Run analysis$|^Run again$/ }).click();
+  await page.getByRole("button", { name: /^Lancer l’analyse$|^Relancer l’analyse$/ }).click();
   await page.waitForURL(/tab=analysis/);
 }
 
@@ -68,8 +68,8 @@ test.describe("An analysis nobody has approved", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await runAnalysis(page, "IMM-2026-001");
 
-    await expect(page.getByText("Nobody has approved this yet")).toBeVisible();
-    await expect(page.locator("main")).toContainText(/a draft nobody has stood behind/i);
+    await expect(page.getByText("Personne n’a encore validé ceci")).toBeVisible();
+    await expect(page.locator("main")).toContainText(/un brouillon derrière lequel personne ne s’est rangé/i);
   });
 
   test("raises the approval because the firm asked for it", async ({ page }) => {
@@ -159,16 +159,16 @@ test.describe("A locked rule", () => {
     await openMatter(page, "IMM-2026-003");
     await tabs(page).getByRole("link", { name: "Courriers" }).click();
 
-    await page.getByLabel("Subject").fill("Documents we still need");
-    await page.getByLabel("Text").fill("Fictional draft to a fictional client.");
-    await page.getByRole("button", { name: "Prepare draft" }).click();
+    await page.getByLabel("Objet").fill("Documents we still need");
+    await page.getByLabel("Texte").fill("Fictional draft to a fictional client.");
+    await page.getByRole("button", { name: "Préparer le brouillon" }).click();
     await page.waitForURL(/tab=communications/);
 
-    await expect(page.getByText("Draft prepared, and waiting for a decision")).toBeVisible();
-    await expect(page.getByText("Not approved — do not use").first()).toBeVisible();
+    await expect(page.getByText("Brouillon préparé, en attente d’une décision")).toBeVisible();
+    await expect(page.getByText("Non validé — ne pas utiliser").first()).toBeVisible();
 
     await tabs(page).getByRole("link", { name: "Validations", exact: true }).click();
-    const approvals = page.getByRole("region", { name: /^Approvals on this matter/ });
+    const approvals = page.getByRole("region", { name: /^Validations sur ce dossier/ });
     await expect(approvals).toContainText("Approve a draft for use outside the firm");
     await expect(approvals).toContainText("Cannot be switched off");
   });
@@ -178,10 +178,10 @@ test.describe("A locked rule", () => {
     await openMatter(page, "IMM-2026-003");
     await tabs(page).getByRole("link", { name: "Courriers" }).click();
 
-    await expect(page.getByText("Orchelio sends nothing")).toBeVisible();
-    await expect(page.locator("main")).toContainText(/no .*sent.* status and no\s+transport/i);
+    await expect(page.getByText("Orchelio n’envoie rien")).toBeVisible();
+    await expect(page.locator("main")).toContainText(/ni statut « envoyé »,\s*ni transport/i);
     // There is no send button anywhere on the page, approved or not.
-    await expect(page.getByRole("button", { name: /send/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /send|envoyer/i })).toHaveCount(0);
   });
 
   test("never confirms a date without a person", async ({ page }) => {
@@ -189,13 +189,13 @@ test.describe("A locked rule", () => {
     await openMatter(page, "IMM-2026-002");
     await tabs(page).getByRole("link", { name: "Validations", exact: true }).click();
 
-    const ask = page.getByRole("button", { name: /Ask a person to confirm/ });
+    const ask = page.getByRole("button", { name: /Demander à une personne de confirmer/ });
     await expect(ask).toBeVisible();
     await ask.click();
     await page.waitForURL(/tab=approvals/);
 
-    await expect(page.getByText("Raised, and waiting for a person")).toBeVisible();
-    const approvals = page.getByRole("region", { name: /^Approvals on this matter/ });
+    await expect(page.getByText("Demandé, en attente d’une personne")).toBeVisible();
+    const approvals = page.getByRole("region", { name: /^Validations sur ce dossier/ });
     await expect(approvals).toContainText("Confirm a recorded date");
     await expect(approvals).toContainText("Cannot be switched off");
   });
@@ -247,7 +247,7 @@ test.describe("What each role may do", () => {
   test("a read-only reviewer cannot prepare a draft", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -255,8 +255,8 @@ test.describe("What each role may do", () => {
     await openMatter(page, "IMM-2026-001");
     await tabs(page).getByRole("link", { name: "Courriers" }).click();
 
-    await expect(page.getByRole("region", { name: "Prepare a draft" })).toHaveCount(0);
-    await expect(page.getByText("Read only")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Préparer un brouillon" })).toHaveCount(0);
+    await expect(page.getByText("Votre rôle ne permet pas de préparer un brouillon")).toBeVisible();
   });
 
   test("the activity log is held by firm administrators", async ({ page }) => {
@@ -563,7 +563,7 @@ test.describe("A request a newer analysis replaced", () => {
     await tabs(page).getByRole("link", { name: "Validations" }).click();
     await page.waitForURL(/tab=approvals/);
 
-    const section = page.getByRole("region", { name: /^Approvals on this matter/ });
+    const section = page.getByRole("region", { name: /^Validations sur ce dossier/ });
     await expect(section).toContainText("Superseded");
     await expect(section).toContainText(/nobody decided it/i);
   });

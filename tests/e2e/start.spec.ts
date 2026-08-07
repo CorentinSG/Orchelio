@@ -112,14 +112,14 @@ test.describe("Pressing it once", () => {
     // demonstration banner is, so screen-reader users get one named area to
     // skip rather than a page full of them.
     const main = page.getByRole("main");
-    await expect(main).toContainText("The matter is open");
+    await expect(main).toContainText("Le dossier est ouvert");
     await expect(main).toContainText(/IMM-\d{4}-\d{3}/);
-    await expect(main).toContainText("2 files are listed on it");
-    await expect(main).toContainText(/Nothing has been decided/i);
+    await expect(main).toContainText("2 fichiers y sont répertoriés");
+    await expect(main).toContainText(/Rien n’a été décidé/i);
 
     // It landed on the analysis, because there is one to read.
     await expect(page).toHaveURL(/tab=analysis/);
-    await expect(main).toContainText(/Nobody has approved this yet/i);
+    await expect(main).toContainText(/Personne n’a encore validé ceci/i);
 
     // Both files are on the matter it just opened — checked here rather than
     // by searching the matter list for a title, because a firm may legitimately

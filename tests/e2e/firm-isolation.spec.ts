@@ -26,13 +26,13 @@ test.describe("Firm switcher", () => {
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
 
     // Offering a switcher with one option would be noise.
-    await expect(page.getByRole("region", { name: "Your firms" })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Vos cabinets" })).toHaveCount(0);
   });
 
   test("lets a member of two firms move between them", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
 
-    const switcher = page.getByRole("region", { name: "Your firms" });
+    const switcher = page.getByRole("region", { name: "Vos cabinets" });
     await expect(switcher).toBeVisible();
 
     // Lands in the first firm alphabetically.
@@ -48,7 +48,7 @@ test.describe("Firm switcher", () => {
   test("remembers the chosen firm across a reload", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -75,7 +75,7 @@ test.describe("Cross-firm access", () => {
     // then try to use it as somebody who does not belong to that firm.
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -111,7 +111,7 @@ test.describe("Cross-firm access", () => {
   }) => {
     await signIn(page, "reviewer@demo.local");
     await page
-      .getByRole("region", { name: "Your firms" })
+      .getByRole("region", { name: "Vos cabinets" })
       .getByRole("button", { name: /Dupont Immigration Law/ })
       .click();
     await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
@@ -130,7 +130,7 @@ test.describe("Cross-firm access", () => {
       if (input) input.value = firmId;
     }, dupontFirmId!);
 
-    const switcher = page.getByRole("region", { name: "Your firms" });
+    const switcher = page.getByRole("region", { name: "Vos cabinets" });
     if ((await switcher.count()) > 0) {
       await switcher.getByRole("button").first().click();
       await expect(page).toHaveURL(/\/403/);
