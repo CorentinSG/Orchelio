@@ -33,16 +33,16 @@ export default async function AdminDemoPage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">
-          Platform administration
+          Administration de la plateforme
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Données de démonstration</h1>
         <p className="mt-1 text-ink-muted">{FICTIONAL_DATA_NOTICE}</p>
       </header>
 
-      <Card title="What each firm holds" description="Counts only.">
+      <Card title="Ce que contient chaque cabinet" description="Des comptes uniquement.">
         {firms.length === 0 ? (
           <p className="text-sm text-ink-muted">
-            No firm exists yet. Run <code className="font-mono">npm run seed</code>.
+            Aucun cabinet n’existe encore. Lancez <code className="font-mono">npm run seed</code>.
           </p>
         ) : (
           <ul className="divide-y divide-line">
@@ -56,18 +56,18 @@ export default async function AdminDemoPage() {
                     </p>
                   </div>
                   <Badge tone={firm._count.matters > 0 ? "success" : "warning"}>
-                    {firm._count.matters > 0 ? "has demonstration data" : "empty"}
+                    {firm._count.matters > 0 ? "contient des données de démonstration" : "vide"}
                   </Badge>
                 </div>
                 <p className="mt-2 text-sm text-ink-subtle">
-                  {firm._count.matters} matter(s) · {firm._count.documents} document(s) ·{" "}
-                  {firm._count.analyses} analysis(es) · {firm._count.approvalRequests} approval(s)
+                  {firm._count.matters} dossier(s) · {firm._count.documents} document(s) ·{" "}
+                  {firm._count.analyses} analyse(s) · {firm._count.approvalRequests} validation(s)
                 </p>
                 {firm._count.matters === 0 ? (
                   <p className="mt-1 text-sm text-ink-muted">
-                    Its own administrator can add sample matters from that firm&apos;s settings. You
-                    cannot do it from here — a platform administrator holds no membership of any
-                    firm.
+                    Son propre administrateur peut ajouter des dossiers d’exemple depuis les
+                    réglages de ce cabinet. Vous ne pouvez pas le faire d’ici — un administrateur de
+                    la plateforme n’est membre d’aucun cabinet.
                   </p>
                 ) : null}
               </li>
@@ -76,12 +76,12 @@ export default async function AdminDemoPage() {
         )}
       </Card>
 
-      <Card title="Demonstration accounts" description="Every one of them fictional.">
+      <Card title="Comptes de démonstration" description="Tous fictifs.">
         <p className="mb-3 text-sm text-ink-muted">
-          All accounts seeded with the demonstration share the password{" "}
-          <span className="font-mono">{DEMO_PASSWORD}</span>. It is printed on the sign-in page as
-          well: it is written in a public repository, so hiding it would be theatre rather than
-          security.
+          Tous les comptes installés avec la démonstration partagent le mot de passe{" "}
+          <span className="font-mono">{DEMO_PASSWORD}</span>. Il figure aussi sur la page de
+          connexion : il est écrit dans un dépôt public, le cacher relèverait donc du théâtre plutôt
+          que de la sécurité.
         </p>
         <dl>
           {DEMO_ACCOUNTS.map((account) => (
@@ -89,51 +89,52 @@ export default async function AdminDemoPage() {
               key={account.email}
               label={<span className="font-mono text-xs">{account.email}</span>}
               value={account.roleLabel}
-              hint={account.firmName ?? "no firm"}
+              hint={account.firmName ?? "aucun cabinet"}
             />
           ))}
         </dl>
         <p className="mt-3 text-sm text-ink-subtle">
-          An account created through the firm-creation form does not appear here — this list is the
-          seed&apos;s, and it does not pretend to be a directory.
+          Un compte créé par le formulaire de création de cabinet n’apparaît pas ici — cette liste
+          est celle des données d’exemple, et elle ne prétend pas être un annuaire.
         </p>
       </Card>
 
-      <Card title="Erasing demonstration data has no button">
+      <Card title="Effacer les données de démonstration n’a pas de bouton">
         <p className="text-sm text-ink-muted">
-          Deleting everything is irreversible, and one of the nine locked approval rules says
-          nothing is ever permanently deleted without a person. A button in a web page is a weaker
-          form of consent than a command somebody types deliberately, so the reset lives here:
+          Tout supprimer est irréversible, et l’une des neuf règles de validation verrouillées dit
+          que rien n’est jamais supprimé définitivement sans une personne. Un bouton dans une page
+          web est une forme de consentement plus faible qu’une commande que quelqu’un tape
+          délibérément : la réinitialisation vit donc ici.
         </p>
         <div className="mt-3">
           <CommandLine>npm run reset-demo</CommandLine>
         </div>
         <p className="mt-2 text-sm text-ink-subtle">
-          It erases every firm on this instance — all {totalMatters} matter(s) above included — and
-          re-seeds the demonstration from scratch. It is not scoped to one firm and it cannot be
-          undone.
+          Elle efface tous les cabinets de cette instance — les {totalMatters} dossier(s) ci-dessus
+          compris — et réinstalle la démonstration depuis zéro. Elle n’est pas limitée à un seul
+          cabinet et elle est irréversible.
         </p>
       </Card>
 
-      <Callout tone="brand" title={`The guided demonstration is ${GUIDE_STEP_COUNT} steps`}>
+      <Callout tone="brand" title={`La visite guidée compte ${GUIDE_STEP_COUNT} étapes`}>
         <p>
-          It walks through the whole product in order, naming the account to use and what to look
-          for on each screen.
+          Elle parcourt tout le produit dans l’ordre, en nommant le compte à utiliser et ce qu’il
+          faut regarder sur chaque écran.
         </p>
         <p className="mt-2">
           <Link href="/guide" className="font-medium text-brand underline underline-offset-4">
-            Open the guided demonstration
+            Ouvrir la visite guidée
           </Link>
         </p>
       </Callout>
 
       <p className="text-sm text-ink-muted">
         <Link href="/admin/firms" className="font-medium text-brand underline underline-offset-4">
-          Firms
+          Cabinets
         </Link>{" "}
         ·{" "}
         <Link href="/admin/system" className="font-medium text-brand underline underline-offset-4">
-          System overview
+          Vue d’ensemble du système
         </Link>
       </p>
     </div>

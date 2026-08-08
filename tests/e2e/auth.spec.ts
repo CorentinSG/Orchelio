@@ -140,10 +140,10 @@ test.describe("Workspaces", () => {
     // A platform administrator holds no firm membership, so /dashboard sends
     // them to platform administration rather than into a firm.
     await expect(page).toHaveURL(/\/admin\/firms/);
-    await expect(page.getByRole("heading", { name: "Cabinets" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinets", exact: true })).toBeVisible();
     await expect(page.getByText("Dupont Immigration Law")).toBeVisible();
     await expect(page.getByText("Carter Employment & Labor Law")).toBeVisible();
-    await expect(page.getByText("Scope of this role")).toBeVisible();
+    await expect(page.getByText("Portée de ce rôle")).toBeVisible();
   });
 });
 

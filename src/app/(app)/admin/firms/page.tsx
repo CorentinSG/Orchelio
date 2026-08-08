@@ -48,82 +48,84 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">
-          Platform administration
+          Administration de la plateforme
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Cabinets</h1>
         <p className="mt-1 text-ink-muted">
-          Every firm on this instance. Matter content is deliberately not shown here.
+          Tous les cabinets de cette instance. Le contenu des dossiers n’y est délibérément pas montré.
         </p>
       </header>
 
       {error ? (
-        <Callout tone="danger" title="The firm was not created" assertive>
+        <Callout tone="danger" title="Le cabinet n’a pas été créé" assertive>
           {error}
         </Callout>
       ) : null}
 
       {created ? (
-        <Callout tone="success" title="Firm created">
+        <Callout tone="success" title="Cabinet créé">
           <p>
-            <span className="font-mono">{created}</span> exists and is waiting to be configured. Its
-            first administrator is <span className="font-mono">{createdEmail}</span>.
+            <span className="font-mono">{created}</span> existe et attend d’être configuré. Son
+            premier administrateur est <span className="font-mono">{createdEmail}</span>.
           </p>
           {newAccount && IS_DEMO ? (
             <p className="mt-2">
-              That account was created just now. Sign in with the shared demonstration password,{" "}
-              <span className="font-mono">{DEMO_PASSWORD}</span> — the same one printed on the
-              sign-in page — then answer the seven setup questions.
+              Ce compte vient d’être créé. Connectez-vous avec le mot de passe partagé de la
+              démonstration, <span className="font-mono">{DEMO_PASSWORD}</span> — celui-là même
+              qu’affiche la page de connexion — puis répondez aux sept questions d’installation.
             </p>
           ) : null}
           {!newAccount ? (
             <p className="mt-2">
-              That account already existed, so it keeps its own password. It is now an
-              administrator of this firm as well.
+              Ce compte existait déjà : il garde son propre mot de passe. Il est désormais
+              administrateur de ce cabinet également.
             </p>
           ) : null}
           <p className="mt-2 text-ink-subtle">
-            The firm is not a usable workspace until the questionnaire is answered. You cannot do
-            that from here: a platform administrator holds no membership of any firm.
+            Le cabinet n’est pas un espace de travail utilisable tant que le questionnaire n’a pas
+            été rempli. Vous ne pouvez pas le faire d’ici : un administrateur de la plateforme n’est
+            membre d’aucun cabinet.
           </p>
         </Callout>
       ) : null}
 
-      <Callout tone="neutral" title="Scope of this role">
-        A platform administrator can see that a firm exists and how much it uses the platform, but
-        holds no membership of any firm and therefore cannot open its matters or documents.
+      <Callout tone="neutral" title="Portée de ce rôle">
+        Un administrateur de la plateforme peut voir qu’un cabinet existe et à quel point il utilise
+        la plateforme, mais il n’est membre d’aucun cabinet et ne peut donc ouvrir ni ses dossiers
+        ni ses documents.
       </Callout>
 
-      <Card title="Instance" description="Summed from each firm's own counts.">
+      <Card title="Instance" description="Somme des comptes propres de chaque cabinet.">
         <dl>
-          <DataRow label="Firms" value={counts.firms} />
-          <DataRow label="Users" value={counts.users} />
-          <DataRow label="Active sessions" value={counts.activeSessions} />
-          <DataRow label="Matters" value={counts.matters} />
+          <DataRow label="Cabinets" value={counts.firms} />
+          <DataRow label="Utilisateurs" value={counts.users} />
+          <DataRow label="Sessions actives" value={counts.activeSessions} />
+          <DataRow label="Dossiers" value={counts.matters} />
           <DataRow label="Documents" value={counts.documents} />
           <DataRow label="Analyses" value={counts.analyses} />
         </dl>
       </Card>
 
       <Card
-        title="Create a firm"
-        description="Everything a firm needs to exist. What it needs to be useful, its own administrator answers next."
+        title="Créer un cabinet"
+        description="Tout ce qu’il faut à un cabinet pour exister. Ce qu’il lui faut pour être utile, son propre administrateur y répondra ensuite."
       >
         <form method="post" action="/api/admin/firms" className="space-y-4">
           <Field
-            label="Firm name"
+            label="Nom du cabinet"
             htmlFor="name"
-            hint="Fictional. The identifier is derived from it, and made unique if it is taken."
+            hint="Fictif. L’identifiant en est dérivé, et rendu unique s’il est déjà pris."
           >
             <input id="name" name="name" required minLength={2} className={inputClass} />
           </Field>
 
           <Field
-            label="Main practice area"
+            label="Domaine principal"
             htmlFor="primaryPracticeArea"
-            hint="Only areas with a full template can be chosen — a firm created into an empty one could not finish its questionnaire."
+            hint="Seuls les domaines disposant d’un modèle complet peuvent être choisis — un cabinet créé dans un domaine vide ne pourrait pas terminer son questionnaire."
           >
             <select id="primaryPracticeArea" name="primaryPracticeArea" required className={inputClass}>
-              <option value="">Choose…</option>
+              <option value="">Choisissez…</option>
               {creatablePracticeAreas().map((area) => (
                 <option key={area.key} value={area.key}>
                   {area.label}
@@ -133,7 +135,7 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="First administrator" htmlFor="administratorName">
+            <Field label="Premier administrateur" htmlFor="administratorName">
               <input
                 id="administratorName"
                 name="administratorName"
@@ -142,9 +144,9 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
               />
             </Field>
             <Field
-              label="Their email"
+              label="Son adresse e-mail"
               htmlFor="administratorEmail"
-              hint="Use a fictional address ending in .local. Orchelio sends nothing to it — it has no way to."
+              hint="Utilisez une adresse fictive se terminant par .local. Orchelio n’y envoie rien — il n’en a aucun moyen."
             >
               <input
                 id="administratorEmail"
@@ -162,21 +164,21 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
               type="submit"
               className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-ink hover:bg-brand-strong"
             >
-              Create firm
+              Créer le cabinet
             </button>
             <p className="text-sm text-ink-subtle">
-              Creates the firm, its configuration — carrying all nine locked approval rules — and
-              its first administrator.
+              Crée le cabinet, sa configuration — portant les neuf règles de validation verrouillées
+              — et son premier administrateur.
             </p>
           </div>
         </form>
       </Card>
 
-      <Card title="Firm list" description="Counts only. No matter, client or document is named.">
+      <Card title="Liste des cabinets" description="Des comptes uniquement. Aucun dossier, client ni document n’y est nommé.">
         {firms.length === 0 ? (
           <p className="text-sm text-ink-muted">
-            No firm has been created yet. Run <code className="font-mono">npm run seed</code>, or
-            create one above.
+            Aucun cabinet n’a encore été créé. Lancez <code className="font-mono">npm run seed</code>,
+            ou créez-en un ci-dessus.
           </p>
         ) : (
           <ul className="divide-y divide-line">
@@ -192,7 +194,7 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Badge tone={firm.status === "active" ? "success" : "neutral"}>
-                      {firm.status}
+                      {firm.status === "active" ? "actif" : firm.status}
                     </Badge>
                     <Badge
                       tone={
@@ -200,14 +202,14 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
                       }
                     >
                       {firm.configuration
-                        ? `onboarding: ${firm.configuration.onboardingStatus}`
-                        : "not configured"}
+                        ? `installation : ${onboardingLabel(firm.configuration.onboardingStatus)}`
+                        : "non configuré"}
                     </Badge>
                   </div>
                 </div>
                 <p className="mt-2 text-sm text-ink-subtle">
-                  {firm._count.memberships} member(s) · {firm._count.matters} matter(s) ·{" "}
-                  {firm._count.documents} document(s) · {firm._count.analyses} analysis(es)
+                  {firm._count.memberships} membre(s) · {firm._count.matters} dossier(s) ·{" "}
+                  {firm._count.documents} document(s) · {firm._count.analyses} analyse(s)
                 </p>
               </li>
             ))}
@@ -217,13 +219,27 @@ export default async function AdminFirmsPage({ searchParams }: PageProps) {
 
       <p className="text-sm text-ink-muted">
         <Link href="/admin/system" className="font-medium text-brand underline underline-offset-4">
-          System overview
+          Vue d’ensemble du système
         </Link>{" "}
         ·{" "}
         <Link href="/admin/demo" className="font-medium text-brand underline underline-offset-4">
-          Demonstration data
+          Données de démonstration
         </Link>
       </p>
     </div>
   );
+}
+
+/** The stored onboarding states, in the reader's language. */
+function onboardingLabel(status: string): string {
+  switch (status) {
+    case "complete":
+      return "terminée";
+    case "in_progress":
+      return "en cours";
+    case "not_started":
+      return "non commencée";
+    default:
+      return status;
+  }
 }

@@ -86,7 +86,7 @@ describe("whether a firm can use the rule at all", () => {
     const readiness = separationReadiness(1);
     expect(readiness.workable).toBe(false);
     // The trap named outright: not "you need more people" but what would break.
-    expect(readiness.note).toMatch(/undecidable/i);
+    expect(readiness.note).toMatch(/indécidable/i);
   });
 
   it("says something different when nobody may decide", () => {
@@ -104,12 +104,12 @@ describe("whether a firm can use the rule at all", () => {
 
 describe("the two things a person is told", () => {
   it("names the requester without hectoring them", () => {
-    expect(SELF_DECISION_NOTICE).toMatch(/you raised this/i);
-    expect(SELF_DECISION_NOTICE).toMatch(/that person is you/i);
+    expect(SELF_DECISION_NOTICE).toMatch(/vous avez formé cette demande/i);
+    expect(SELF_DECISION_NOTICE).toMatch(/cette personne, c’est vous/i);
   });
 
   it("says what to do instead, not only that it was refused", () => {
-    expect(SELF_DECISION_REFUSAL).toMatch(/ask a colleague/i);
+    expect(SELF_DECISION_REFUSAL).toMatch(/demandez à un collègue/i);
   });
 
   it("keeps the two messages distinct", () => {

@@ -69,15 +69,15 @@ test.describe("firm settings", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/settings");
 
-    const tabs = page.getByRole("navigation", { name: "Settings sections" });
+    const tabs = page.getByRole("navigation", { name: "Sections des réglages" });
     for (const name of [
-      "Profile",
-      "Matter types",
-      "AI features",
-      "Approval rules",
-      "People and roles",
-      "Branding",
-      "Demonstration",
+      "Profil",
+      "Types de dossier",
+      "Fonctions d’IA",
+      "Règles de validation",
+      "Personnes et rôles",
+      "Identité visuelle",
+      "Démonstration",
     ]) {
       await expect(tabs.getByRole("link", { name, exact: true })).toBeVisible();
     }
@@ -87,12 +87,12 @@ test.describe("firm settings", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/settings?section=approvals");
 
-    const heading = page.getByRole("heading", { name: /9 rules nobody can switch off/ });
+    const heading = page.getByRole("heading", { name: /9 règles que personne ne peut désactiver/ });
     await expect(heading).toBeVisible();
 
     // The rules are listed, and none of them is a form control. A disabled
     // checkbox would still be a control; there is not even that.
-    const locked = page.getByText("Always required");
+    const locked = page.getByText("Toujours obligatoire");
     await expect(locked).toHaveCount(9);
 
     for (const key of ["fileSubmission", "permanentDeletion", "externalTransmission"]) {
@@ -104,24 +104,24 @@ test.describe("firm settings", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/settings?section=approvals");
 
-    const closeMatter = page.getByRole("checkbox", { name: /Close a matter/ });
+    const closeMatter = page.getByRole("checkbox", { name: /Clore un dossier/ });
     const wasChecked = await closeMatter.isChecked();
 
     if (wasChecked) await closeMatter.uncheck();
     else await closeMatter.check();
 
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/section=approvals&saved=1/);
 
-    await expect(page.getByRole("checkbox", { name: /Close a matter/ })).toBeChecked({
+    await expect(page.getByRole("checkbox", { name: /Clore un dossier/ })).toBeChecked({
       checked: !wasChecked,
     });
 
     // Put it back, so the rest of the suite meets the firm it expects.
-    const restored = page.getByRole("checkbox", { name: /Close a matter/ });
+    const restored = page.getByRole("checkbox", { name: /Clore un dossier/ });
     if (wasChecked) await restored.check();
     else await restored.uncheck();
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/saved=1/);
   });
 
@@ -138,7 +138,7 @@ test.describe("firm settings", () => {
 
     await page.goto("/settings?section=ai");
     await page.getByRole("checkbox", { name: /Repérer les documents manquants/ }).uncheck();
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/saved=1/);
 
     // Omitted, not shown as zero: a "0 missing documents" card at a firm that
@@ -149,7 +149,7 @@ test.describe("firm settings", () => {
 
     await page.goto("/settings?section=ai");
     await page.getByRole("checkbox", { name: /Repérer les documents manquants/ }).check();
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/saved=1/);
   });
 
@@ -157,8 +157,8 @@ test.describe("firm settings", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/settings?section=branding");
 
-    await page.getByLabel("Display name").fill("Carter Law");
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByLabel("Nom affiché").fill("Carter Law");
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/saved=1/);
 
     const sidebar = page.getByRole("complementary", { name: "Espace du cabinet" });
@@ -167,8 +167,8 @@ test.describe("firm settings", () => {
     await expect(sidebar.getByText("Orchelio", { exact: true })).toBeVisible();
 
     await page.goto("/settings?section=branding");
-    await page.getByLabel("Display name").fill("");
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByLabel("Nom affiché").fill("");
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/saved=1/);
   });
 
@@ -198,7 +198,7 @@ test.describe("firm settings", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/settings?section=demonstration");
 
-    await expect(page.getByRole("button", { name: /Add \d+ sample matter/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Ajouter \d+ dossier\(s\) d’exemple/ })).toBeVisible();
     await expect(page.getByText("npm run reset-demo")).toBeVisible();
 
     // Nothing on the page deletes anything.
@@ -213,9 +213,9 @@ test.describe("firm settings", () => {
     // the sentence is governed rather than absolute (ADR-0025): destinations
     // are listed, and under the simulation this instance runs, unused.
     await expect(page.getByRole("main")).toContainText(
-      "Nothing leaves this machine except what is listed",
+      "Rien ne quitte cette machine hormis ce qui est listé",
     );
-    await expect(page.getByRole("main")).toContainText("Sent to an AI provider");
+    await expect(page.getByRole("main")).toContainText("Envoyé à un fournisseur d’IA");
     await expect(page.getByRole("main")).toContainText(
       "aucune clé n’est configurée et la simulation n’ouvre aucune connexion",
     );
@@ -223,13 +223,13 @@ test.describe("firm settings", () => {
 
     // The half a supplier would leave out. A page listing only the enforced
     // promises would be the same shape of lie as a zero where a dash belongs.
-    await expect(page.getByRole("heading", { name: /promise\(s\) nothing enforces yet/ })).toBeVisible();
-    await expect(page.getByRole("main")).toContainText(/encrypted with a key the firm holds/i);
-    await expect(page.getByText("not implemented").first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /promesse\(s\) que rien ne fait encore respecter/ })).toBeVisible();
+    await expect(page.getByRole("main")).toContainText(/chiffrée avec une clé que le cabinet détient/i);
+    await expect(page.getByText("non implémenté").first()).toBeVisible();
 
     // And it says the uncomfortable fact about this build outright.
-    await expect(page.getByRole("main")).toContainText("Encrypted at rest");
-    await expect(page.getByRole("main")).toContainText("anybody with the file has everything");
+    await expect(page.getByRole("main")).toContainText("Chiffré au repos");
+    await expect(page.getByRole("main")).toContainText("quiconque détient le fichier détient tout");
   });
 
   test("the confidentiality report offers nothing to change", async ({ page }) => {
@@ -238,7 +238,7 @@ test.describe("firm settings", () => {
 
     // Confidentiality is not a preference a firm sets. It is the one section
     // with no form, and a switch here would imply it could be switched off.
-    await expect(page.getByRole("button", { name: "Save changes" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Enregistrer les modifications" })).toHaveCount(0);
     await expect(page.getByRole("checkbox")).toHaveCount(0);
   });
 
@@ -251,10 +251,10 @@ test.describe("firm settings", () => {
     await page.evaluate(() => {
       document.querySelectorAll("[required]").forEach((node) => node.removeAttribute("required"));
     });
-    await page.getByLabel("Firm name").fill("");
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByLabel("Nom du cabinet").fill("");
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
 
-    await expect(alerts(page)).toContainText(/Enter a firm name/);
+    await expect(alerts(page)).toContainText(/Saisissez le nom du cabinet/);
   });
 });
 
@@ -269,8 +269,8 @@ test.describe("the time zone a firm chose", () => {
    */
   async function chooseTimezone(page: import("@playwright/test").Page, value: string) {
     await page.goto("/settings?section=profile");
-    await page.getByLabel("Timezone").selectOption(value);
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByLabel("Fuseau horaire").selectOption(value);
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
     await page.waitForURL(/section=profile/);
   }
 
@@ -303,11 +303,11 @@ test.describe("the time zone a firm chose", () => {
 
     await page.goto("/activity");
     await expect(page.getByRole("main")).toContainText(
-      "Dates and times are shown in Pacific (Los Angeles).",
+      "Les dates et heures sont affichées en Pacifique (Los Angeles).",
     );
 
     await page.goto("/approvals");
-    await expect(page.getByRole("main")).toContainText("Pacific (Los Angeles)");
+    await expect(page.getByRole("main")).toContainText("Pacifique (Los Angeles)");
   });
 
   test("moves the clock on the activity log by the difference between the zones", async ({
@@ -338,10 +338,11 @@ test.describe("the time zone a firm chose", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/settings?section=profile");
 
-    await expect(page.getByRole("main")).toContainText(
-      "English is the only interface language Orchelio has",
-    );
-    await expect(page.getByRole("main")).toContainText("nothing reads it yet");
+    // The V1 pivot inverted the claim without weakening the rule: the
+    // interface is French now, and the setting still says so rather than
+    // pretending it chooses anything.
+    await expect(page.getByRole("main")).toContainText("L’interface est en français");
+    await expect(page.getByRole("main")).toContainText("rien ne le lit encore");
   });
 
   test("puts the firm's zone back where the rest of the suite expects it", async ({ page }) => {
@@ -351,6 +352,6 @@ test.describe("the time zone a firm chose", () => {
     await chooseTimezone(page, "America/New_York");
 
     await page.goto("/settings?section=profile");
-    await expect(page.getByLabel("Timezone")).toHaveValue("America/New_York");
+    await expect(page.getByLabel("Fuseau horaire")).toHaveValue("America/New_York");
   });
 });

@@ -80,7 +80,7 @@ export function separationReadiness(deciders: number): SeparationReadiness {
     return {
       deciders,
       workable: true,
-      note: `${deciders} people here may decide, so a request always has somebody other than its requester who can act on it.`,
+      note: `${deciders} personnes peuvent décider ici : une demande a donc toujours quelqu’un d’autre que son demandeur pour agir dessus.`,
     };
   }
 
@@ -89,15 +89,15 @@ export function separationReadiness(deciders: number): SeparationReadiness {
     workable: false,
     note:
       deciders === 1
-        ? "Only one person here may decide. Switching this on would make every request they raise undecidable — including by them. Give a second person the attorney or administrator role first."
-        : "Nobody here may decide yet. Give somebody the attorney or administrator role first.",
+        ? "Une seule personne peut décider ici. Activer ceci rendrait indécidable chaque demande qu’elle forme — y compris par elle-même. Donnez d’abord à une deuxième personne le rôle d’avocat ou d’administrateur."
+        : "Personne ne peut encore décider ici. Donnez d’abord à quelqu’un le rôle d’avocat ou d’administrateur.",
   };
 }
 
 /** The wording a decider sees when the request is their own. */
 export const SELF_DECISION_NOTICE =
-  "You raised this request. Deciding it yourself records that a person looked, and that person is you.";
+  "Vous avez formé cette demande. La décider vous-même enregistre qu’une personne a regardé, et cette personne, c’est vous.";
 
 /** The wording the server returns when the firm has refused that. */
 export const SELF_DECISION_REFUSAL =
-  "This firm requires a different person to decide a request from the one who raised it. Ask a colleague who may decide to look at this one.";
+  "Ce cabinet exige qu’une demande soit décidée par une personne différente de celle qui l’a formée. Demandez à un collègue habilité à décider de regarder celle-ci.";

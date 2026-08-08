@@ -78,7 +78,7 @@ async function postForm(
 }
 
 async function continueStep(page: import("@playwright/test").Page, nextStep: number) {
-  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continuer" }).click();
   await page.waitForURL(new RegExp(`/onboarding/${nextStep}`));
 }
 
@@ -109,7 +109,7 @@ test.describe("platform administration", () => {
     await page.goto("/admin/system");
 
     await expect(page.getByRole("heading", { name: "Vue d’ensemble du système" })).toBeVisible();
-    await expect(page.getByText("connected")).toBeVisible();
+    await expect(page.getByText("connectée")).toBeVisible();
     await expect(page.getByText("simulé", { exact: true })).toBeVisible();
   });
 
@@ -169,16 +169,16 @@ test("a third firm can be created entirely through the interface", async ({ page
   await signIn(page, "platform.admin@demo.local");
   await page.goto("/admin/firms");
 
-  await page.getByLabel("Firm name").fill(firm.name);
-  await page.getByLabel("Main practice area").selectOption("immigration");
-  await page.getByLabel("First administrator").fill(firm.administratorName);
-  await page.getByLabel("Their email").fill(firm.email);
-  await page.getByRole("button", { name: "Create firm" }).click();
+  await page.getByLabel("Nom du cabinet").fill(firm.name);
+  await page.getByLabel("Domaine principal").selectOption("immigration");
+  await page.getByLabel("Premier administrateur").fill(firm.administratorName);
+  await page.getByLabel("Son adresse e-mail").fill(firm.email);
+  await page.getByRole("button", { name: "Créer le cabinet" }).click();
 
   await page.waitForURL(/created=/);
   // Exact: the practice-area hint on the same page also contains the words
   // "firm created", and a loose match resolves to two elements.
-  await expect(page.getByText("Firm created", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cabinet créé", { exact: true })).toBeVisible();
   await expect(page.getByText(firm.email)).toBeVisible();
   await expect(page.getByRole("main")).toContainText(firm.name);
 
@@ -189,19 +189,19 @@ test("a third firm can be created entirely through the interface", async ({ page
   await signIn(page, firm.email);
   await page.goto("/onboarding/1");
 
-  await page.getByLabel("Firm name").fill(firm.name);
-  await page.getByLabel("Firm administrator").fill(firm.administratorName);
-  await page.getByLabel("Email address").fill(firm.email);
+  await page.getByLabel("Nom du cabinet").fill(firm.name);
+  await page.getByLabel("Administrateur du cabinet").fill(firm.administratorName);
+  await page.getByLabel("Adresse e-mail").fill(firm.email);
   await continueStep(page, 2);
 
   await page.getByRole("checkbox", { name: "Droit de l’immigration" }).check();
-  await page.getByLabel("Main practice area").selectOption("immigration");
+  await page.getByLabel("Domaine principal").selectOption("immigration");
   await continueStep(page, 3);
 
   await page.getByRole("checkbox", { name: "Regroupement familial" }).check();
   await continueStep(page, 4);
 
-  await page.getByRole("checkbox", { name: "Lead intake" }).check();
+  await page.getByRole("checkbox", { name: "Premier contact" }).check();
   await continueStep(page, 5);
 
   await page.getByRole("checkbox", { name: "Repérer les documents manquants" }).check();
@@ -211,7 +211,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   // enforced whatever this firm chooses, which is the point of them.
   await continueStep(page, 7);
 
-  await page.getByRole("button", { name: "Confirm configuration" }).click();
+  await page.getByRole("button", { name: "Confirmer la configuration" }).click();
   await page.waitForURL(/\/dashboard/);
 
   // --- 3. It is a working firm --------------------------------------------
@@ -221,7 +221,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   // that was just created, not to one that already existed.
   await expect(page.getByRole("heading", { level: 1, name: firm.name })).toBeVisible();
   await expect(page.getByRole("main")).toContainText("Droit de l’immigration");
-  await expect(page.getByRole("main")).not.toContainText("not configured yet");
+  await expect(page.getByRole("main")).not.toContainText("non configuré");
 
   // And it holds nothing belonging to anybody else.
   await page.goto("/matters");
@@ -231,7 +231,7 @@ test("a third firm can be created entirely through the interface", async ({ page
   // --- 4. Its own administrator can give it demonstration data -------------
 
   await page.goto("/settings?section=demonstration");
-  const addButton = page.getByRole("button", { name: /Add \d+ sample matter/ });
+  const addButton = page.getByRole("button", { name: /Ajouter \d+ dossier\(s\) d’exemple/ });
   await expect(addButton).toBeVisible();
   await addButton.click();
   await page.waitForURL(/added=/);

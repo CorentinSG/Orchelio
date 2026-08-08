@@ -78,7 +78,7 @@ test.describe("An analysis nobody has approved", () => {
     await page.goto("/approvals");
 
     const waiting = page.getByRole("region", { name: /^Waiting for a decision/ });
-    await expect(waiting).toContainText("Rely on an AI analysis");
+    await expect(waiting).toContainText("S’appuyer sur une analyse d’IA");
     await expect(waiting).toContainText("IMM-2026-001");
   });
 });
@@ -91,7 +91,7 @@ test.describe("Deciding", () => {
 
     const waiting = page.getByRole("region", { name: /^Waiting for a decision/ });
     await expect(waiting).toContainText("If you approve:");
-    await expect(waiting).toContainText(/Has an attorney read this analysis/i);
+    await expect(waiting).toContainText(/Un avocat a-t-il lu cette analyse/i);
   });
 
   test("offers four decisions, none of them the obvious one", async ({ page }) => {
@@ -169,7 +169,7 @@ test.describe("A locked rule", () => {
 
     await tabs(page).getByRole("link", { name: "Validations", exact: true }).click();
     const approvals = page.getByRole("region", { name: /^Validations sur ce dossier/ });
-    await expect(approvals).toContainText("Approve a draft for use outside the firm");
+    await expect(approvals).toContainText("Valider un brouillon pour usage hors du cabinet");
     await expect(approvals).toContainText("Cannot be switched off");
   });
 
@@ -196,7 +196,7 @@ test.describe("A locked rule", () => {
 
     await expect(page.getByText("Demandé, en attente d’une personne")).toBeVisible();
     const approvals = page.getByRole("region", { name: /^Validations sur ce dossier/ });
-    await expect(approvals).toContainText("Confirm a recorded date");
+    await expect(approvals).toContainText("Confirmer une date enregistrée");
     await expect(approvals).toContainText("Cannot be switched off");
   });
 });
@@ -402,8 +402,8 @@ test.describe("Separation of duties", () => {
     await page.goto("/approvals");
 
     const card = pendingCard(page, "IMM-2026-003");
-    await expect(card).toContainText("You raised this request");
-    await expect(card).toContainText("that person is you");
+    await expect(card).toContainText("Vous avez formé cette demande");
+    await expect(card).toContainText("cette personne, c’est vous");
     // Still decidable: informed, not blocked.
     await expect(card.getByRole("button", { name: /^Approved$/ })).toBeVisible();
   });
@@ -417,16 +417,16 @@ test.describe("Separation of duties", () => {
     await page.goto("/settings?section=approvals");
 
     await page
-      .getByRole("checkbox", { name: /must be decided by somebody other than the person/ })
+      .getByRole("checkbox", { name: /doit être décidée par quelqu’un d’autre que la personne/ })
       .check();
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
 
-    await expect(page.getByRole("main").getByRole("alert")).toContainText(/undecidable/i);
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(/indécidable/i);
 
     // Nothing was stored: the box comes back unticked.
     await page.goto("/settings?section=approvals");
     await expect(
-      page.getByRole("checkbox", { name: /must be decided by somebody other than the person/ }),
+      page.getByRole("checkbox", { name: /doit être décidée par quelqu’un d’autre que la personne/ }),
     ).not.toBeChecked();
   });
 
@@ -437,9 +437,9 @@ test.describe("Separation of duties", () => {
     // The count is real rather than assumed: this firm has one person who may
     // decide, and the screen names the consequence instead of saying "not
     // available".
-    await expect(page.getByRole("main")).toContainText(/Only one person here may decide/);
-    await expect(page.getByRole("main")).toContainText(/undecidable/);
-    await expect(page.getByRole("main")).toContainText(/Give a second person the attorney/);
+    await expect(page.getByRole("main")).toContainText(/Une seule personne peut décider ici/);
+    await expect(page.getByRole("main")).toContainText(/indécidable/);
+    await expect(page.getByRole("main")).toContainText(/Donnez d’abord à une deuxième personne le rôle d’avocat/);
   });
 });
 

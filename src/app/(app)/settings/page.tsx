@@ -127,22 +127,22 @@ export default async function SettingsPage({ searchParams }: PageProps) {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Réglages du cabinet</h1>
         <p className="mt-1 text-ink-muted">
-          What this firm handles, what it lets the assistant do, and who may use it.
+          Ce que ce cabinet traite, ce qu’il autorise l’assistant à faire, et qui peut s’en servir.
         </p>
       </header>
 
       {error ? (
-        <Callout tone="danger" title="That change was not saved" assertive>
+        <Callout tone="danger" title="Cette modification n’a pas été enregistrée" assertive>
           {error}
         </Callout>
       ) : null}
       {saved ? (
-        <Callout tone="success" title="Saved">
-          The change applies immediately and is recorded in the activity log.
+        <Callout tone="success" title="Enregistré">
+          La modification s’applique immédiatement et figure au journal d’activité.
         </Callout>
       ) : null}
 
-      {!canEdit ? <ReadOnlyNotice what={`You hold a role in ${firm.name} that can read the settings.`} /> : null}
+      {!canEdit ? <ReadOnlyNotice what={`Votre rôle dans ${firm.name} permet de consulter les réglages.`} /> : null}
 
       <SettingsTabs active={section.slug} />
 
@@ -152,7 +152,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           <form method="post" action="/api/settings" className="space-y-4">
             <input type="hidden" name="section" value="profile" />
 
-            <Field label="Firm name" htmlFor="firmName">
+            <Field label="Nom du cabinet" htmlFor="firmName">
               <input
                 id="firmName"
                 name="firmName"
@@ -164,7 +164,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Administrator" htmlFor="contactName">
+              <Field label="Administrateur" htmlFor="contactName">
                 <input
                   id="contactName"
                   name="contactName"
@@ -175,9 +175,9 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                 />
               </Field>
               <Field
-                label="Administrator email"
+                label="E-mail de l’administrateur"
                 htmlFor="contactEmail"
-                hint="Fictional. Orchelio sends nothing to it, or to anywhere else."
+                hint="Fictif. Orchelio n’y envoie rien, ni nulle part ailleurs."
               >
                 <input
                   id="contactEmail"
@@ -192,7 +192,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="People using Orchelio" htmlFor="userCount">
+              <Field label="Personnes utilisant Orchelio" htmlFor="userCount">
                 <input
                   id="userCount"
                   name="userCount"
@@ -204,9 +204,9 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                 />
               </Field>
               <Field
-                label="Primary jurisdiction"
+                label="Ressort principal"
                 htmlFor="jurisdiction"
-                hint="Recorded, never used to reach a legal conclusion."
+                hint="Enregistré, jamais utilisé pour tirer une conclusion juridique."
               >
                 <select
                   id="jurisdiction"
@@ -225,11 +225,11 @@ export default async function SettingsPage({ searchParams }: PageProps) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Language" htmlFor="language" hint="English is the only interface language Orchelio has. The choice is stored and nothing reads it yet.">
+              <Field label="Langue" htmlFor="language" hint="L’interface est en français. Ce choix est enregistré, et rien ne le lit encore — l’anglais n’est pas disponible.">
                 <select
                   id="language"
                   name="language"
-                  defaultValue={configuration?.language ?? "en"}
+                  defaultValue={configuration?.language ?? "fr"}
                   disabled={!canEdit}
                   className={inputClass}
                 >
@@ -240,7 +240,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                   ))}
                 </select>
               </Field>
-              <Field label="Timezone" htmlFor="timezone" hint="Every date and time Orchelio shows is named in this zone.">
+              <Field label="Fuseau horaire" htmlFor="timezone" hint="Chaque date et heure affichée par Orchelio est donnée dans ce fuseau.">
                 <select
                   id="timezone"
                   name="timezone"
@@ -255,7 +255,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                   ))}
                 </select>
               </Field>
-              <Field label="Currency" htmlFor="currency" hint="Used on the usage and costs screen. Orchelio charges nothing.">
+              <Field label="Devise" htmlFor="currency" hint="Utilisée sur l’écran Consommation et coûts. Orchelio ne facture rien.">
                 <select
                   id="currency"
                   name="currency"
@@ -272,18 +272,18 @@ export default async function SettingsPage({ searchParams }: PageProps) {
               </Field>
             </div>
 
-            <Callout tone="neutral" title="The main practice area is not changed here">
+            <Callout tone="neutral" title="Le domaine principal ne se change pas ici">
               <p>
-                {firm.name} is set up as a {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()}{" "}
-                firm. Changing that re-derives the matter types, the workflow vocabulary, the AI
-                features and the dashboard — so it is the questionnaire&apos;s job, not a field on
-                this page.
+                {firm.name} est installé comme cabinet de{" "}
+                {practiceAreaLabel(firm.primaryPracticeArea).toLowerCase()}. En changer redérive les
+                types de dossier, le vocabulaire des déroulés, les fonctions d’IA et le tableau de
+                bord — c’est donc le travail du questionnaire, pas d’un champ sur cette page.
               </p>
               <p className="mt-2">
                 <Link href="/onboarding" className="font-medium text-brand underline underline-offset-4">
-                  Re-run the setup questionnaire
+                  Reprendre le questionnaire d’installation
                 </Link>{" "}
-                — it keeps every answer already given.
+                — il conserve chaque réponse déjà donnée.
               </p>
             </Callout>
 
@@ -296,12 +296,12 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           <form method="post" action="/api/settings">
             <input type="hidden" name="section" value="matter-types" />
             <p className="mb-4 text-sm text-ink-muted">
-              These are the kinds of matter this firm can open. Unticking one does not touch matters
-              already open under it — nothing in Orchelio deletes a matter.
+              Ce sont les types de dossier que ce cabinet peut ouvrir. En décocher un ne touche pas
+              aux dossiers déjà ouverts sous ce type — rien dans Orchelio ne supprime un dossier.
             </p>
             {matterTypes.length === 0 ? (
               <p className="text-sm text-ink-muted">
-                No matter types are available for this firm&apos;s practice areas yet.
+                Aucun type de dossier n’est encore disponible pour les domaines de ce cabinet.
               </p>
             ) : (
               <ul className="space-y-2">
@@ -347,10 +347,10 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           <div className="space-y-6">
             <form method="post" action="/api/settings">
               <input type="hidden" name="section" value="approvals" />
-              <h3 className="text-sm font-semibold text-ink">Rules this firm chooses</h3>
+              <h3 className="text-sm font-semibold text-ink">Les règles que ce cabinet choisit</h3>
               <p className="mb-3 mt-0.5 text-sm text-ink-muted">
-                When one of these is on, the action creates a request instead of taking effect, and
-                a person decides.
+                Quand l’une d’elles est active, l’action crée une demande au lieu de prendre effet,
+                et une personne décide.
               </p>
               <ul className="space-y-2">
                 {CONFIGURABLE_APPROVAL_OPTIONS.map((option) => (
@@ -365,20 +365,20 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                 ))}
               </ul>
               <div className="mt-5 border-t border-line pt-4">
-                <h3 className="text-sm font-semibold text-ink">Who may decide</h3>
+                <h3 className="text-sm font-semibold text-ink">Qui peut décider</h3>
                 <p className="mb-3 mt-0.5 text-sm text-ink-muted">
-                  An approval you grant yourself records that a person looked, and that person is
-                  you. {readiness.note}
+                  Une validation que vous vous accordez à vous-même enregistre qu’une personne a
+                  regardé, et cette personne, c’est vous. {readiness.note}
                 </p>
                 <ul className="space-y-2">
                   <CheckboxOption
                     name="requireSeparateApprover"
                     value="on"
-                    label="A request must be decided by somebody other than the person who raised it"
+                    label="Une demande doit être décidée par quelqu’un d’autre que la personne qui l’a formée"
                     description={
                       readiness.workable
-                        ? "Refused on the server, not merely hidden. The requester is named on every card whether this is on or off."
-                        : "Not workable for this firm yet — turning it on would make every request undecidable."
+                        ? "Refusé par le serveur, pas seulement masqué. Le demandeur est nommé sur chaque carte, que ce réglage soit actif ou non."
+                        : "Pas encore praticable dans ce cabinet — l’activer rendrait toute demande indécidable."
                     }
                     defaultChecked={configuration?.requireSeparateApprover ?? false}
                   />
@@ -390,13 +390,13 @@ export default async function SettingsPage({ searchParams }: PageProps) {
 
             <div>
               <h3 className="text-sm font-semibold text-ink">
-                The {LOCKED_APPROVAL_OPTIONS.length} rules nobody can switch off
+                Les {LOCKED_APPROVAL_OPTIONS.length} règles que personne ne peut désactiver
               </h3>
               <p className="mb-3 mt-0.5 text-sm text-ink-muted">
-                These are safety properties of {APP_NAME}, not preferences. There is no control
-                here to turn one off, no form field that submits one, and no value in this
-                firm&apos;s configuration that changes the answer — the server writes them in
-                whatever arrives.
+                Ce sont des propriétés de sûreté d’{APP_NAME}, pas des préférences. Il n’y a ici
+                aucun contrôle pour en désactiver une, aucun champ de formulaire qui en soumette
+                une, et aucune valeur dans la configuration de ce cabinet qui change la réponse —
+                le serveur les inscrit quoi qu’il reçoive.
               </p>
               <LockedRules rules={LOCKED_APPROVAL_OPTIONS} />
             </div>
@@ -407,20 +407,20 @@ export default async function SettingsPage({ searchParams }: PageProps) {
         {section.slug === "people" ? (
           <div className="space-y-4">
             <p className="text-sm text-ink-muted">
-              A role decides what somebody may do, not what they may see: every screen asks for a
-              permission, so a paralegal and an attorney see the same matters and can do different
-              things with them.
+              Un rôle décide de ce qu’une personne peut faire, pas de ce qu’elle peut voir : chaque
+              écran demande une permission, donc un assistant juridique et un avocat voient les
+              mêmes dossiers et peuvent en faire des choses différentes.
             </p>
             <MemberList members={memberRows} canManage={canManagePeople} />
             {!canManagePeople ? (
               <p className="text-sm text-ink-subtle">
-                Changing a role belongs to a firm administrator.
+                Changer un rôle relève de l’administrateur du cabinet.
               </p>
             ) : null}
-            <Callout tone="neutral" title="Inviting somebody new is not offered">
-              An invitation is an email, and Orchelio has no way to send one — there is no transport
-              anywhere in the product. In this demonstration, accounts come from the seed or from
-              the platform administration screen.
+            <Callout tone="neutral" title="Inviter quelqu’un n’est pas proposé">
+              Une invitation est un courriel, et Orchelio n’a aucun moyen d’en envoyer un — il n’y a
+              aucun transport nulle part dans le produit. Dans cette démonstration, les comptes
+              viennent des données d’exemple ou de l’écran d’administration de la plateforme.
             </Callout>
           </div>
         ) : null}
@@ -431,9 +431,9 @@ export default async function SettingsPage({ searchParams }: PageProps) {
             <input type="hidden" name="section" value="branding" />
 
             <Field
-              label="Display name"
+              label="Nom affiché"
               htmlFor="displayName"
-              hint={`How this firm names itself in its own sidebar. Leave empty to use "${firm.name}".`}
+              hint={`Comment ce cabinet se nomme dans sa propre barre latérale. Laissez vide pour utiliser « ${firm.name} ».`}
             >
               <input
                 id="displayName"
@@ -446,25 +446,27 @@ export default async function SettingsPage({ searchParams }: PageProps) {
             </Field>
 
             <div>
-              <p className="text-sm font-medium text-ink">Accent colour</p>
+              <p className="text-sm font-medium text-ink">Couleur d’accent</p>
               <p className="mb-2 mt-0.5 text-sm text-ink-muted">
-                A fixed palette rather than a colour picker: an arbitrary colour can fail contrast
-                against the text placed on it, and this one has to stay legible in both themes.
+                Une palette fixe plutôt qu’un sélecteur de couleur : une couleur arbitraire peut
+                échouer au contraste avec le texte posé dessus, et celle-ci doit rester lisible dans
+                les deux thèmes.
               </p>
               <AccentChoice selected={branding.accent} />
             </div>
 
-            <Callout tone="neutral" title={`${APP_NAME} is not white-labelled`}>
-              A firm brands itself here, not the product. The product name, the demonstration
-              banner and the interface stay {APP_NAME}&apos;s — a screen that presented itself as
-              the firm&apos;s own software would be claiming something untrue about who wrote it.
+            <Callout tone="neutral" title={`${APP_NAME} n’est pas en marque blanche`}>
+              Un cabinet appose ici sa marque, pas celle du produit. Le nom du produit, la bannière
+              de démonstration et l’interface restent ceux d’{APP_NAME} — un écran qui se
+              présenterait comme le logiciel propre au cabinet affirmerait quelque chose de faux sur
+              qui l’a écrit.
             </Callout>
 
             {/* A definition row belongs inside a definition list. Loose
                 <dt>/<dd> elements are read as ordinary text. */}
             <dl>
               <DataRow
-                label="Shown in the sidebar as"
+                label="Affiché dans la barre latérale comme"
                 value={firmDisplayName(branding, firm.name)}
               />
             </dl>
@@ -492,7 +494,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
         ) : null}
       </Card>
 
-      <Card title="What each section changes" description="So a tab is not a mystery before it is opened.">
+      <Card title="Ce que chaque section change" description="Pour qu’un onglet ne soit pas une énigme avant d’être ouvert.">
         <dl>
           {SETTINGS_SECTIONS.map((entry) => (
             <DataRow key={entry.slug} label={entry.title} value={entry.changes} />
@@ -532,34 +534,34 @@ function DemonstrationSection({
   return (
     <div className="space-y-5">
       {added !== null ? (
-        <Callout tone="success" title="Sample data added">
-          {added} matter(s) created
-          {skipped && Number(skipped) > 0 ? `, ${skipped} already present and left untouched` : ""}.
+        <Callout tone="success" title="Données d’exemple ajoutées">
+          {added} dossier(s) créé(s)
+          {skipped && Number(skipped) > 0 ? `, ${skipped} déjà présent(s) et laissé(s) intact(s)` : ""}.
         </Callout>
       ) : null}
 
       <dl>
-        <DataRow label="Matters" value={inventory.matters} />
+        <DataRow label="Dossiers" value={inventory.matters} />
         <DataRow label="Clients" value={inventory.clients} />
         <DataRow label="Documents" value={inventory.documents} />
         <DataRow label="Analyses" value={inventory.analyses} />
-        <DataRow label="Approval requests" value={inventory.approvals} />
-        <DataRow label="Tasks" value={inventory.tasks} />
+        <DataRow label="Demandes de validation" value={inventory.approvals} />
+        <DataRow label="Tâches" value={inventory.tasks} />
       </dl>
 
       <div>
-        <h3 className="text-sm font-semibold text-ink">Add sample matters</h3>
+        <h3 className="text-sm font-semibold text-ink">Ajouter des dossiers d’exemple</h3>
         <p className="mt-0.5 text-sm text-ink-muted">
-          The same fictional matters the demonstration ships with, added to {firmName}. Every
-          person, employer, date and document in them is invented. A matter whose reference already
-          exists is skipped, so this is safe to press twice.
+          Les mêmes dossiers fictifs que ceux livrés avec la démonstration, ajoutés à {firmName}.
+          Chaque personne, employeur, date et document y est inventé. Un dossier dont la référence
+          existe déjà est ignoré : vous pouvez appuyer deux fois sans risque.
         </p>
 
         {available.length === 0 ? (
           <p className="mt-3 text-sm text-ink-muted">
             {notOffered.length > 0
-              ? "There are sample matters for this practice area, but none of their matter types are switched on for this firm. Turn one on under Matter types."
-              : "No sample matters exist for this practice area."}
+              ? "Des dossiers d’exemple existent pour ce domaine, mais aucun de leurs types de dossier n’est activé pour ce cabinet. Activez-en un dans Types de dossier."
+              : "Aucun dossier d’exemple n’existe pour ce domaine."}
           </p>
         ) : (
           <>
@@ -573,8 +575,8 @@ function DemonstrationSection({
             </ul>
             {notOffered.length > 0 ? (
               <p className="mt-2 text-sm text-ink-subtle">
-                {notOffered.length} further sample matter(s) are not offered, because this firm does
-                not have their matter type switched on.
+                {notOffered.length} autre(s) dossier(s) d’exemple ne sont pas proposés, parce que ce
+                cabinet n’a pas activé leur type de dossier.
               </p>
             ) : null}
             {canEdit ? (
@@ -583,7 +585,7 @@ function DemonstrationSection({
                   type="submit"
                   className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-ink hover:bg-brand-strong"
                 >
-                  Add {available.length} sample matter(s)
+                  Ajouter {available.length} dossier(s) d’exemple
                 </button>
               </form>
             ) : null}
@@ -593,20 +595,21 @@ function DemonstrationSection({
 
       <div className="border-t border-line pt-4">
         <h3 className="text-sm font-semibold text-ink">
-          Erasing demonstration data has no button <Badge tone="warning">deliberate</Badge>
+          Effacer les données de démonstration n’a pas de bouton{" "}
+          <Badge tone="warning">délibéré</Badge>
         </h3>
         <p className="mt-1 text-sm text-ink-muted">
-          Deleting everything is a real, irreversible action, and one of the nine locked rules says
-          nothing is ever permanently deleted without a person. A button in a web page is a weaker
-          form of consent than a command somebody types on purpose, so this is where the
-          demonstration reset lives:
+          Tout supprimer est une action réelle et irréversible, et l’une des neuf règles verrouillées
+          dit que rien n’est jamais supprimé définitivement sans une personne. Un bouton dans une
+          page web est une forme de consentement plus faible qu’une commande que quelqu’un tape
+          exprès : voilà donc où vit la réinitialisation de la démonstration.
         </p>
         <div className="mt-2">
           <CommandLine>npm run reset-demo</CommandLine>
         </div>
         <p className="mt-2 text-sm text-ink-subtle">
-          It erases every firm on this instance and re-seeds the demonstration. It is not scoped to
-          one firm, and it cannot be undone.
+          Elle efface tous les cabinets de cette instance et réinstalle les données de
+          démonstration. Elle n’est pas limitée à un seul cabinet, et elle est irréversible.
         </p>
       </div>
     </div>

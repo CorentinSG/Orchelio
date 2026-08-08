@@ -141,5 +141,5 @@ export function daysBetween(from: Date, to: Date, timezone: string): number {
  * exists.
  */
 export function timezoneNotice(timezone: string): string {
-  return `Dates and times are shown in ${timezoneLabel(timezone)}.`;
+  return `Les dates et heures sont affichées en ${timezoneLabel(timezone)}.`;
 }

@@ -29,7 +29,7 @@ import { PRACTICE_AREAS, practiceAreaLabel } from "@/lib/practice-areas";
 import { providerNotice } from "@/lib/ai/notice";
 import { serverEnv } from "@/lib/env";
 
-export const metadata = { title: "Set up your firm" };
+export const metadata = { title: "Installer votre cabinet" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -72,26 +72,26 @@ export default async function OnboardingStepPage({ params, searchParams }: PageP
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-medium uppercase tracking-wide text-brand">Firm setup</p>
+        <p className="text-sm font-medium uppercase tracking-wide text-brand">Installation du cabinet</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">
-          Configure {firm.name}
+          Configurer {firm.name}
         </h1>
         <p className="mt-1 text-ink-muted">
-          Your answers configure Orchelio for this firm. Nothing here changes the software — it
-          selects which parts of it this firm uses.
+          Vos réponses configurent Orchelio pour ce cabinet. Rien ici ne change le logiciel — elles
+          choisissent quelles parties ce cabinet utilise.
         </p>
       </header>
 
       <ProgressBar step={step} />
 
       {error ? (
-        <Callout tone="danger" title="Please check this step" assertive>
+        <Callout tone="danger" title="Vérifiez cette étape" assertive>
           {error}
         </Callout>
       ) : null}
       {saved ? (
-        <Callout tone="success" title="Draft saved">
-          You can close this page and come back to it later.
+        <Callout tone="success" title="Brouillon enregistré">
+          Vous pouvez fermer cette page et y revenir plus tard.
         </Callout>
       ) : null}
 
@@ -119,10 +119,10 @@ export default async function OnboardingStepPage({ params, searchParams }: PageP
             type="submit"
             className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
           >
-            Confirm configuration
+            Confirmer la configuration
           </button>
           <p className="mt-2 text-sm text-ink-subtle">
-            This applies the configuration to {firm.name}. You can change it again at any time.
+            Ceci applique la configuration à {firm.name}. Vous pourrez la modifier à tout moment.
           </p>
         </form>
       ) : null}
@@ -133,10 +133,10 @@ export default async function OnboardingStepPage({ params, searchParams }: PageP
           type="submit"
           className="text-sm font-medium text-ink-muted underline underline-offset-4 hover:text-ink"
         >
-          Start the questionnaire again
+          Recommencer le questionnaire
         </button>
         <p className="mt-1 text-sm text-ink-subtle">
-          Returns to step 1. Nothing is discarded — your answers are still there.
+          Revient à l’étape 1. Rien n’est effacé — vos réponses sont toujours là.
         </p>
       </form>
     </div>
@@ -147,12 +147,12 @@ type Answers = Awaited<ReturnType<typeof loadDraft>>["answers"];
 
 function StepFirmDetails({ answers }: { answers: Answers }) {
   return (
-    <Card title="Firm details" description="Use fictional details — this is a demonstration.">
+    <Card title="Le cabinet" description="Utilisez des informations fictives — ceci est une démonstration.">
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Firm name" htmlFor="firmName">
+        <Field label="Nom du cabinet" htmlFor="firmName">
           <input id="firmName" name="firmName" defaultValue={answers.firmName} className={inputClass} required />
         </Field>
-        <Field label="Firm administrator" htmlFor="contactName">
+        <Field label="Administrateur du cabinet" htmlFor="contactName">
           <input
             id="contactName" name="contactName"
             defaultValue={answers.contactName}
@@ -160,7 +160,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             required
           />
         </Field>
-        <Field label="Email address" htmlFor="contactEmail" hint="Fictional. Nothing is ever sent to it.">
+        <Field label="Adresse e-mail" htmlFor="contactEmail" hint="Fictive. Rien n’y est jamais envoyé.">
           <input
             id="contactEmail" name="contactEmail"
             type="email"
@@ -170,7 +170,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             required
           />
         </Field>
-        <Field label="Number of users" htmlFor="userCount">
+        <Field label="Nombre d’utilisateurs" htmlFor="userCount">
           <input
             id="userCount" name="userCount"
             type="number"
@@ -180,7 +180,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             className={inputClass}
           />
         </Field>
-        <Field label="Main jurisdiction" htmlFor="jurisdiction">
+        <Field label="Ressort principal" htmlFor="jurisdiction">
           <select id="jurisdiction" name="jurisdiction" defaultValue={answers.jurisdiction} className={inputClass}>
             {JURISDICTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -189,7 +189,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             ))}
           </select>
         </Field>
-        <Field label="Language" htmlFor="language" hint="English is the only interface language Orchelio has. The choice is stored and nothing reads it yet.">
+        <Field label="Langue" htmlFor="language" hint="L’interface est en français. Ce choix est enregistré, et rien ne le lit encore — l’anglais n’est pas disponible.">
           <select id="language" name="language" defaultValue={answers.language} className={inputClass}>
             {LANGUAGES.map((option) => (
               <option key={option.value} value={option.value}>
@@ -198,7 +198,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             ))}
           </select>
         </Field>
-        <Field label="Currency" htmlFor="currency" hint="Used on the usage and costs screen. Orchelio charges nothing.">
+        <Field label="Devise" htmlFor="currency" hint="Utilisée sur l’écran Consommation et coûts. Orchelio ne facture rien.">
           <select id="currency" name="currency" defaultValue={answers.currency} className={inputClass}>
             {CURRENCIES.map((option) => (
               <option key={option.value} value={option.value}>
@@ -207,7 +207,7 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
             ))}
           </select>
         </Field>
-        <Field label="Time zone" htmlFor="timezone" hint="Every date and time Orchelio shows is named in this zone.">
+        <Field label="Fuseau horaire" htmlFor="timezone" hint="Chaque date et heure affichée par Orchelio est donnée dans ce fuseau.">
           <select id="timezone" name="timezone" defaultValue={answers.timezone} className={inputClass}>
             {TIMEZONES.map((option) => (
               <option key={option.value} value={option.value}>
@@ -228,8 +228,8 @@ function StepFirmDetails({ answers }: { answers: Answers }) {
 function StepPracticeAreas({ answers }: { answers: Answers }) {
   return (
     <Card
-      title="What areas of law does your firm practise?"
-      description="Select every area you work in, then choose the main one."
+      title="Quels domaines de droit votre cabinet pratique-t-il ?"
+      description="Sélectionnez tous les domaines dans lesquels vous travaillez, puis choisissez le principal."
     >
       <ul className="grid gap-2 sm:grid-cols-2">
         {PRACTICE_AREAS.map((area) => (
@@ -238,7 +238,7 @@ function StepPracticeAreas({ answers }: { answers: Answers }) {
             name="practiceAreas"
             value={area.key}
             label={area.label}
-            description={area.status === "available" ? undefined : "Template coming soon."}
+            description={area.status === "available" ? undefined : "Modèle bientôt disponible."}
             defaultChecked={answers.practiceAreas.includes(area.key)}
           />
         ))}
@@ -246,9 +246,9 @@ function StepPracticeAreas({ answers }: { answers: Answers }) {
 
       <div className="mt-6">
         <Field
-          label="Main practice area"
+          label="Domaine principal"
           htmlFor="primaryPracticeArea"
-          hint="This decides the dashboard, the vocabulary and the workflows this firm sees."
+          hint="Il détermine le tableau de bord, le vocabulaire et les déroulés que ce cabinet verra."
         >
           <select
             id="primaryPracticeArea"
@@ -256,7 +256,7 @@ function StepPracticeAreas({ answers }: { answers: Answers }) {
             defaultValue={answers.primaryPracticeArea}
             className={inputClass}
           >
-            <option value="">Choose an area…</option>
+            <option value="">Choisissez un domaine…</option>
             {PRACTICE_AREAS.filter((area) => area.status === "available").map((area) => (
               <option key={area.key} value={area.key}>
                 {area.label}
@@ -265,8 +265,8 @@ function StepPracticeAreas({ answers }: { answers: Answers }) {
           </select>
         </Field>
         <p className="mt-2 text-sm text-ink-subtle">
-          Only Immigration Law and Employment &amp; Labor Law ship a full template in this
-          demonstration, so only those can be the main area.
+          Seuls le droit de l’immigration et le droit du travail disposent d’un modèle complet dans
+          cette démonstration : eux seuls peuvent être le domaine principal.
         </p>
       </div>
 
@@ -293,12 +293,12 @@ function StepMatterTypes({
 
   return (
     <Card
-      title="Which types of matter does your firm handle?"
-      description="These decide the fields, documents, workflows and dashboard each matter uses."
+      title="Quels types de dossier votre cabinet traite-t-il ?"
+      description="Ils déterminent les champs, les documents, les déroulés et le tableau de bord de chaque dossier."
     >
       {matterTypes.length === 0 ? (
-        <Callout tone="warning" title="No practice area selected yet">
-          Go back to step 2 and choose at least one area of law.
+        <Callout tone="warning" title="Aucun domaine de droit sélectionné">
+          Revenez à l’étape 2 et choisissez au moins un domaine de droit.
         </Callout>
       ) : (
         [...grouped.entries()].map(([areaKey, types]) => (
@@ -335,8 +335,8 @@ function StepWorkflow({
 }) {
   return (
     <Card
-      title="Which steps are part of your normal workflow?"
-      description="Select the steps a matter goes through at your firm."
+      title="Quelles étapes font partie de votre déroulé habituel ?"
+      description="Sélectionnez les étapes par lesquelles passe un dossier dans votre cabinet."
     >
       <ul className="grid gap-2 sm:grid-cols-2">
         {WORKFLOW_STEP_OPTIONS.map((option) => (
@@ -352,9 +352,9 @@ function StepWorkflow({
       </ul>
 
       <div className="mt-6 rounded-card border border-line bg-surface-muted px-4 py-4">
-        <h3 className="text-sm font-semibold text-ink">Your workflow</h3>
+        <h3 className="text-sm font-semibold text-ink">Votre déroulé</h3>
         <p className="mb-3 text-sm text-ink-muted">
-          Saved when you continue. Steps appear in the order a matter travels through them.
+          Enregistré quand vous continuez. Les étapes apparaissent dans l’ordre où un dossier les traverse.
         </p>
         <WorkflowPreview steps={selectedLabels} />
       </div>
@@ -369,13 +369,14 @@ function StepWorkflow({
 function StepAiFeatures({ answers }: { answers: Answers }) {
   return (
     <Card
-      title="How would you like Claude to assist your team?"
-      description="Every one of these produces a draft for a person to review. None of them decides anything."
+      title="Comment l’assistant doit-il aider votre équipe ?"
+      description="Chacune produit un brouillon qu’une personne relit. Aucune ne décide de quoi que ce soit."
     >
       <div className="mb-4">
-        <Callout tone="ai" title="AI-generated — Human review required">
+        <Callout tone="ai" title="Produit par une IA — à lire par une personne, obligatoire">
           <p>
-            Claude never states a legal conclusion, never sends anything and never acts on its own.
+            L’assistant n’énonce jamais de conclusion juridique, n’envoie jamais rien et n’agit
+            jamais de lui-même.
           </p>
           <p className="mt-2">{providerNotice(serverEnv()).banner}</p>
         </Callout>
@@ -405,8 +406,8 @@ function StepApprovals({ answers }: { answers: Answers }) {
   return (
     <div className="space-y-6">
       <Card
-        title="Which actions must require human approval?"
-        description="Choose the actions that nobody at your firm may complete without a second pair of eyes."
+        title="Quelles actions doivent requérir une validation humaine ?"
+        description="Choisissez les actions que personne dans votre cabinet ne peut accomplir sans un second regard."
       >
         <ul className="grid gap-2 sm:grid-cols-2">
           {CONFIGURABLE_APPROVAL_OPTIONS.map((option) => (
@@ -427,15 +428,15 @@ function StepApprovals({ answers }: { answers: Answers }) {
       </Card>
 
       <Card
-        title="Always required"
-        description="These cannot be switched off, by anyone, on any screen."
+        title="Toujours obligatoire"
+        description="Impossible à désactiver, par qui que ce soit, sur quelque écran que ce soit."
       >
         <div className="mb-4">
-          <Callout tone="warning" title="Not a preference">
+          <Callout tone="warning" title="Ce n’est pas une préférence">
             <p>
-              These are safety properties of Orchelio rather than settings. They are enforced on
-              the server whatever a firm configuration says, and they are stored with your
-              configuration so the guarantee is auditable rather than merely asserted.
+              Ce sont des propriétés de sûreté d’Orchelio, pas des réglages. Elles sont appliquées
+              par le serveur quoi que dise la configuration d’un cabinet, et elles sont enregistrées
+              avec votre configuration : la garantie est vérifiable, pas seulement affirmée.
             </p>
           </Callout>
         </div>
@@ -468,34 +469,34 @@ function StepSummary({ answers, selectedLabels }: { answers: Answers; selectedLa
 
   return (
     <div className="space-y-6">
-      <Card title="Summary" description="Check this over before you confirm.">
+      <Card title="Récapitulatif" description="Relisez ceci avant de confirmer.">
         <dl className="grid gap-4 sm:grid-cols-2">
-          <SummaryItem label="Firm name" value={answers.firmName} />
-          <SummaryItem label="Administrator" value={answers.contactName} />
+          <SummaryItem label="Nom du cabinet" value={answers.firmName} />
+          <SummaryItem label="Administrateur" value={answers.contactName} />
           <SummaryItem
-            label="Main practice area"
+            label="Domaine principal"
             value={practiceAreaLabel(answers.primaryPracticeArea)}
           />
           <SummaryItem
-            label="Other practice areas"
+            label="Autres domaines"
             value={
               answers.practiceAreas.filter((area) => area !== answers.primaryPracticeArea).length > 0
                 ? answers.practiceAreas
                     .filter((area) => area !== answers.primaryPracticeArea)
                     .map(practiceAreaLabel)
                     .join(", ")
-                : "None"
+                : "Aucun"
             }
           />
-          <SummaryItem label="Jurisdiction" value={answers.jurisdiction} />
+          <SummaryItem label="Ressort" value={answers.jurisdiction} />
           <SummaryItem
-            label="Locale"
+            label="Langue, devise et fuseau"
             value={`${answers.language} · ${answers.currency} · ${answers.timezone}`}
           />
         </dl>
       </Card>
 
-      <Card title="Matter types" description={`${answers.matterTypes.length} selected.`}>
+      <Card title="Types de dossier" description={`${answers.matterTypes.length} sélectionné(s).`}>
         <ul className="flex flex-wrap gap-1.5">
           {configuration.matterTypes.map((type) => (
             <li key={type} className="rounded-full border border-line px-3 py-1 text-sm text-ink">
@@ -505,14 +506,14 @@ function StepSummary({ answers, selectedLabels }: { answers: Answers; selectedLa
         </ul>
       </Card>
 
-      <Card title="Workflow" description="The path a matter follows at this firm.">
+      <Card title="Déroulé d’un dossier" description="Le chemin qu’un dossier suit dans ce cabinet.">
         <WorkflowPreview steps={selectedLabels} />
       </Card>
 
-      <Card title="AI features" description={`${aiLabels.length} enabled.`}>
+      <Card title="Fonctions d’IA" description={`${aiLabels.length} activée(s).`}>
         {aiLabels.length === 0 ? (
           <p className="text-sm text-ink-muted">
-            None. Orchelio still manages matters, documents and approvals.
+            Aucune. Orchelio gère toujours les dossiers, les documents et les validations.
           </p>
         ) : (
           <ul className="list-inside list-disc text-sm text-ink">
@@ -523,10 +524,10 @@ function StepSummary({ answers, selectedLabels }: { answers: Answers; selectedLa
         )}
       </Card>
 
-      <Card title="Approvals" description="What needs a human decision at this firm.">
-        <h3 className="text-sm font-semibold text-ink">Chosen by your firm</h3>
+      <Card title="Validations" description="Ce qui requiert une décision humaine dans ce cabinet.">
+        <h3 className="text-sm font-semibold text-ink">Choisies par votre cabinet</h3>
         {approvalLabels.length === 0 ? (
-          <p className="mt-1 text-sm text-ink-muted">None beyond the rules below.</p>
+          <p className="mt-1 text-sm text-ink-muted">Aucune au-delà des règles ci-dessous.</p>
         ) : (
           <ul className="mt-1 list-inside list-disc text-sm text-ink">
             {approvalLabels.map((label) => (
@@ -536,7 +537,7 @@ function StepSummary({ answers, selectedLabels }: { answers: Answers; selectedLa
         )}
 
         <h3 className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-ink">
-          <LockIcon /> Always required
+          <LockIcon /> Toujours obligatoire
         </h3>
         <ul className="mt-1 list-inside list-disc text-sm text-ink-muted">
           {LOCKED_APPROVAL_OPTIONS.map((option) => (
@@ -545,24 +546,24 @@ function StepSummary({ answers, selectedLabels }: { answers: Answers; selectedLa
         </ul>
       </Card>
 
-      <Card title="Roles" description="Who can do what at this firm.">
+      <Card title="Rôles" description="Qui peut faire quoi dans ce cabinet.">
         <ul className="list-inside list-disc text-sm text-ink">
-          <li>Firm Administrator — configuration, users, workflows, costs, activity log.</li>
-          <li>Attorney — matters, analyses, approvals, deadlines, communications.</li>
-          <li>Paralegal — intake, documents, analyses. No approvals, no deadlines, no closing.</li>
-          <li>Read-only Reviewer — may look and nothing else.</li>
+          <li>Administrateur du cabinet — configuration, utilisateurs, déroulés, coûts, journal d’activité.</li>
+          <li>Avocat — dossiers, analyses, validations, échéances, courriers.</li>
+          <li>Assistant juridique — questionnaire client, documents, analyses. Ni validation, ni échéance, ni clôture.</li>
+          <li>Lecteur — peut consulter, et rien d’autre.</li>
         </ul>
       </Card>
 
-      <Card title="Integrations" description="Prepared, not connected in this demonstration.">
+      <Card title="Intégrations" description="Prévues, non connectées dans cette démonstration.">
         <p className="text-sm text-ink-muted">
           Microsoft 365, Google Workspace, Clio, MyCase, PracticePanther, SharePoint, OneDrive,
-          Dropbox, DocuSign, LawPay. Integration not connected in this demonstration.
+          Dropbox, DocuSign, LawPay. Aucune intégration n’est connectée dans cette démonstration.
         </p>
       </Card>
 
       <div className="border-t border-line pt-5">
-        <StepActions step={7} submitLabel="Save and stay here" />
+        <StepActions step={7} submitLabel="Enregistrer et rester ici" />
       </div>
     </div>
   );

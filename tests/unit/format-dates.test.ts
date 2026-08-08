@@ -129,15 +129,15 @@ describe("counting days", () => {
 
 describe("telling the reader which zone they are looking at", () => {
   it("labels the zones Orchelio offers in the firm's words", () => {
-    expect(timezoneLabel(PACIFIC)).toBe("Pacific (Los Angeles)");
-    expect(timezoneLabel(EASTERN)).toBe("Eastern (New York)");
+    expect(timezoneLabel(PACIFIC)).toBe("Pacifique (Los Angeles)");
+    expect(timezoneLabel(EASTERN)).toBe("Est (New York)");
   });
 
   it("falls back to the identifier rather than to nothing", () => {
-    expect(timezoneLabel("Europe/Paris")).toBe("Europe/Paris");
+    expect(timezoneLabel("Asia/Tokyo")).toBe("Asia/Tokyo");
   });
 
   it("writes a sentence for somebody who did not choose the setting", () => {
-    expect(timezoneNotice(PACIFIC)).toBe("Dates and times are shown in Pacific (Los Angeles).");
+    expect(timezoneNotice(PACIFIC)).toBe("Les dates et heures sont affichées en Pacifique (Los Angeles).");
   });
 });

@@ -38,6 +38,14 @@ fuseau du cabinet, comme l'exige ADR-0021.
 | Review (the second pass) | **Relecture** | Une relecture indépendante, pas une « revue ». |
 | Firm | **Cabinet** | |
 | Platform administrator | **Administrateur de la plateforme** | |
+| Workflow | **Déroulé** — « le déroulé d'un dossier » | « Flux de travail » est un calque ; « processus » sonne qualité-ISO. |
+| Onboarding | **Installation** | Le questionnaire *installe* le cabinet dans le produit ; « embarquement » ne se dit pas. |
+| Branding | **Identité visuelle** | |
+| Retainer agreement | **Convention d'honoraires** | Le terme du métier, pas « accord de mandat ». |
+| Filing | **Dépôt** — et « déposer » | Jamais « classer », qui en français veut dire l'inverse. |
+| Privileged (classe de données) | **Couvert par le secret professionnel** | Le concept français correspondant ; « privilégié » ne veut rien dire ici. |
+| Client-confidential | **Confidentiel client** | |
+| Egress | **Sortie** — « ce qui quitte la machine » | |
 | Lead | **Premier contact** | « Lead » est du vocabulaire commercial anglais ; un cabinet parle d'un premier contact. |
 
 ## Rôles
@@ -93,6 +101,12 @@ est fixée ici pour que chaque écran dise exactement la même chose.
 Jusqu'ici, l'interface était en anglais et le réglage « langue » disait
 honnêtement qu'il ne changeait rien (ADR-0021). La bascule V1 inverse la
 situation : le produit est en français, et le réglage continue de dire la
-vérité — « L'interface est en français ; ce réglage ne change encore rien. »
-L'anglais reviendra comme une vraie option quand un cabinet le demandera,
-extrait de ces écrans vers un catalogue de traductions.
+vérité — « L'interface est en français. Ce choix est enregistré, et rien ne le
+lit encore — l'anglais n'est pas disponible. » L'anglais reviendra comme une
+vraie option quand un cabinet le demandera, extrait de ces écrans vers un
+catalogue de traductions.
+
+Deux choses ont bougé avec la bascule, parce que ne pas les bouger aurait été
+mentir : la valeur par défaut d'un nouveau cabinet est `fr` et non plus `en`,
+et la page déclare `<html lang="fr">`. Ce dernier point n'est pas cosmétique —
+un lecteur d'écran prononçait jusqu'ici du français avec des phonèmes anglais.

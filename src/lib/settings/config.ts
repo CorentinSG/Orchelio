@@ -36,51 +36,51 @@ export type SettingsSection = {
 export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
   {
     slug: "profile",
-    title: "Profile",
-    description: "The firm's name, its administrator, and the conventions its screens use.",
-    changes: "Firm name, contact, jurisdiction, language, timezone, currency.",
+    title: "Profil",
+    description: "Le nom du cabinet, son administrateur, et les conventions que ses écrans emploient.",
+    changes: "Nom du cabinet, contact, ressort, langue, fuseau horaire, devise.",
   },
   {
     slug: "matter-types",
-    title: "Matter types",
-    description: "Which kinds of matter this firm handles.",
-    changes: "The matter types offered when opening a matter.",
+    title: "Types de dossier",
+    description: "Les types de dossier que ce cabinet traite.",
+    changes: "Les types de dossier proposés à l’ouverture d’un dossier.",
   },
   {
     slug: "ai",
-    title: "AI features",
-    description: "What the simulated assistant is allowed to do for this firm.",
-    changes: "The AI features the workspace offers, and the widgets that depend on them.",
+    title: "Fonctions d’IA",
+    description: "Ce que l’assistant est autorisé à faire pour ce cabinet.",
+    changes: "Les fonctions d’IA proposées par l’assistant, et les cartes du tableau de bord qui en dépendent.",
   },
   {
     slug: "approvals",
-    title: "Approval rules",
-    description: "Which actions need a person's decision before they take effect.",
-    changes: "The configurable rules. The nine locked rules cannot be changed by anyone.",
+    title: "Règles de validation",
+    description: "Les actions qui requièrent la décision d’une personne avant de prendre effet.",
+    changes: "Les règles configurables. Les neuf règles verrouillées ne peuvent être changées par personne.",
   },
   {
     slug: "people",
-    title: "People and roles",
-    description: "Who may use this firm's workspace, and what each of them may do.",
-    changes: "A member's role, or whether their access is suspended.",
+    title: "Personnes et rôles",
+    description: "Qui peut utiliser l’espace de ce cabinet, et ce que chacun peut y faire.",
+    changes: "Le rôle d’un membre, ou la suspension de son accès.",
   },
   {
     slug: "branding",
-    title: "Branding",
-    description: "How this firm identifies itself inside Orchelio.",
-    changes: "The firm's display name and accent colour. Not the product's.",
+    title: "Identité visuelle",
+    description: "Comment ce cabinet s’identifie à l’intérieur d’Orchelio.",
+    changes: "Le nom affiché du cabinet et sa couleur d’accent. Pas ceux du produit.",
   },
   {
     slug: "confidentiality",
-    title: "Confidentiality",
-    description: "Where this firm's data is, who can read it, and what leaves the machine.",
-    changes: "Nothing. It reports; it is the one section with no form.",
+    title: "Confidentialité",
+    description: "Où sont les données de ce cabinet, qui peut les lire, et ce qui quitte la machine.",
+    changes: "Rien. Elle rend compte ; c’est la seule section sans formulaire.",
   },
   {
     slug: "demonstration",
-    title: "Demonstration",
-    description: "The fictional data in this firm's workspace.",
-    changes: "Adds sample matters. Nothing here deletes anything.",
+    title: "Démonstration",
+    description: "Les données fictives dans l’espace de ce cabinet.",
+    changes: "Ajoute des dossiers d’exemple. Rien ici ne supprime quoi que ce soit.",
   },
 ] as const;
 
@@ -112,10 +112,10 @@ export function settingsSection(slug: string | undefined): SettingsSection {
  * legible on both.
  */
 export const ACCENT_COLOURS = [
-  { key: "default", label: "Orchelio blue", light: "#1f4e79", dark: "#7ba7d4" },
-  { key: "slate", label: "Slate", light: "#334155", dark: "#94a3b8" },
-  { key: "teal", label: "Teal", light: "#0f5f5c", dark: "#5eb3ae" },
-  { key: "plum", label: "Plum", light: "#5b2f5e", dark: "#c093c4" },
+  { key: "default", label: "Bleu Orchelio", light: "#1f4e79", dark: "#7ba7d4" },
+  { key: "slate", label: "Ardoise", light: "#334155", dark: "#94a3b8" },
+  { key: "teal", label: "Sarcelle", light: "#0f5f5c", dark: "#5eb3ae" },
+  { key: "plum", label: "Prune", light: "#5b2f5e", dark: "#c093c4" },
   { key: "bronze", label: "Bronze", light: "#7a4a1e", dark: "#d9a271" },
 ] as const;
 
@@ -212,16 +212,16 @@ export type ProfileValidation = { ok: true } | { ok: false; message: string };
  */
 export function validateProfile(update: Partial<ProfileUpdate>): ProfileValidation {
   if (!update.firmName?.trim()) {
-    return { ok: false, message: "Enter a firm name." };
+    return { ok: false, message: "Saisissez le nom du cabinet." };
   }
   if (!update.contactName?.trim()) {
-    return { ok: false, message: "Enter the name of the firm administrator." };
+    return { ok: false, message: "Saisissez le nom de l’administrateur du cabinet." };
   }
   if (!update.contactEmail?.trim() || !update.contactEmail.includes("@")) {
-    return { ok: false, message: "Enter a fictional email address." };
+    return { ok: false, message: "Saisissez une adresse e-mail fictive." };
   }
   if (update.userCount !== undefined && (!Number.isFinite(update.userCount) || update.userCount < 1)) {
-    return { ok: false, message: "The number of users must be at least one." };
+    return { ok: false, message: "Le nombre d’utilisateurs doit être d’au moins un." };
   }
   return { ok: true };
 }

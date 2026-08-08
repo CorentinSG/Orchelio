@@ -29,16 +29,16 @@ export default async function AdminSystemPage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-brand">
-          Platform administration
+          Administration de la plateforme
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Vue d’ensemble du système</h1>
         <p className="mt-1 text-ink-muted">
-          Measured on this request. Nothing on this page is cached.
+          Mesuré lors de cette requête. Rien sur cette page n’est mis en cache.
         </p>
       </header>
 
       {status.database.state === "unavailable" ? (
-        <Callout tone="danger" title="The database could not be reached" assertive>
+        <Callout tone="danger" title="La base de données n’a pas pu être jointe" assertive>
           <p>{status.database.reason}</p>
           <div className="mt-2">
             <CommandLine>{status.database.remedy}</CommandLine>
@@ -46,13 +46,13 @@ export default async function AdminSystemPage() {
         </Callout>
       ) : null}
 
-      <Card title="Runtime">
+      <Card title="Exécution">
         <dl>
           <DataRow label="Application" value={APP_FULL_NAME} />
-          <DataRow label="Environment" value={status.appEnv} />
+          <DataRow label="Environnement" value={status.appEnv} />
           <DataRow label="Node.js" value={status.nodeVersion} />
           <DataRow
-            label="AI provider"
+            label="Fournisseur d’IA"
             value={
               <span className="flex items-center justify-end gap-2">
                 <span className="font-mono">{status.aiProvider}</span>
@@ -64,51 +64,51 @@ export default async function AdminSystemPage() {
         </dl>
       </Card>
 
-      <Card title="Database">
+      <Card title="Base de données">
         {status.database.state === "connected" ? (
           <dl>
             <DataRow
-              label="State"
-              value={<Badge tone="success">connected</Badge>}
-              hint={`${status.database.latencyMs} ms round trip`}
+              label="État"
+              value={<Badge tone="success">connectée</Badge>}
+              hint={`${status.database.latencyMs} ms aller-retour`}
             />
-            <DataRow label="Migrations applied" value={status.database.migrationsApplied} />
-            <DataRow label="Firms" value={status.database.firmCount} />
+            <DataRow label="Migrations appliquées" value={status.database.migrationsApplied} />
+            <DataRow label="Cabinets" value={status.database.firmCount} />
           </dl>
         ) : (
           <p className="text-sm text-ink-muted">
-            No figures are shown, because none could be read. A zero here would be a claim about
-            the data rather than about the connection.
+            Aucun chiffre n’est affiché, parce qu’aucun n’a pu être lu. Un zéro ici serait une
+            affirmation sur les données plutôt que sur la connexion.
           </p>
         )}
       </Card>
 
-      <Card title="Records" description="Each firm's own counts, added up.">
+      <Card title="Enregistrements" description="Les comptes propres de chaque cabinet, additionnés.">
         <dl>
-          <DataRow label="Firms" value={counts.firms} />
-          <DataRow label="Users" value={counts.users} />
-          <DataRow label="Active sessions" value={counts.activeSessions} />
-          <DataRow label="Matters" value={counts.matters} />
+          <DataRow label="Cabinets" value={counts.firms} />
+          <DataRow label="Utilisateurs" value={counts.users} />
+          <DataRow label="Sessions actives" value={counts.activeSessions} />
+          <DataRow label="Dossiers" value={counts.matters} />
           <DataRow label="Documents" value={counts.documents} />
           <DataRow label="Analyses" value={counts.analyses} />
-          <DataRow label="Approval requests" value={counts.approvals} />
-          <DataRow label="Activity events" value={counts.auditEvents} />
+          <DataRow label="Demandes de validation" value={counts.approvals} />
+          <DataRow label="Événements d’activité" value={counts.auditEvents} />
         </dl>
       </Card>
 
-      <Callout tone="neutral" title="What this page is not">
-        It is not monitoring. There is no history, no alerting and no retention here — a single
-        reading, taken when the page was opened. A deployment that mattered would need all three;
-        see <span className="font-mono">docs/PRODUCTION_READINESS.md</span>.
+      <Callout tone="neutral" title="Ce que cette page n’est pas">
+        Ce n’est pas de la supervision. Il n’y a ici ni historique, ni alerte, ni conservation —
+        une seule mesure, prise à l’ouverture de la page. Un déploiement qui compte aurait besoin
+        des trois ; voir <span className="font-mono">docs/PRODUCTION_READINESS.md</span>.
       </Callout>
 
       <p className="text-sm text-ink-muted">
         <Link href="/admin/firms" className="font-medium text-brand underline underline-offset-4">
-          Firms
+          Cabinets
         </Link>{" "}
         ·{" "}
         <Link href="/admin/demo" className="font-medium text-brand underline underline-offset-4">
-          Demonstration data
+          Données de démonstration
         </Link>
       </p>
     </div>

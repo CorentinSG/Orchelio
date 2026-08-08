@@ -274,7 +274,7 @@ describe("switching separation of duties on", () => {
     const result = await settings.updateApprovals(scope(fixture.employment.firmId), [], true);
 
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.message).toMatch(/undecidable/i);
+    if (!result.ok) expect(result.message).toMatch(/indécidable/i);
 
     const stored = await configurationOf(fixture.employment.firmId);
     expect(stored?.requireSeparateApprover).toBe(false);

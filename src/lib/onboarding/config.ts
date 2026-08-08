@@ -19,13 +19,13 @@ import { PRACTICE_AREAS, isPracticeAreaAvailable } from "@/lib/practice-areas";
 export const ONBOARDING_STEP_COUNT = 7;
 
 export const ONBOARDING_STEPS = [
-  { number: 1, slug: "firm", title: "Firm details" },
-  { number: 2, slug: "practice-areas", title: "Practice areas" },
-  { number: 3, slug: "matter-types", title: "Matter types" },
-  { number: 4, slug: "workflow", title: "Workflow" },
-  { number: 5, slug: "ai", title: "AI features" },
-  { number: 6, slug: "approvals", title: "Approvals" },
-  { number: 7, slug: "summary", title: "Summary" },
+  { number: 1, slug: "firm", title: "Le cabinet" },
+  { number: 2, slug: "practice-areas", title: "Domaines de droit" },
+  { number: 3, slug: "matter-types", title: "Types de dossier" },
+  { number: 4, slug: "workflow", title: "Déroulé d’un dossier" },
+  { number: 5, slug: "ai", title: "Fonctions d’IA" },
+  { number: 6, slug: "approvals", title: "Validations" },
+  { number: 7, slug: "summary", title: "Récapitulatif" },
 ] as const;
 
 export type OnboardingAnswers = {
@@ -153,26 +153,26 @@ export function validateStep(step: number, answers: Partial<OnboardingAnswers>):
   switch (step) {
     case 1: {
       if (!answers.firmName?.trim()) {
-        return { ok: false, message: "Enter a firm name." };
+        return { ok: false, message: "Saisissez le nom du cabinet." };
       }
       if (!answers.contactName?.trim()) {
-        return { ok: false, message: "Enter the name of the firm administrator." };
+        return { ok: false, message: "Saisissez le nom de l’administrateur du cabinet." };
       }
       if (!answers.contactEmail?.trim() || !answers.contactEmail.includes("@")) {
-        return { ok: false, message: "Enter a fictional email address." };
+        return { ok: false, message: "Saisissez une adresse e-mail fictive." };
       }
       return { ok: true };
     }
     case 2: {
       const areas = answers.practiceAreas ?? [];
       if (areas.length === 0) {
-        return { ok: false, message: "Select at least one practice area." };
+        return { ok: false, message: "Sélectionnez au moins un domaine de droit." };
       }
       if (!answers.primaryPracticeArea) {
-        return { ok: false, message: "Choose which practice area is the firm's main one." };
+        return { ok: false, message: "Choisissez le domaine principal du cabinet." };
       }
       if (!areas.includes(answers.primaryPracticeArea)) {
-        return { ok: false, message: "The main practice area must be one you selected." };
+        return { ok: false, message: "Le domaine principal doit faire partie de ceux que vous avez sélectionnés." };
       }
       if (!isPracticeAreaAvailable(answers.primaryPracticeArea)) {
         // Only immigration and employment ship a full template in this build.
@@ -188,13 +188,13 @@ export function validateStep(step: number, answers: Partial<OnboardingAnswers>):
     }
     case 3: {
       if ((answers.matterTypes ?? []).length === 0) {
-        return { ok: false, message: "Select at least one type of matter your firm handles." };
+        return { ok: false, message: "Sélectionnez au moins un type de dossier traité par le cabinet." };
       }
       return { ok: true };
     }
     case 4: {
       if ((answers.workflowStepIds ?? []).length === 0) {
-        return { ok: false, message: "Select at least one workflow step." };
+        return { ok: false, message: "Sélectionnez au moins une étape du déroulé." };
       }
       return { ok: true };
     }

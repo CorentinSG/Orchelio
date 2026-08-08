@@ -33,7 +33,7 @@ const EMPTY_ANSWERS: OnboardingAnswers = {
   contactEmail: "",
   userCount: 5,
   jurisdiction: "NY",
-  language: "en",
+  language: "fr",
   currency: "USD",
   timezone: "America/New_York",
   primaryPracticeArea: "",

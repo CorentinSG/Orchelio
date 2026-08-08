@@ -128,7 +128,7 @@ export async function POST(request: Request) {
       update.contactEmail = String(formData.get("contactEmail") ?? "");
       update.userCount = Math.max(1, Number(formData.get("userCount") ?? 1) || 1);
       update.jurisdiction = String(formData.get("jurisdiction") ?? "NY");
-      update.language = String(formData.get("language") ?? "en");
+      update.language = String(formData.get("language") ?? "fr");
       update.currency = String(formData.get("currency") ?? "USD");
       update.timezone = String(formData.get("timezone") ?? "America/New_York");
       break;

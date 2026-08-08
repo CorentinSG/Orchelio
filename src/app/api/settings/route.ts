@@ -79,7 +79,7 @@ export async function POST(request: Request) {
         contactEmail: String(formData.get("contactEmail") ?? ""),
         userCount: Math.max(1, Number(formData.get("userCount") ?? 1) || 1),
         jurisdiction: String(formData.get("jurisdiction") ?? "NY"),
-        language: String(formData.get("language") ?? "en"),
+        language: String(formData.get("language") ?? "fr"),
         currency: String(formData.get("currency") ?? "USD"),
         timezone: String(formData.get("timezone") ?? "America/New_York"),
       };

@@ -17,7 +17,7 @@ import { ROLE_LABELS, type FirmRole, FIRM_ROLES } from "@/lib/auth/permissions";
 
 export function SettingsTabs({ active }: { active: string }) {
   return (
-    <nav aria-label="Settings sections" className="border-b border-line">
+    <nav aria-label="Sections des réglages" className="border-b border-line">
       <ul className="-mb-px flex flex-wrap gap-1">
         {SETTINGS_SECTIONS.map((section) => (
           <li key={section.slug}>
@@ -40,7 +40,7 @@ export function SettingsTabs({ active }: { active: string }) {
 }
 
 /** The submit row. Absent entirely when the reader may not change anything. */
-export function SaveBar({ label = "Save changes" }: { label?: string }) {
+export function SaveBar({ label = "Enregistrer les modifications" }: { label?: string }) {
   return (
     <div className="mt-5 flex items-center gap-3 border-t border-line pt-4">
       <button
@@ -49,16 +49,16 @@ export function SaveBar({ label = "Save changes" }: { label?: string }) {
       >
         {label}
       </button>
-      <p className="text-sm text-ink-subtle">Saved immediately. Recorded in the activity log.</p>
+      <p className="text-sm text-ink-subtle">Enregistré immédiatement. Consigné au journal d’activité.</p>
     </div>
   );
 }
 
 export function ReadOnlyNotice({ what }: { what: string }) {
   return (
-    <Callout tone="neutral" title="You are reading, not editing">
-      {what} You can see this firm&apos;s configuration; changing it belongs to a firm
-      administrator.
+    <Callout tone="neutral" title="Vous lisez, vous ne modifiez pas">
+      {what} Vous pouvez consulter la configuration de ce cabinet ; la modifier relève de
+      l’administrateur du cabinet.
     </Callout>
   );
 }
@@ -115,7 +115,7 @@ export function MemberList({
   canManage: boolean;
 }) {
   if (members.length === 0) {
-    return <p className="text-sm text-ink-muted">This firm has no members yet.</p>;
+    return <p className="text-sm text-ink-muted">Ce cabinet n’a encore aucun membre.</p>;
   }
 
   return (
@@ -126,14 +126,14 @@ export function MemberList({
             <div className="min-w-0">
               <p className="font-medium text-ink">
                 {member.name}
-                {member.isSelf ? <span className="ml-2 text-sm text-ink-subtle">(you)</span> : null}
+                {member.isSelf ? <span className="ml-2 text-sm text-ink-subtle">(vous)</span> : null}
               </p>
               <p className="truncate text-sm text-ink-muted">{member.email}</p>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
               <Badge tone="brand">{ROLE_LABELS[member.role as FirmRole] ?? member.role}</Badge>
               <Badge tone={member.status === "active" ? "success" : "warning"}>
-                {member.status}
+                {member.status === "active" ? "actif" : "suspendu"}
               </Badge>
             </div>
           </div>
@@ -148,7 +148,7 @@ export function MemberList({
                     htmlFor={`role-${member.membershipId}`}
                     className="block text-xs font-medium text-ink-muted"
                   >
-                    Role
+                    Rôle
                   </label>
                   <select
                     id={`role-${member.membershipId}`}
@@ -167,7 +167,7 @@ export function MemberList({
                   type="submit"
                   className="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-muted"
                 >
-                  Change role
+                  Changer le rôle
                 </button>
               </form>
 
@@ -183,7 +183,7 @@ export function MemberList({
                   type="submit"
                   className="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-muted"
                 >
-                  {member.status === "active" ? "Suspend access" : "Restore access"}
+                  {member.status === "active" ? "Suspendre l’accès" : "Rétablir l’accès"}
                 </button>
               </form>
             </div>
@@ -213,7 +213,7 @@ export function LockedRules({ rules }: { rules: readonly { key: string; label: s
             <span className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-medium text-ink">{rule.label}</span>
               <Badge tone="warning">
-                <LockIcon /> Always required
+                <LockIcon /> Toujours obligatoire
               </Badge>
             </span>
             <span className="mt-0.5 block text-sm text-ink-muted">{rule.description}</span>

@@ -58,48 +58,48 @@ export type ApprovableAction = {
 export const APPROVABLE_ACTIONS: readonly ApprovableAction[] = [
   {
     key: "legal_analysis",
-    label: "Rely on an AI analysis",
+    label: "S’appuyer sur une analyse d’IA",
     resourceType: "ai_analysis",
     riskLevel: "high",
     lockedBy: null,
     configurableBy: "legalAnalysis",
     question:
-      "Has an attorney read this analysis and satisfied themselves it does not overstate what the file supports?",
+      "Un avocat a-t-il lu cette analyse et s’est-il assuré qu’elle n’affirme pas plus que ce que le dossier permet ?",
     effect:
-      "The analysis is recorded as read and approved by you. Nothing about it changes — an approval is a statement that a person has taken responsibility for it, not an edit.",
+      "L’analyse est enregistrée comme lue et validée par vous. Rien n’y change — une validation est la déclaration qu’une personne en prend la responsabilité, pas une modification.",
   },
   {
     key: "external_transmission",
-    label: "Approve a draft for use outside the firm",
+    label: "Valider un brouillon pour usage hors du cabinet",
     resourceType: "draft_communication",
     riskLevel: "high",
     lockedBy: "externalTransmission",
     configurableBy: null,
-    question: "Have you read these exact words and are you content for them to leave the firm?",
+    question: "Avez-vous lu ces mots exacts, et acceptez-vous qu’ils quittent le cabinet ?",
     effect:
-      "The draft is marked approved for use, so somebody may copy it out. Orchelio still sends nothing: there is no transport in this product and no status beyond this one.",
+      "Le brouillon est marqué validé pour usage : quelqu’un peut le copier. Orchelio n’envoie toujours rien — il n’y a aucun transport dans ce produit, et aucun statut au-delà de celui-ci.",
   },
   {
     key: "deadline_confirmation",
-    label: "Confirm a recorded date",
+    label: "Confirmer une date enregistrée",
     resourceType: "matter",
     riskLevel: "high",
     lockedBy: "deadlineConfirmation",
     configurableBy: null,
     question:
-      "Have you checked this date against the underlying notice, rule or filing, rather than against what was typed here?",
+      "Avez-vous vérifié cette date contre l’avis, la règle ou l’acte d’origine, plutôt que contre ce qui a été saisi ici ?",
     effect:
-      "The date is recorded as confirmed by you on this date. Orchelio never calculates or confirms a date itself, so this record is the only thing that makes it confirmed.",
+      "La date est enregistrée comme confirmée par vous, à la date du jour. Orchelio ne calcule ni ne confirme jamais une date lui-même : cet enregistrement est la seule chose qui la rende confirmée.",
   },
   {
     key: "close_matter",
-    label: "Close a matter",
+    label: "Clore un dossier",
     resourceType: "matter",
     riskLevel: "medium",
     lockedBy: null,
     configurableBy: "closeMatter",
-    question: "Is everything on this matter finished, and is the file in the state you want it left in?",
-    effect: "The matter is marked closed and stops appearing in the open-matter counts.",
+    question: "Tout est-il terminé sur ce dossier, et le laissez-vous dans l’état où vous voulez qu’il reste ?",
+    effect: "Le dossier est marqué clos et cesse d’apparaître dans les comptes de dossiers ouverts.",
   },
 ] as const;
 

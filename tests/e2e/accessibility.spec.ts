@@ -180,7 +180,7 @@ test.describe("keyboard and focus", () => {
 
     await page.keyboard.press("Tab");
     const focused = page.locator(":focus");
-    await expect(focused).toHaveText(/skip/i);
+    await expect(focused).toHaveText(/aller au contenu/i);
 
     await page.keyboard.press("Enter");
     // The skip link has to move focus, not merely scroll: a link that jumps the
@@ -240,8 +240,8 @@ test.describe("announcements", () => {
     await page.evaluate(() => {
       document.querySelectorAll("[required]").forEach((node) => node.removeAttribute("required"));
     });
-    await page.getByLabel("Firm name").fill("");
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByLabel("Nom du cabinet").fill("");
+    await page.getByRole("button", { name: "Enregistrer les modifications" }).click();
 
     // role="alert" is reserved for genuine errors, so a screen reader is not
     // interrupted by the standing demonstration notice.

@@ -138,7 +138,7 @@ test.describe("Pressing it once", () => {
     await page.goto("/approvals?action=legal_analysis");
 
     await expect(page.getByRole("region", { name: /^Waiting for a decision/ })).toContainText(
-      "Rely on an AI analysis",
+      "S’appuyer sur une analyse d’IA",
     );
   });
 });

@@ -36,29 +36,33 @@ export function resolveKey(key: ScopedKey, practiceArea: string): string {
 // Step 1 — general information
 // ---------------------------------------------------------------------------
 
-export const LANGUAGES = [{ value: "en", label: "English" }] as const;
+export const LANGUAGES = [
+  { value: "fr", label: "Français" },
+  { value: "en", label: "English" },
+] as const;
 
 export const CURRENCIES = [
-  { value: "USD", label: "US dollar (USD)" },
   { value: "EUR", label: "Euro (EUR)" },
-  { value: "GBP", label: "Pound sterling (GBP)" },
+  { value: "USD", label: "Dollar américain (USD)" },
+  { value: "GBP", label: "Livre sterling (GBP)" },
 ] as const;
 
 export const TIMEZONES = [
-  { value: "America/New_York", label: "Eastern (New York)" },
-  { value: "America/Chicago", label: "Central (Chicago)" },
-  { value: "America/Denver", label: "Mountain (Denver)" },
-  { value: "America/Los_Angeles", label: "Pacific (Los Angeles)" },
+  { value: "Europe/Paris", label: "Paris (France)" },
+  { value: "America/New_York", label: "Est (New York)" },
+  { value: "America/Chicago", label: "Centre (Chicago)" },
+  { value: "America/Denver", label: "Montagnes (Denver)" },
+  { value: "America/Los_Angeles", label: "Pacifique (Los Angeles)" },
 ] as const;
 
 export const JURISDICTIONS = [
   { value: "NY", label: "New York" },
-  { value: "CA", label: "California" },
+  { value: "CA", label: "Californie" },
   { value: "TX", label: "Texas" },
   { value: "IL", label: "Illinois" },
-  { value: "FL", label: "Florida" },
+  { value: "FL", label: "Floride" },
   { value: "MA", label: "Massachusetts" },
-  { value: "OTHER", label: "Other / multiple" },
+  { value: "OTHER", label: "Autre / plusieurs" },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -82,20 +86,20 @@ export type WorkflowStepOption = {
 export const WORKFLOW_STEP_OPTIONS: readonly WorkflowStepOption[] = [
   {
     id: "lead_intake",
-    label: "Lead intake",
-    description: "Record a prospective client and what they are asking for.",
+    label: "Premier contact",
+    description: "Enregistrer un client potentiel et sa demande.",
     key: { default: "lead_intake" },
   },
   {
     id: "conflict_check",
-    label: "Conflict check",
-    description: "Check for a conflict of interest before taking the matter on.",
+    label: "Vérification des conflits",
+    description: "Vérifier l’absence de conflit d’intérêts avant d’accepter le dossier.",
     key: { default: "conflict_check" },
   },
   {
     id: "initial_consultation",
-    label: "Initial consultation",
-    description: "Prepare for and hold the first meeting with the client.",
+    label: "Première consultation",
+    description: "Préparer et tenir le premier rendez-vous avec le client.",
     key: {
       default: "consultation_preparation",
       byPracticeArea: { employment_law: "employment_case_assessment" },
@@ -103,14 +107,14 @@ export const WORKFLOW_STEP_OPTIONS: readonly WorkflowStepOption[] = [
   },
   {
     id: "retainer_agreement",
-    label: "Retainer agreement",
-    description: "Agree the engagement and its terms.",
+    label: "Convention d’honoraires",
+    description: "Convenir de la mission et de ses conditions.",
     key: { default: "retainer_agreement" },
   },
   {
     id: "document_collection",
-    label: "Document collection",
-    description: "Request and gather the documents the matter needs.",
+    label: "Collecte des documents",
+    description: "Demander et rassembler les documents nécessaires au dossier.",
     key: {
       default: "document_collection",
       byPracticeArea: { employment_law: "evidence_collection" },
@@ -118,56 +122,56 @@ export const WORKFLOW_STEP_OPTIONS: readonly WorkflowStepOption[] = [
   },
   {
     id: "fact_investigation",
-    label: "Fact investigation",
-    description: "Establish what happened, and when.",
+    label: "Établissement des faits",
+    description: "Établir ce qui s’est passé, et quand.",
     key: { default: "fact_investigation" },
   },
   {
     id: "legal_research",
-    label: "Legal research",
-    description: "Research the law that applies. Always performed by a person.",
+    label: "Recherche juridique",
+    description: "Rechercher le droit applicable. Toujours effectuée par une personne.",
     key: { default: "legal_research" },
   },
   {
     id: "document_drafting",
-    label: "Document drafting",
-    description: "Prepare drafts for attorney review.",
+    label: "Rédaction d’actes",
+    description: "Préparer des projets à relire par un avocat.",
     key: { default: "document_drafting" },
   },
   {
     id: "attorney_review",
-    label: "Attorney review",
-    description: "An attorney reviews the work before it goes anywhere.",
+    label: "Relecture par un avocat",
+    description: "Un avocat relit le travail avant qu’il n’aille où que ce soit.",
     key: { default: "attorney_review" },
   },
   {
     id: "client_approval",
-    label: "Client approval",
-    description: "The client confirms before the firm acts.",
+    label: "Accord du client",
+    description: "Le client confirme avant que le cabinet agisse.",
     key: { default: "client_approval" },
   },
   {
     id: "negotiation",
-    label: "Negotiation",
-    description: "Discussions with the other side. Never automated.",
+    label: "Négociation",
+    description: "Les échanges avec la partie adverse. Jamais automatisés.",
     key: { default: "negotiation" },
   },
   {
     id: "filing",
-    label: "Filing",
-    description: "Prepare a filing. Orchelio never submits one.",
+    label: "Dépôt",
+    description: "Préparer un dépôt. Orchelio n’en soumet jamais un.",
     key: { default: "filing" },
   },
   {
     id: "billing",
-    label: "Billing",
-    description: "Record time and prepare an invoice.",
+    label: "Facturation",
+    description: "Enregistrer les temps et préparer une facture.",
     key: { default: "billing" },
   },
   {
     id: "matter_closing",
-    label: "Matter closing",
-    description: "Close the matter and archive it.",
+    label: "Clôture du dossier",
+    description: "Clore le dossier et l’archiver.",
     key: { default: "matter_closing" },
   },
 ] as const;
@@ -286,15 +290,15 @@ export type ApprovalOption = {
 
 /** Rules a firm chooses for itself. */
 export const CONFIGURABLE_APPROVAL_OPTIONS: readonly ApprovalOption[] = [
-  { key: "createMatter", label: "Create a matter", description: "Opening a new matter needs approval." },
-  { key: "sendEmail", label: "Send an email", description: "A prepared draft needs approval before anyone uses it." },
-  { key: "createDeadline", label: "Create a deadline", description: "A new deadline must be confirmed by a person." },
-  { key: "modifyDeadline", label: "Change a deadline", description: "Moving a deadline must be confirmed by a person." },
-  { key: "modifyClientRecord", label: "Modify a client record", description: "Changing client details needs approval." },
-  { key: "legalAnalysis", label: "Generate legal analysis", description: "Any AI analysis must be approved before it is relied on." },
-  { key: "shareDocument", label: "Share a document", description: "Sharing outside the firm needs approval." },
-  { key: "prepareFiling", label: "Prepare a filing", description: "Preparing a filing needs approval." },
-  { key: "closeMatter", label: "Close a matter", description: "Closing a matter needs approval." },
+  { key: "createMatter", label: "Créer un dossier", description: "L’ouverture d’un nouveau dossier requiert une validation." },
+  { key: "sendEmail", label: "Envoyer un courriel", description: "Un brouillon préparé doit être validé avant que quiconque l’utilise." },
+  { key: "createDeadline", label: "Créer une échéance", description: "Une nouvelle échéance doit être confirmée par une personne." },
+  { key: "modifyDeadline", label: "Modifier une échéance", description: "Déplacer une échéance doit être confirmé par une personne." },
+  { key: "modifyClientRecord", label: "Modifier une fiche client", description: "Changer les informations d’un client requiert une validation." },
+  { key: "legalAnalysis", label: "Produire une analyse juridique", description: "Toute analyse d’IA doit être validée avant qu’on s’y fie." },
+  { key: "shareDocument", label: "Partager un document", description: "Partager hors du cabinet requiert une validation." },
+  { key: "prepareFiling", label: "Préparer un dépôt", description: "Préparer un dépôt requiert une validation." },
+  { key: "closeMatter", label: "Clore un dossier", description: "Clore un dossier requiert une validation." },
 ] as const;
 
 /**
@@ -305,13 +309,13 @@ export const CONFIGURABLE_APPROVAL_OPTIONS: readonly ApprovalOption[] = [
  * regardless of what a firm configuration says.
  */
 export const LOCKED_APPROVAL_OPTIONS: readonly ApprovalOption[] = [
-  { key: "fileSubmission", label: "Submit a filing", description: "Orchelio never submits a filing. A person does." },
-  { key: "permanentDeletion", label: "Delete a document", description: "Nothing is ever permanently deleted automatically." },
-  { key: "settlementCommunication", label: "Send a settlement proposal", description: "Never sent automatically." },
-  { key: "opposingCounselCommunication", label: "Communicate with opposing counsel", description: "Never without explicit human approval." },
-  { key: "legalAdviceDelivery", label: "Deliver legal advice", description: "No legal advice is ever sent automatically." },
-  { key: "deadlineConfirmation", label: "Confirm a deadline as final", description: "No deadline is final without a person confirming it." },
-  { key: "externalTransmission", label: "Send anything outside the firm", description: "Orchelio has no send capability at all." },
-  { key: "eligibilityConclusion", label: "Conclude on eligibility or entitlement", description: "Never decided by the AI." },
-  { key: "conflictClearance", label: "Clear a conflict of interest", description: "Never cleared automatically." },
+  { key: "fileSubmission", label: "Soumettre un dépôt", description: "Orchelio ne soumet jamais un dépôt. Une personne le fait." },
+  { key: "permanentDeletion", label: "Supprimer un document", description: "Rien n’est jamais supprimé définitivement de façon automatique." },
+  { key: "settlementCommunication", label: "Envoyer une proposition transactionnelle", description: "Jamais envoyée automatiquement." },
+  { key: "opposingCounselCommunication", label: "Communiquer avec l’avocat adverse", description: "Jamais sans validation humaine explicite." },
+  { key: "legalAdviceDelivery", label: "Délivrer un conseil juridique", description: "Aucun conseil juridique n’est jamais envoyé automatiquement." },
+  { key: "deadlineConfirmation", label: "Confirmer une échéance comme définitive", description: "Aucune échéance n’est définitive sans qu’une personne la confirme." },
+  { key: "externalTransmission", label: "Envoyer quoi que ce soit hors du cabinet", description: "Orchelio n’a aucune capacité d’envoi." },
+  { key: "eligibilityConclusion", label: "Conclure sur une éligibilité ou un droit", description: "Jamais décidé par l’IA." },
+  { key: "conflictClearance", label: "Lever un conflit d’intérêts", description: "Jamais levé automatiquement." },
 ] as const;

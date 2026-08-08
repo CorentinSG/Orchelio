@@ -345,7 +345,7 @@ async function main() {
         enabledWorkflows: JSON.stringify(firm.configuration.enabledWorkflows),
         aiFeatures: JSON.stringify(firm.configuration.aiFeatures),
         approvals: JSON.stringify(firm.configuration.approvals),
-        language: "en",
+        language: "fr",
         timezone: "America/New_York",
         currency: "USD",
         onboardingStatus: "complete",

@@ -38,7 +38,7 @@ async function uncheckAll(page: Page, name: string) {
 }
 
 async function continueStep(page: Page) {
-  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continuer" }).click();
 }
 
 test.describe.configure({ mode: "serial" });
@@ -57,7 +57,7 @@ test.describe("The seven-step questionnaire", () => {
     await page.goto("/onboarding/1");
 
     await expect(page.getByRole("progressbar")).toBeVisible();
-    await expect(page.getByText("Step 1 of 7 — Firm details")).toBeVisible();
+    await expect(page.getByText("Étape 1 sur 7 — Le cabinet")).toBeVisible();
     await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "1");
   });
 
@@ -65,12 +65,12 @@ test.describe("The seven-step questionnaire", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/onboarding/1");
 
-    await page.getByLabel("Firm name").fill("");
+    await page.getByLabel("Nom du cabinet").fill("");
     await continueStep(page);
 
     // Still on step 1: the browser refused to submit.
     await expect(page).toHaveURL(/\/onboarding\/1/);
-    await expect(page.getByLabel("Firm name")).toHaveJSProperty("validity.valid", false);
+    await expect(page.getByLabel("Nom du cabinet")).toHaveJSProperty("validity.valid", false);
   });
 
   test("and so does the server, when the browser is bypassed", async ({ page }) => {
@@ -85,10 +85,10 @@ test.describe("The seven-step questionnaire", () => {
         .querySelectorAll<HTMLInputElement>("input[required]")
         .forEach((input) => input.removeAttribute("required"));
     });
-    await page.getByLabel("Firm name").fill("");
+    await page.getByLabel("Nom du cabinet").fill("");
     await continueStep(page);
 
-    await expect(page.getByText("Enter a firm name.")).toBeVisible();
+    await expect(page.getByText("Saisissez le nom du cabinet.")).toBeVisible();
   });
 
   test("refuses a main practice area that has no template", async ({ page }) => {
@@ -97,20 +97,20 @@ test.describe("The seven-step questionnaire", () => {
 
     // Family Law is offered — the product is meant to grow into it — but it
     // cannot yet be a firm's main area, and saying so is better than pretending.
-    await expect(page.getByText("Template coming soon.").first()).toBeVisible();
+    await expect(page.getByText("Modèle bientôt disponible.").first()).toBeVisible();
   });
 
   test("saves a draft and comes back to it", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/onboarding/1");
 
-    await page.getByLabel("Firm administrator").fill("Claire Dupont");
-    await page.getByRole("button", { name: "Save as draft" }).click();
+    await page.getByLabel("Administrateur du cabinet").fill("Claire Dupont");
+    await page.getByRole("button", { name: "Enregistrer le brouillon" }).click();
 
-    await expect(page.getByText("Draft saved")).toBeVisible();
+    await expect(page.getByText("Brouillon enregistré")).toBeVisible();
 
     await page.goto("/onboarding/1");
-    await expect(page.getByLabel("Firm administrator")).toHaveValue("Claire Dupont");
+    await expect(page.getByLabel("Administrateur du cabinet")).toHaveValue("Claire Dupont");
   });
 
   test("reproduces the published immigration configuration", async ({ page }) => {
@@ -118,20 +118,20 @@ test.describe("The seven-step questionnaire", () => {
 
     // Step 1
     await page.goto("/onboarding/1");
-    await page.getByLabel("Firm name").fill("Dupont Immigration Law");
-    await page.getByLabel("Firm administrator").fill("Claire Dupont");
-    await page.getByLabel("Email address").fill("claire@demo.local");
+    await page.getByLabel("Nom du cabinet").fill("Dupont Immigration Law");
+    await page.getByLabel("Administrateur du cabinet").fill("Claire Dupont");
+    await page.getByLabel("Adresse e-mail").fill("claire@demo.local");
     await continueStep(page);
 
     // Step 2
-    await expect(page.getByText("Step 2 of 7")).toBeVisible();
+    await expect(page.getByText("Étape 2 sur 7")).toBeVisible();
     await uncheckAll(page, "practiceAreas");
     await check(page, "Droit de l’immigration");
-    await page.getByLabel("Main practice area").selectOption("immigration");
+    await page.getByLabel("Domaine principal").selectOption("immigration");
     await continueStep(page);
 
     // Step 3
-    await expect(page.getByText("Step 3 of 7")).toBeVisible();
+    await expect(page.getByText("Étape 3 sur 7")).toBeVisible();
     await uncheckAll(page, "matterTypes");
     await check(page, "Regroupement familial");
     await check(page, "Immigration professionnelle");
@@ -139,16 +139,16 @@ test.describe("The seven-step questionnaire", () => {
     await continueStep(page);
 
     // Step 4
-    await expect(page.getByText("Step 4 of 7")).toBeVisible();
+    await expect(page.getByText("Étape 4 sur 7")).toBeVisible();
     await uncheckAll(page, "workflowStepIds");
-    await check(page, /^Lead intake/);
-    await check(page, /^Conflict check/);
-    await check(page, /^Initial consultation/);
-    await check(page, /^Document collection/);
+    await check(page, /^Premier contact/);
+    await check(page, /^Vérification des conflits/);
+    await check(page, /^Première consultation/);
+    await check(page, /^Collecte des documents/);
     await continueStep(page);
 
     // Step 5
-    await expect(page.getByText("Step 5 of 7")).toBeVisible();
+    await expect(page.getByText("Étape 5 sur 7")).toBeVisible();
     await uncheckAll(page, "aiFeatureIds");
     await check(page, /^Résumer les documents/);
     await check(page, /^Établir une chronologie factuelle/);
@@ -158,32 +158,32 @@ test.describe("The seven-step questionnaire", () => {
     await continueStep(page);
 
     // Step 6 — the locked rules are visible and cannot be unticked.
-    await expect(page.getByText("Step 6 of 7")).toBeVisible();
+    await expect(page.getByText("Étape 6 sur 7")).toBeVisible();
     await uncheckAll(page, "approvalKeys");
-    await check(page, /^Send an email/);
-    await check(page, /^Create a deadline/);
-    await check(page, /^Change a deadline/);
-    await check(page, /^Generate legal analysis/);
+    await check(page, /^Envoyer un courriel/);
+    await check(page, /^Créer une échéance/);
+    await check(page, /^Modifier une échéance/);
+    await check(page, /^Produire une analyse juridique/);
 
-    const lockedFiling = page.getByRole("checkbox", { name: /^Submit a filing/ });
+    const lockedFiling = page.getByRole("checkbox", { name: /^Soumettre un dépôt/ });
     await expect(lockedFiling).toBeDisabled();
     await expect(lockedFiling).toBeChecked();
     await continueStep(page);
 
     // Step 7 — the summary reports what was chosen.
-    await expect(page.getByText("Step 7 of 7")).toBeVisible();
-    const summary = page.getByRole("region", { name: "Summary" });
+    await expect(page.getByText("Étape 7 sur 7")).toBeVisible();
+    const summary = page.getByRole("region", { name: "Récapitulatif" });
     await expect(summary).toContainText("Dupont Immigration Law");
     await expect(summary).toContainText("Droit de l’immigration");
 
-    const matterTypesCard = page.getByRole("region", { name: "Matter types" });
+    const matterTypesCard = page.getByRole("region", { name: "Types de dossier" });
     await expect(matterTypesCard).toContainText("family_based");
     await expect(matterTypesCard).toContainText("naturalisation");
 
-    const workflowCard = page.getByRole("region", { name: "Workflow" });
-    await expect(workflowCard).toContainText("Initial consultation");
+    const workflowCard = page.getByRole("region", { name: "Déroulé d’un dossier" });
+    await expect(workflowCard).toContainText("Première consultation");
 
-    await page.getByRole("button", { name: "Confirm configuration" }).click();
+    await page.getByRole("button", { name: "Confirmer la configuration" }).click();
 
     // The dashboard is now assembled from this configuration.
     await expect(page).toHaveURL(/\/dashboard/);
@@ -197,7 +197,7 @@ test.describe("The seven-step questionnaire", () => {
     await page.goto("/onboarding/2");
     await uncheckAll(page, "practiceAreas");
     await check(page, "Droit du travail");
-    await page.getByLabel("Main practice area").selectOption("employment_law");
+    await page.getByLabel("Domaine principal").selectOption("employment_law");
     await continueStep(page);
 
     await uncheckAll(page, "matterTypes");
@@ -209,10 +209,10 @@ test.describe("The seven-step questionnaire", () => {
 
     // Identical workflow answers to the immigration firm above.
     await uncheckAll(page, "workflowStepIds");
-    await check(page, /^Lead intake/);
-    await check(page, /^Conflict check/);
-    await check(page, /^Initial consultation/);
-    await check(page, /^Document collection/);
+    await check(page, /^Premier contact/);
+    await check(page, /^Vérification des conflits/);
+    await check(page, /^Première consultation/);
+    await check(page, /^Collecte des documents/);
     await continueStep(page);
 
     await uncheckAll(page, "aiFeatureIds");
@@ -224,12 +224,12 @@ test.describe("The seven-step questionnaire", () => {
     await continueStep(page);
 
     await uncheckAll(page, "approvalKeys");
-    await check(page, /^Send an email/);
-    await check(page, /^Create a deadline/);
-    await check(page, /^Generate legal analysis/);
+    await check(page, /^Envoyer un courriel/);
+    await check(page, /^Créer une échéance/);
+    await check(page, /^Produire une analyse juridique/);
     await continueStep(page);
 
-    await page.getByRole("button", { name: "Confirm configuration" }).click();
+    await page.getByRole("button", { name: "Confirmer la configuration" }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
     // The same product, the same answers — a different dashboard, because the
@@ -246,7 +246,7 @@ test.describe("The seven-step questionnaire", () => {
     await page.getByRole("checkbox", { name: /^Repérer les documents manquants/ }).uncheck();
     await continueStep(page);
     await continueStep(page);
-    await page.getByRole("button", { name: "Confirm configuration" }).click();
+    await page.getByRole("button", { name: "Confirmer la configuration" }).click();
 
     await expect(page).toHaveURL(/\/dashboard/);
     // A card reading "0 missing wage records" at a firm that never asked
@@ -258,7 +258,7 @@ test.describe("The seven-step questionnaire", () => {
     await page.getByRole("checkbox", { name: /^Repérer les documents manquants/ }).check();
     await continueStep(page);
     await continueStep(page);
-    await page.getByRole("button", { name: "Confirm configuration" }).click();
+    await page.getByRole("button", { name: "Confirmer la configuration" }).click();
     await expect(page).toHaveURL(/\/dashboard/);
   });
 });

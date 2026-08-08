@@ -18,7 +18,7 @@ export function ProgressBar({ step }: { step: number }) {
     <div>
       <div className="flex items-baseline justify-between">
         <p className="text-sm font-medium text-ink">
-          Step {step} of {ONBOARDING_STEP_COUNT} — {ONBOARDING_STEPS[step - 1]?.title}
+          Étape {step} sur {ONBOARDING_STEP_COUNT} — {ONBOARDING_STEPS[step - 1]?.title}
         </p>
         <p className="text-sm text-ink-muted">{percent}%</p>
       </div>
@@ -27,7 +27,7 @@ export function ProgressBar({ step }: { step: number }) {
         aria-valuenow={step}
         aria-valuemin={1}
         aria-valuemax={ONBOARDING_STEP_COUNT}
-        aria-label="Onboarding progress"
+        aria-label="Progression de l’installation"
         className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-muted"
       >
         <div className="h-full rounded-full bg-brand" style={{ width: `${percent}%` }} />
@@ -138,7 +138,7 @@ export function CheckboxOption({
             <span className="text-sm font-medium text-ink">{label}</span>
             {locked ? (
               <Badge tone="warning">
-                <LockIcon /> Always required
+                <LockIcon /> Toujours obligatoire
               </Badge>
             ) : null}
           </span>
@@ -162,7 +162,7 @@ export function LockIcon() {
 /** Back / Save as draft / Continue. Present on every step. */
 export function StepActions({
   step,
-  submitLabel = "Continue",
+  submitLabel = "Continuer",
 }: {
   step: number;
   submitLabel?: string;
@@ -177,7 +177,7 @@ export function StepActions({
           formNoValidate
           className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
         >
-          Back
+          Retour
         </button>
       ) : null}
 
@@ -197,10 +197,10 @@ export function StepActions({
         formNoValidate
         className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
       >
-        Save as draft
+        Enregistrer le brouillon
       </button>
 
-      <p className="text-sm text-ink-subtle">Every answer is saved as you go.</p>
+      <p className="text-sm text-ink-subtle">Chaque réponse est enregistrée au fur et à mesure.</p>
     </div>
   );
 }
@@ -210,7 +210,7 @@ export function WorkflowPreview({ steps }: { steps: readonly string[] }) {
   if (steps.length === 0) {
     return (
       <p className="text-sm text-ink-muted">
-        Select the steps above and a preview of your workflow will appear here.
+        Sélectionnez les étapes ci-dessus et un aperçu de votre déroulé apparaîtra ici.
       </p>
     );
   }

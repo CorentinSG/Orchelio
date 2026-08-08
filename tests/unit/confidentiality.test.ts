@@ -158,7 +158,7 @@ describe("the enforcement register", () => {
     // has stopped being read. Encryption at rest is the honest example.
     const unenforced = ENFORCEMENT.filter((entry) => entry.enforcedBy === null);
     expect(unenforced.length).toBeGreaterThan(0);
-    expect(unenforced.some((entry) => /encrypt/i.test(entry.rule))).toBe(true);
+    expect(unenforced.some((entry) => /chiffr/i.test(entry.rule))).toBe(true);
   });
 
   it("points every enforced promise at something a reader can open", () => {
