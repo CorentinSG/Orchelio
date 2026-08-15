@@ -59,10 +59,10 @@ export type GuidedInput = {
  */
 function blockingReason(input: GuidedInput): string | null {
   if (!input.canCreateMatter) {
-    return "Opening a matter is held by attorneys and firm administrators. Ask one of them to open it — you will be able to add documents to it as soon as it exists.";
+    return "L’ouverture d’un dossier appartient aux avocats et aux administrateurs du cabinet. Demandez à l’un d’eux de l’ouvrir — vous pourrez y ajouter des documents dès qu’il existera.";
   }
   if (input.matterTypes.length === 0) {
-    return "This firm has not yet chosen which kinds of matter it handles, so there is nothing to open one as. A firm administrator sets that in Settings, under Matter types.";
+    return "Ce cabinet n’a pas encore choisi quels types de dossier il traite : il n’y a donc rien sous quoi en ouvrir un. Un administrateur du cabinet le règle dans Réglages, sous Types de dossier.";
   }
   return null;
 }
@@ -73,29 +73,29 @@ export function guidedReadiness(input: GuidedInput): GuidedReadiness {
   const documents: GuidedStep = input.canAddDocuments
     ? {
         key: "documents",
-        title: "Your files are listed",
+        title: "Vos fichiers sont recensés",
         will: true,
         // Said here as well as on the upload panel, because this is where a
         // person decides whether to drag a client's file onto the screen.
-        note: "Only the name, the type and the size of each file are recorded. The files themselves stay on your computer — Orchelio never receives them and never opens one.",
+        note: "Seuls le nom, le type et la taille de chaque fichier sont enregistrés. Les fichiers eux-mêmes restent sur votre ordinateur — Orchelio ne les reçoit jamais et n’en ouvre aucun.",
       }
     : {
         key: "documents",
-        title: "Your files are listed",
+        title: "Vos fichiers sont recensés",
         will: false,
-        note: "Your role does not add documents. The matter will still be opened, and a colleague can add them to it afterwards.",
+        note: "Votre rôle n’ajoute pas de documents. Le dossier sera tout de même ouvert, et un collègue pourra les y ajouter ensuite.",
       };
 
   const analysisWill = input.canRunAnalysis && input.aiFeatures.length > 0;
   const analysis: GuidedStep = {
     key: "analysis",
-    title: "Orchelio reads what you have entered",
+    title: "Orchelio lit ce que vous avez saisi",
     will: analysisWill,
     note: analysisWill
-      ? "It works from what you typed and from the names of the files — never from inside a document. You get back what disagrees with what, what is usually on file and is not, and the questions worth asking the client."
+      ? "Il travaille à partir de ce que vous avez tapé et du nom des fichiers — jamais de l’intérieur d’un document. Vous obtenez ce qui se contredit, ce qui figure d’habitude au dossier et manque ici, et les questions qui valent la peine d’être posées au client."
       : input.aiFeatures.length === 0
-        ? "This firm has switched off every AI feature, so nothing would be produced. The matter is still opened. A firm administrator can switch them back on in Settings, under AI features."
-        : "Your role does not run an analysis. The matter is still opened, and a colleague can run one on it.",
+        ? "Ce cabinet a désactivé toutes les fonctions d’IA : rien ne serait produit. Le dossier est tout de même ouvert. Un administrateur du cabinet peut les réactiver dans Réglages, sous Fonctions d’IA."
+        : "Votre rôle ne lance pas d’analyse. Le dossier est tout de même ouvert, et un collègue pourra en lancer une dessus.",
   };
 
   return {
@@ -104,18 +104,18 @@ export function guidedReadiness(input: GuidedInput): GuidedReadiness {
     steps: [
       {
         key: "matter",
-        title: "A matter is opened",
+        title: "Un dossier est ouvert",
         will: true,
-        note: "It gets a reference of its own and belongs to this firm. Nobody outside the firm can reach it.",
+        note: "Il reçoit sa propre référence et appartient à ce cabinet. Personne hors du cabinet ne peut l’atteindre.",
       },
       documents,
       analysis,
       {
         key: "decision",
-        title: "Nothing is decided",
+        title: "Rien n’est décidé",
         will: true,
         // The last line on the page, and the point of the whole product.
-        note: "Whatever comes back is a draft nobody has stood behind. It waits for a person to read it and take responsibility — and that person is you.",
+        note: "Ce qui revient est un brouillon derrière lequel personne ne s’est rangé. Il attend qu’une personne le lise et en prenne la responsabilité — et cette personne, c’est vous.",
       },
     ],
   };

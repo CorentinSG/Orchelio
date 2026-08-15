@@ -53,8 +53,9 @@ import { displayValue, fieldsFor, type MatterField } from "@/lib/matters/fields"
 /**
  * The document kinds that would ordinarily support a given field.
  *
- * Used only to describe how well supported a fact is — "the file contains an
- * I-94, which is the kind of document this date is normally read from". It is
+ * Used only to describe how well supported a fact is — "the file contains a
+ * residence permit, which is the kind of document this date is normally read
+ * from". It is
  * never used to assert that the document *says* so, because nothing here can
  * open a document.
  */
@@ -63,14 +64,14 @@ const EVIDENCED_BY: Record<string, readonly string[]> = {
   nationality: ["passport"],
   country_of_birth: ["passport", "birth_certificate"],
   date_of_birth: ["passport", "birth_certificate"],
-  last_entry_date: ["i94"],
-  last_entry_classification: ["i94"],
-  current_status: ["i94", "uscis_notice", "visa"],
-  status_expiration_date: ["i94", "uscis_notice"],
-  petitioner: ["uscis_notice", "marriage_certificate"],
-  beneficiary: ["uscis_notice"],
+  last_entry_date: ["residence_permit", "visa"],
+  last_entry_classification: ["visa", "residence_permit"],
+  current_status: ["residence_permit", "prefecture_letter", "visa"],
+  status_expiration_date: ["residence_permit", "prefecture_letter"],
+  petitioner: ["prefecture_letter", "marriage_certificate", "proof_of_address"],
+  beneficiary: ["prefecture_letter", "birth_certificate"],
   employer: ["employment_letter"],
-  prior_applications: ["prior_filing", "uscis_notice"],
+  prior_applications: ["prior_filing", "prefecture_letter"],
   // Employment
   employer_name: ["employment_agreement", "offer_letter", "pay_stub"],
   employee_name: ["employment_agreement", "offer_letter", "pay_stub"],
@@ -87,7 +88,7 @@ const EVIDENCED_BY: Record<string, readonly string[]> = {
   termination_reason_stated: ["termination_letter"],
   severance_offered: ["severance_agreement"],
   // A claim that a document exists is supported by that document being on file.
-  i94_available: ["i94"],
+  residence_permit_available: ["residence_permit"],
   employment_agreement_available: ["employment_agreement"],
   handbook_available: ["employee_handbook"],
   performance_reviews_available: ["performance_review"],
@@ -115,35 +116,37 @@ const DATE_SUBJECTS: readonly DateSubject[] = [
     key: "last_entry",
     subject: "Date de dernière entrée",
     fieldKey: "last_entry_date",
-    documentCategories: ["i94"],
-    intakePattern: /entry|entered|arriv/i,
+    documentCategories: ["residence_permit", "visa"],
+    // Bilingual, like every pattern in this codebase that reads a firm's own
+    // words: the intake keys are whatever the firm wrote them as.
+    intakePattern: /entry|entered|arriv|entree|entrée/i,
   },
   {
     key: "termination",
     subject: "Date de fin d’emploi",
     fieldKey: "termination_date",
     documentCategories: ["termination_letter"],
-    intakePattern: /terminat|dismiss|let_go|end_of_employment/i,
+    intakePattern: /terminat|dismiss|let_go|end_of_employment|licenciement|rupture|fin_de_contrat/i,
   },
   {
     key: "internal_complaint",
     subject: "Date de la plainte",
     fieldKey: "complaint_date",
     documentCategories: ["internal_complaint"],
-    intakePattern: /complaint|raised|reported/i,
+    intakePattern: /complaint|raised|reported|plainte|signalement|reclamation|réclamation/i,
   },
   {
     key: "employment_end",
     subject: "Dernier jour d’emploi",
     fieldKey: "employment_end_date",
     documentCategories: ["termination_letter"],
-    intakePattern: /last_day|final_day/i,
+    intakePattern: /last_day|final_day|dernier_jour|fin_de_mission/i,
   },
 ];
 
 /** Boolean fields that claim a document exists, and the kind they name. */
 const AVAILABILITY_CLAIMS: Record<string, string> = {
-  i94_available: "i94",
+  residence_permit_available: "residence_permit",
   employment_agreement_available: "employment_agreement",
   handbook_available: "employee_handbook",
   performance_reviews_available: "performance_review",

@@ -512,7 +512,7 @@ describe("the dashboard's practice-area counts", () => {
     // certificate. Filing the identity ones removes this matter from that
     // count — and from that count only, because the marriage certificate is
     // still outstanding.
-    for (const category of ["passport", "i94", "birth_certificate"]) {
+    for (const category of ["passport", "residence_permit", "birth_certificate"]) {
       await documents.addDocument(scope, {
         matterId: created.id,
         filename: `${category}-lindqvist.pdf`,
@@ -546,7 +546,7 @@ describe("the dashboard's practice-area counts", () => {
 
     const before = await statistics.practiceAreaCounts(scope, "immigration", NOW);
 
-    for (const category of ["passport", "i94", "birth_certificate", "marriage_certificate"]) {
+    for (const category of ["passport", "residence_permit", "birth_certificate", "marriage_certificate"]) {
       await documents.addDocument(scope, {
         matterId: created.id,
         filename: `${category}-abara.pdf`,

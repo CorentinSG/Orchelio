@@ -75,12 +75,12 @@ test.describe("the guided demonstration", () => {
     // Somebody deciding whether to sign in should be able to read what they
     // would be shown first.
     await page.goto("/guide");
-    await expect(page.getByRole("heading", { name: /21 steps through Orchelio/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Orchelio en 21 étapes/ })).toBeVisible();
   });
 
   test("has twenty-one numbered steps", async ({ page }) => {
     await page.goto("/guide");
-    await expect(page.getByRole("listitem").filter({ has: page.getByRole("link", { name: /^Open \// }) })).toHaveCount(21);
+    await expect(page.getByRole("listitem").filter({ has: page.getByRole("link", { name: /^Ouvrir \// }) })).toHaveCount(21);
   });
 
   test("says up front that everything in it is invented", async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe("the guided demonstration", () => {
   test("every step links somewhere that answers", async ({ page }) => {
     await page.goto("/guide");
 
-    const links = page.getByRole("link", { name: /^Open \// });
+    const links = page.getByRole("link", { name: /^Ouvrir \// });
     const count = await links.count();
     expect(count).toBe(21);
 

@@ -98,7 +98,7 @@ test.describe("The Moreau matter — a contradiction", () => {
     // Each account says where it came from, so a reader can weigh them.
     await expect(section).toContainText("Enregistré sur la fiche");
     await expect(section).toContainText("Document au dossier");
-    await expect(section).toContainText("i94-moreau-entry-2024-03-04.pdf");
+    await expect(section).toContainText("titre-sejour-moreau-entree-2024-03-04.pdf");
   });
 
   test("refuses to say which is right", async ({ page }) => {
@@ -155,7 +155,7 @@ test.describe("The Hassan matter — not enough on file", () => {
     const missing = page.getByRole("region", { name: /^Documents absents du dossier/ });
 
     await expect(missing).toBeVisible();
-    await expect(missing).toContainText("I-94");
+    await expect(missing).toContainText("Titre de séjour ou récépissé");
     await expect(missing).not.toContainText(/échouera|ne peut pas réussir|fatal/i);
   });
 });

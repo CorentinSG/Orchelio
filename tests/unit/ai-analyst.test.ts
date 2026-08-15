@@ -172,8 +172,8 @@ describe("the Vasquez matter — the control", () => {
     const labels = result.timeline.map((event) => event.label).join(" | ");
     const dates = result.timeline.map((event) => event.date);
 
-    expect(labels).toMatch(/complaint/i);
-    expect(labels).toMatch(/termination/i);
+    expect(labels).toMatch(/plainte/i);
+    expect(labels).toMatch(/licenciement/i);
     // Ordered, so a reader can see the sequence for themselves.
     expect([...dates].sort()).toEqual(dates);
   });

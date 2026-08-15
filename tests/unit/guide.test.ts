@@ -79,7 +79,7 @@ describe("the guided demonstration", () => {
     // The refusals are the substance of the product. A walkthrough that skipped
     // them would be describing something else.
     const text = GUIDE_STEPS.map((step) => `${step.action} ${step.notice}`).join(" ").toLowerCase();
-    for (const subject of ["no send button", "padlock", "refusal", "conclusion", "simulated"]) {
+    for (const subject of ["aucun bouton d’envoi", "cadenas", "refus", "conclusion", "simul"]) {
       expect(text.includes(subject), `no step mentions "${subject}"`).toBe(true);
     }
   });

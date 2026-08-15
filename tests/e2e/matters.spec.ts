@@ -143,10 +143,10 @@ test.describe("A matter record", () => {
     const body = await page.locator("main").innerText();
     // Labels unique to this area — "Employer" appears in both, so it proves
     // nothing.
-    expect(body).toContain("Date d’expiration du statut");
-    expect(body).toContain("I-94 disponible");
+    expect(body).toContain("Date d’expiration du titre");
+    expect(body).toContain("Titre de séjour ou récépissé fourni");
     expect(body).not.toContain("Heures impayées alléguées");
-    expect(body).not.toContain("Exempté ou non exempté");
+    expect(body).not.toContain("Régime de durée du travail");
   });
 
   test("shows the employment fields, and none of the immigration ones", async ({ page }) => {
@@ -155,9 +155,9 @@ test.describe("A matter record", () => {
 
     const body = await page.locator("main").innerText();
     expect(body).toContain("Heures impayées alléguées");
-    expect(body).toContain("Exempté ou non exempté");
-    expect(body).not.toContain("Date d’expiration du statut");
-    expect(body).not.toContain("I-94 disponible");
+    expect(body).toContain("Régime de durée du travail");
+    expect(body).not.toContain("Date d’expiration du titre");
+    expect(body).not.toContain("Titre de séjour ou récépissé fourni");
   });
 
   test("moves between the tabs, all of which now exist", async ({
@@ -519,7 +519,7 @@ test.describe("The firm workspace pages", () => {
       "Dossiers actifs",
       "Premiers contacts",
       "Documents d’identité manquants",
-      "Dates d’expiration de statut à revoir",
+      "Titres arrivant à expiration",
     ]) {
       const tile = page.locator("p", { hasText: new RegExp(`^${label}$`) }).locator("..");
       await expect(tile, label).toBeVisible();

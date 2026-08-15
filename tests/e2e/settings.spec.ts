@@ -145,7 +145,7 @@ test.describe("firm settings", () => {
     // never asked Orchelio to look would read as reassurance.
     await page.goto("/dashboard");
     await expect(page.getByText("Documents d’identité manquants")).toHaveCount(0);
-    await expect(page.getByText("Documents d’immigration manquants")).toHaveCount(0);
+    await expect(page.getByText("Pièces de séjour manquantes")).toHaveCount(0);
 
     await page.goto("/settings?section=ai");
     await page.getByRole("checkbox", { name: /Repérer les documents manquants/ }).check();

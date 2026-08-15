@@ -27,15 +27,17 @@ export type DocumentCategory = {
 
 export const IMMIGRATION_CATEGORIES: readonly DocumentCategory[] = [
   { key: "passport", label: "Passeport", expectedFor: ["*"], whyItMatters: "Établit l’identité, la nationalité et les dates de validité contre lesquelles tout le dossier se lit." },
-  { key: "i94", label: "I-94", expectedFor: ["*"], whyItMatters: "Consigne la date, le lieu et la catégorie de la dernière admission — les dates d’où part tout calcul de statut." },
+  { key: "residence_permit", label: "Titre de séjour ou récépissé", expectedFor: ["*"], whyItMatters: "Porte la nature du titre et ses dates de validité — celles d’où part tout calcul de séjour." },
   { key: "visa", label: "Visa" },
-  { key: "uscis_notice", label: "Avis USCIS" },
-  { key: "birth_certificate", label: "Acte de naissance", expectedFor: ["family_based", "naturalisation"], whyItMatters: "Atteste le lien familial sur lequel une pétition repose." },
-  { key: "marriage_certificate", label: "Acte de mariage", expectedFor: ["family_based"], whyItMatters: "Atteste le mariage sur lequel repose une pétition familiale." },
-  { key: "employment_letter", label: "Attestation d’emploi", expectedFor: ["employment_based"], whyItMatters: "Décrit le poste, le salaire et les conditions que l’employeur pétitionnaire propose." },
-  { key: "tax_record", label: "Justificatif fiscal", expectedFor: ["naturalisation"], whyItMatters: "Montre l’historique de déclarations contre lequel une demande de naturalisation est examinée." },
-  { key: "prior_filing", label: "Dépôt antérieur" },
-  { key: "police_certificate", label: "Certificat de police" },
+  { key: "prefecture_letter", label: "Courrier de la préfecture" },
+  { key: "proof_of_address", label: "Justificatif de domicile" },
+  { key: "ofii_attestation", label: "Attestation OFII" },
+  { key: "birth_certificate", label: "Acte de naissance", expectedFor: ["family_based", "naturalisation"], whyItMatters: "Atteste le lien familial sur lequel repose une demande de regroupement." },
+  { key: "marriage_certificate", label: "Acte de mariage", expectedFor: ["family_based"], whyItMatters: "Atteste le mariage sur lequel repose une demande familiale." },
+  { key: "employment_letter", label: "Promesse ou contrat de travail", expectedFor: ["employment_based"], whyItMatters: "Décrit le poste, la rémunération et les conditions que l’employeur propose." },
+  { key: "tax_record", label: "Avis d’imposition", expectedFor: ["naturalisation"], whyItMatters: "Montre l’historique fiscal au regard duquel une demande de naturalisation est examinée." },
+  { key: "prior_filing", label: "Demande antérieure" },
+  { key: "police_certificate", label: "Bulletin n° 3 du casier judiciaire" },
   { key: "other", label: "Autre" },
 ] as const;
 
@@ -59,7 +61,7 @@ export const EMPLOYMENT_CATEGORIES: readonly DocumentCategory[] = [
     expectedFor: ["wrongful_termination", "retaliation"],
     whyItMatters: "Consigne le motif déclaré de la fin d’emploi, et sa date.",
   },
-  { key: "severance_agreement", label: "Accord d’indemnité de départ", expectedFor: ["severance_review"], whyItMatters: "Contient la renonciation, la contrepartie et tout délai d’acceptation." },
+  { key: "severance_agreement", label: "Rupture conventionnelle ou transaction", expectedFor: ["severance_review"], whyItMatters: "Contient la renonciation, la contrepartie et tout délai de rétractation." },
   {
     key: "internal_complaint",
     label: "Plainte interne",
@@ -71,8 +73,8 @@ export const EMPLOYMENT_CATEGORIES: readonly DocumentCategory[] = [
   { key: "text_message", label: "SMS" },
   { key: "medical_or_accommodation_request", label: "Demande médicale ou d’aménagement" },
   { key: "leave_request", label: "Demande de congé" },
-  { key: "agency_charge", label: "Plainte à l’agence" },
-  { key: "right_to_sue", label: "Avis de droit d’agir" },
+  { key: "agency_charge", label: "Requête au conseil de prud’hommes" },
+  { key: "right_to_sue", label: "Convocation au bureau de conciliation" },
   { key: "witness_statement", label: "Déclaration de témoin" },
   { key: "other", label: "Autre" },
 ] as const;
@@ -91,7 +93,7 @@ const BY_PRACTICE_AREA: Record<string, readonly DocumentCategory[]> = {
  */
 export const IDENTITY_CATEGORIES: readonly string[] = [
   "passport",
-  "i94",
+  "residence_permit",
   "visa",
   "birth_certificate",
 ];

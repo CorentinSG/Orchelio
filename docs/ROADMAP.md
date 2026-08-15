@@ -188,7 +188,7 @@ Delivered:
 
 **Acceptance met:** the six fictional matters exist with their twenty-two documents under the
 right firm, each demonstrating what Phase 6 will need — including the Daniel Moreau matter, whose
-intake says the last entry was 11 February 2024 while the I-94 on file is dated 4 March 2024.
+intake says the last entry was 11 February 2024 while the residence permit on file is dated 4 March 2024.
 
 The dashboard's practice-area widgets now hold real figures — leads, consultations scheduled,
 recorded expiry dates within ninety days, matters missing an expected document, the two
@@ -255,7 +255,7 @@ Delivered:
   including the prompt-injection defence.
 
 **Acceptance met:** the Daniel Moreau matter surfaces the disagreement between the entry date on
-the record (11 February 2024) and the date in the I-94's own filename (4 March 2024), shows both
+the record (11 February 2024) and the date in the residence permit's own filename (4 March 2024), shows both
 with their sources, and refuses to resolve it. The Amira Hassan matter reaches "more information
 required" and states no conclusion. Both are asserted in `tests/unit/ai-analyst.test.ts` against
 the same data the seed writes.

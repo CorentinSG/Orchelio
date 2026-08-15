@@ -118,7 +118,7 @@ Proved by:
 **Criterion:** the six fictional matters exist with their twenty-two documents
 under the right firm, each demonstrating what the simulated analysis will need —
 including the matter whose intake says the last entry was 11 February 2024 while
-the I-94 on file is dated 4 March 2024.
+the residence permit on file is dated 4 March 2024.
 
 Proved by:
 
@@ -136,7 +136,7 @@ Proved by:
 ## Phase 6 — Simulated AI
 
 **Criterion:** the Daniel Moreau matter surfaces the disagreement between the
-entry date on the record and the date in the I-94's own filename, shows both
+entry date on the record and the date in the residence permit's own filename, shows both
 with their sources, and refuses to resolve it. The Amira Hassan matter reaches
 "more information required" and states no conclusion.
 

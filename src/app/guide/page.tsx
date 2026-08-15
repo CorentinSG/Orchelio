@@ -8,8 +8,8 @@ import { DEMO_PASSWORD } from "@/lib/demo-accounts";
 import { APP_NAME, FICTIONAL_DATA_NOTICE, POWERED_BY } from "@/lib/app-config";
 
 export const metadata = {
-  title: "Guided demonstration",
-  description: `A ${GUIDE_STEP_COUNT}-step walkthrough of ${APP_NAME}.`,
+  title: "Visite guidée",
+  description: `Une visite d’${APP_NAME} en ${GUIDE_STEP_COUNT} étapes.`,
 };
 
 /**
@@ -32,22 +32,23 @@ export default function GuidePage() {
       <main id="main" tabIndex={-1} className="flex-1 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl space-y-6">
           <header>
-            <OrchelioWordmark subtitle="Guided demonstration" />
+            <OrchelioWordmark subtitle="Visite guidée" />
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink">
-              {GUIDE_STEP_COUNT} steps through {APP_NAME}
+              {APP_NAME} en {GUIDE_STEP_COUNT} étapes
             </h1>
             <p className="mt-2 text-ink-muted">
-              In order, about twenty minutes. Each step names the account to sign in as, the screen
-              to open, and — the part that matters — what to look for once you are there.
+              Dans l’ordre, une vingtaine de minutes. Chaque étape nomme le compte avec lequel se
+              connecter, l’écran à ouvrir, et — c’est là l’essentiel — ce qu’il faut y regarder.
             </p>
           </header>
 
-          <Callout tone="warning" title="Everything you are about to see is invented">
+          <Callout tone="warning" title="Tout ce que vous allez voir est inventé">
             <p>{FICTIONAL_DATA_NOTICE}</p>
             <p className="mt-2">
-              Every account uses the password <span className="font-mono">{DEMO_PASSWORD}</span>,
-              which is also printed on the sign-in page. No AI request leaves this machine
-              anywhere in this walkthrough, and no charge is incurred by any of it.
+              Tous les comptes utilisent le mot de passe{" "}
+              <span className="font-mono">{DEMO_PASSWORD}</span>, qui figure aussi sur la page de
+              connexion. Aucune requête d’IA ne quitte cette machine au cours de cette visite, et
+              rien n’y engage de frais.
             </p>
           </Callout>
 
@@ -66,21 +67,21 @@ export default function GuidePage() {
                 >
                   <p className="text-sm text-ink">{step.action}</p>
                   <p className="mt-2 text-sm text-ink-muted">
-                    <span className="font-medium text-ink">Look for:</span> {step.notice}
+                    <span className="font-medium text-ink">À regarder :</span> {step.notice}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Link
                       href={step.href}
                       className="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-muted"
                     >
-                      Open {step.href}
+                      Ouvrir {step.href}
                     </Link>
                     {step.account ? (
                       <Badge tone="neutral">
                         <span className="font-mono">{step.account}</span>
                       </Badge>
                     ) : (
-                      <Badge tone="neutral">the account you just created</Badge>
+                      <Badge tone="neutral">le compte que vous venez de créer</Badge>
                     )}
                   </div>
                 </Card>
@@ -88,19 +89,19 @@ export default function GuidePage() {
             ))}
           </ol>
 
-          <Card title="When you reach the end">
+          <Card title="Quand vous arriverez au bout">
             <p className="text-sm text-ink-muted">
-              Three firms will exist, configured differently, sharing one codebase and not one row
-              of data. That is the whole claim {APP_NAME} makes, and steps 18 to 21 are the ones
-              that test it rather than assert it.
+              Trois cabinets existeront, configurés différemment, partageant un seul code et pas
+              une seule ligne de données. C’est là toute la promesse d’{APP_NAME}, et les étapes 18
+              à 21 sont celles qui la mettent à l’épreuve plutôt que de l’affirmer.
             </p>
             <p className="mt-3 text-sm">
               <Link href="/login" className="font-medium text-brand underline underline-offset-4">
-                Start at step 1
+                Commencer à l’étape 1
               </Link>{" "}
               ·{" "}
               <Link href="/" className="font-medium text-brand underline underline-offset-4">
-                Back to the home page
+                Retour à l’accueil
               </Link>
             </p>
           </Card>

@@ -459,7 +459,7 @@ Conventions applied throughout:
 ### Two deliberate choices worth knowing
 
 **`Matter.fields` is a JSON column, not a set of columns.** Immigration matters carry a status
-expiration date and an I-94 classification; employment matters carry a termination date and an
+expiration date and the visa it was entered under; employment matters carry a termination date and an
 hourly rate. Which fields are visible comes from the firm's configuration, so they cannot be a
 fixed schema without one table per practice area — which is exactly the fork Orchelio exists to
 avoid.

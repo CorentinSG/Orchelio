@@ -187,7 +187,7 @@ test.describe("The seven-step questionnaire", () => {
 
     // The dashboard is now assembled from this configuration.
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByText("Dates d’expiration de statut à revoir")).toBeVisible();
+    await expect(page.getByText("Titres arrivant à expiration")).toBeVisible();
     await expect(page.getByText("Documents d’identité manquants")).toBeVisible();
   });
 
@@ -236,7 +236,7 @@ test.describe("The seven-step questionnaire", () => {
     // questions an employment firm asks are not the ones an immigration firm asks.
     await expect(page.getByText("Lettres de licenciement à examiner")).toBeVisible();
     await expect(page.getByText("Justificatifs de salaire manquants")).toBeVisible();
-    await expect(page.getByText("Dates d’expiration de statut à revoir")).toHaveCount(0);
+    await expect(page.getByText("Titres arrivant à expiration")).toHaveCount(0);
   });
 
   test("omits a widget whose AI feature the firm switched off", async ({ page }) => {

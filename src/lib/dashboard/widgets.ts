@@ -39,9 +39,9 @@ const SHARED_WIDGETS: readonly DashboardWidget[] = [
 const IMMIGRATION_WIDGETS: readonly DashboardWidget[] = [
   { key: "new_leads", label: "Premiers contacts", hint: "Dossiers encore au stade du premier contact", tone: "brand", availableFrom: 5 },
   { key: "consultations_to_prepare", label: "Consultations à préparer", hint: "Dossiers avec une consultation programmée", tone: "brand", availableFrom: 5 },
-  { key: "status_dates_to_review", label: "Dates d’expiration de statut à revoir", hint: "Expiration enregistrée sous 90 jours — non confirmée", tone: "warning", availableFrom: 5 },
-  { key: "missing_identity_documents", label: "Documents d’identité manquants", hint: "Dossiers sans passeport, I-94 ou acte de naissance", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
-  { key: "missing_immigration_documents", label: "Documents d’immigration manquants", hint: "Dossiers auxquels manque une autre pièce attendue", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "status_dates_to_review", label: "Titres arrivant à expiration", hint: "Expiration enregistrée sous 90 jours — non confirmée", tone: "warning", availableFrom: 5 },
+  { key: "missing_identity_documents", label: "Documents d’identité manquants", hint: "Dossiers sans passeport, titre de séjour ou acte de naissance", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
+  { key: "missing_immigration_documents", label: "Pièces de séjour manquantes", hint: "Dossiers auxquels manque une autre pièce attendue", tone: "warning", availableFrom: 5, requiresAiFeature: "missing_documents" },
   { key: "awaiting_attorney_approval", label: "Dossiers en attente de validation", hint: "Analyses pas encore validées", tone: "warning", availableFrom: 7 },
   { key: "upcoming_deadlines", label: "Dates à revoir", hint: "Sous 30 jours — enregistrées, jamais confirmées", tone: "neutral", availableFrom: 5 },
 ];

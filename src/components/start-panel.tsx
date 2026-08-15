@@ -53,11 +53,11 @@ export function StartPanel({
     for (const file of Array.from(files)) {
       const extension = extensionOf(file.name);
       if (!(ALLOWED_DOCUMENT_EXTENSIONS as readonly string[]).includes(extension)) {
-        refused.push(`${file.name} is .${extension || "unknown"}`);
+        refused.push(`${file.name} est en .${extension || "inconnu"}`);
         continue;
       }
       if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
-        refused.push(`${file.name} is over ${MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} MB`);
+        refused.push(`${file.name} dépasse ${MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} Mo`);
         continue;
       }
       accepted.push({ name: file.name, size: file.size, type: file.type });
@@ -68,7 +68,7 @@ export function StartPanel({
       // word is one somebody believes is on the matter.
       const room = MAX_FILES_AT_ONCE - previous.length;
       if (accepted.length > room) {
-        refused.push(`${accepted.length - room} more than the ${MAX_FILES_AT_ONCE} allowed at once`);
+        refused.push(`${accepted.length - room} de plus que les ${MAX_FILES_AT_ONCE} autorisés à la fois`);
       }
       return [...previous, ...accepted.slice(0, Math.max(0, room))];
     });
@@ -76,7 +76,7 @@ export function StartPanel({
     setProblem(
       refused.length === 0
         ? null
-        : `Not added — ${refused.join("; ")}. Orchelio accepts ${ALLOWED_DOCUMENT_EXTENSIONS.join(", ")}.`,
+        : `Non ajouté${refused.length > 1 ? "s" : ""} — ${refused.join(" ; ")}. Orchelio accepte ${ALLOWED_DOCUMENT_EXTENSIONS.join(", ")}.`,
     );
   }
 
@@ -85,10 +85,10 @@ export function StartPanel({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="clientName" className="block text-sm font-medium text-ink">
-            Who is the client?
+            Qui est le client ?
           </label>
           <p className="mt-0.5 text-sm text-ink-muted">
-            {"A fictional name. Never a real person — this is a demonstration."}
+            {"Un nom fictif. Jamais une personne réelle — ceci est une démonstration."}
           </p>
           <input
             id="clientName"
@@ -102,10 +102,10 @@ export function StartPanel({
 
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-ink">
-            What is it about?
+            De quoi s’agit-il ?
           </label>
           <p className="mt-0.5 text-sm text-ink-muted">
-            {"One line, in your own words. You can change it later."}
+            {"Une ligne, dans vos propres mots. Vous pourrez la changer plus tard."}
           </p>
           <input
             id="title"
@@ -120,10 +120,10 @@ export function StartPanel({
 
       <div>
         <label htmlFor="matterTypeKey" className="block text-sm font-medium text-ink">
-          Which kind of matter?
+          Quel type de dossier ?
         </label>
         <p className="mt-0.5 text-sm text-ink-muted">
-          {"Only the kinds this firm said it handles are offered."}
+          {"Seuls les types que ce cabinet a déclaré traiter sont proposés."}
         </p>
         <select
           id="matterTypeKey"
@@ -141,10 +141,10 @@ export function StartPanel({
 
       {canAddDocuments ? (
         <div>
-          <p className="block text-sm font-medium text-ink">What do you have on file?</p>
+          <p className="block text-sm font-medium text-ink">Qu’avez-vous au dossier ?</p>
           <p className="mt-0.5 text-sm text-ink-muted">
             {
-              "Optional. Drag several in at once — Orchelio records their names and nothing else, and you can say what each one is later."
+              "Facultatif. Glissez-en plusieurs à la fois — Orchelio enregistre leur nom et rien d’autre, et vous pourrez dire plus tard ce qu’est chacun."
             }
           </p>
 
@@ -172,20 +172,20 @@ export function StartPanel({
             }`}
           >
             <p className="text-sm text-ink">
-              Drag files here, or{" "}
+              Glissez des fichiers ici, ou{" "}
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 className="font-medium text-brand underline underline-offset-4"
               >
-                choose them
+                choisissez-les
               </button>
               .
             </p>
             <p className="mt-1 text-xs text-ink-subtle">
-              {ALLOWED_DOCUMENT_EXTENSIONS.join(", ")} · up to{" "}
-              {MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} MB each · at most {MAX_FILES_AT_ONCE} at once ·
-              fictional documents only
+              {ALLOWED_DOCUMENT_EXTENSIONS.join(", ")} · jusqu’à{" "}
+              {MAX_DOCUMENT_SIZE_BYTES / 1024 / 1024} Mo chacun · {MAX_FILES_AT_ONCE} au plus à la
+              fois · documents fictifs uniquement
             </p>
 
             <input
@@ -194,7 +194,7 @@ export function StartPanel({
               multiple
               accept={ACCEPT}
               className="sr-only"
-              aria-label="Choose documents"
+              aria-label="Choisir des documents"
               onChange={(event) => accept(event.target.files)}
             />
 
@@ -204,7 +204,7 @@ export function StartPanel({
                   <li key={`${file.name}-${index}`}>
                     {file.name}{" "}
                     <span className="text-ink-muted">
-                      ({Math.max(1, Math.round(file.size / 1024))} KB)
+                      ({Math.max(1, Math.round(file.size / 1024))} Ko)
                     </span>
                   </li>
                 ))}
@@ -224,7 +224,7 @@ export function StartPanel({
         type="submit"
         className="rounded-md bg-brand px-5 py-2.5 text-sm font-medium text-brand-ink hover:bg-brand-strong"
       >
-        Open the matter
+        Ouvrir le dossier
       </button>
     </form>
   );

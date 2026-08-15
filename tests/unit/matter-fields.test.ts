@@ -48,7 +48,7 @@ describe("fields belong to their practice area", () => {
       "nationality",
       "country_of_birth",
       "date_of_birth",
-      "i94_available",
+      "residence_permit_available",
       "last_entry_date",
       "last_entry_classification",
       "petitioner",
@@ -165,19 +165,21 @@ describe("sanitising submitted values", () => {
   });
 
   it("keeps a select value that was offered", () => {
-    expect(sanitiseFieldValues("immigration", "family_based", { current_status: "h1b" })).toEqual({
-      current_status: "h1b",
+    expect(
+      sanitiseFieldValues("immigration", "family_based", { current_status: "passeport_talent" }),
+    ).toEqual({
+      current_status: "passeport_talent",
     });
   });
 
   it("normalises booleans and numbers", () => {
     const cleaned = sanitiseFieldValues("immigration", "family_based", {
-      i94_available: "true",
+      residence_permit_available: "true",
       prior_removals: "false",
       dependants: "2",
     });
 
-    expect(cleaned).toEqual({ i94_available: true, prior_removals: false, dependants: 2 });
+    expect(cleaned).toEqual({ residence_permit_available: true, prior_removals: false, dependants: 2 });
   });
 
   it("drops an empty value rather than storing a blank", () => {
@@ -196,7 +198,7 @@ describe("sanitising submitted values", () => {
 
 describe("displaying values", () => {
   const status = IMMIGRATION_FIELDS.find((field) => field.key === "current_status")!;
-  const i94 = IMMIGRATION_FIELDS.find((field) => field.key === "i94_available")!;
+  const permit = IMMIGRATION_FIELDS.find((field) => field.key === "residence_permit_available")!;
 
   it("says Unknown rather than leaving a blank", () => {
     for (const missing of [undefined, null, ""]) {
@@ -205,12 +207,12 @@ describe("displaying values", () => {
   });
 
   it("shows the option label, not the stored key", () => {
-    expect(displayValue(status, "h1b")).toBe("H-1B");
+    expect(displayValue(status, "passeport_talent")).toBe("Passeport talent");
   });
 
   it("shows booleans as words", () => {
-    expect(displayValue(i94, true)).toBe("Oui");
-    expect(displayValue(i94, false)).toBe("Non");
+    expect(displayValue(permit, true)).toBe("Oui");
+    expect(displayValue(permit, false)).toBe("Non");
   });
 });
 
@@ -219,10 +221,10 @@ describe("document categories", () => {
     const immigration = IMMIGRATION_CATEGORIES.map((c) => c.key);
     const employment = EMPLOYMENT_CATEGORIES.map((c) => c.key);
 
-    expect(immigration).toContain("i94");
+    expect(immigration).toContain("residence_permit");
     expect(employment).toContain("pay_stub");
     expect(immigration).not.toContain("pay_stub");
-    expect(employment).not.toContain("i94");
+    expect(employment).not.toContain("residence_permit");
   });
 
   it("recognises only its own categories", () => {
@@ -242,7 +244,7 @@ describe("expected documents", () => {
       (category) => category.key,
     );
 
-    expect(missing).toContain("i94");
+    expect(missing).toContain("residence_permit");
     expect(missing).toContain("marriage_certificate");
     expect(missing).not.toContain("passport");
   });

@@ -51,11 +51,11 @@ test.describe("Before the button is pressed", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/start");
 
-    const steps = page.getByRole("region", { name: /^What happens when you press/ });
-    await expect(steps).toContainText("A matter is opened");
-    await expect(steps).toContainText("Your files are listed");
-    await expect(steps).toContainText("Orchelio reads what you have entered");
-    await expect(steps).toContainText("Nothing is decided");
+    const steps = page.getByRole("region", { name: /^Ce qui se passe quand vous appuyez/ });
+    await expect(steps).toContainText("Un dossier est ouvert");
+    await expect(steps).toContainText("Vos fichiers sont recensés");
+    await expect(steps).toContainText("Orchelio lit ce que vous avez saisi");
+    await expect(steps).toContainText("Rien n’est décidé");
   });
 
   test("says the file itself never leaves the computer, where the decision is made", async ({
@@ -66,25 +66,25 @@ test.describe("Before the button is pressed", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/start");
 
-    await expect(page.getByRole("main")).toContainText(/stay on your computer/i);
-    await expect(page.getByRole("main")).toContainText(/never opens one/i);
+    await expect(page.getByRole("main")).toContainText(/restent sur votre ordinateur/i);
+    await expect(page.getByRole("main")).toContainText(/n’en ouvre aucun/i);
   });
 
   test("asks four things, not a dozen", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/start");
 
-    await expect(page.getByLabel("Who is the client?")).toBeVisible();
-    await expect(page.getByLabel("What is it about?")).toBeVisible();
-    await expect(page.getByLabel("Which kind of matter?")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Open the matter" })).toBeVisible();
+    await expect(page.getByLabel("Qui est le client ?")).toBeVisible();
+    await expect(page.getByLabel("De quoi s’agit-il ?")).toBeVisible();
+    await expect(page.getByLabel("Quel type de dossier ?")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ouvrir le dossier" })).toBeVisible();
   });
 
   test("offers only the kinds of matter this firm handles", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/start");
 
-    const options = await page.getByLabel("Which kind of matter?").locator("option").allTextContents();
+    const options = await page.getByLabel("Quel type de dossier ?").locator("option").allTextContents();
     expect(options.length).toBeGreaterThan(0);
     // An immigration firm is never offered an employment matter type.
     expect(options.join(" ")).not.toMatch(/wrongful termination|wage/i);
@@ -96,13 +96,13 @@ test.describe("Pressing it once", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/start");
 
-    await page.getByLabel("Who is the client?").fill("Priya Raman");
-    await page.getByLabel("What is it about?").fill("Spouse petition — first review");
-    await page.getByLabel("Choose documents").setInputFiles([
+    await page.getByLabel("Qui est le client ?").fill("Priya Raman");
+    await page.getByLabel("De quoi s’agit-il ?").fill("Spouse petition — first review");
+    await page.getByLabel("Choisir des documents").setInputFiles([
       { name: "passport-raman.pdf", mimeType: "application/pdf", buffer: Buffer.from("x") },
       { name: "i94-raman.pdf", mimeType: "application/pdf", buffer: Buffer.from("y") },
     ]);
-    await page.getByRole("button", { name: "Open the matter" }).click();
+    await page.getByRole("button", { name: "Ouvrir le dossier" }).click();
 
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
 
@@ -148,8 +148,8 @@ test.describe("What it refuses", () => {
     await signIn(page, "reviewer@demo.local");
     await page.goto("/start");
 
-    await expect(page.getByRole("main")).toContainText(/attorneys and firm administrators/i);
-    await expect(page.getByRole("button", { name: "Open the matter" })).toHaveCount(0);
+    await expect(page.getByRole("main")).toContainText(/appartient aux avocats et aux administrateurs/i);
+    await expect(page.getByRole("button", { name: "Ouvrir le dossier" })).toHaveCount(0);
   });
 
   test("refuses that reviewer on the server, not only on the screen", async ({ page }) => {

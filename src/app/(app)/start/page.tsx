@@ -58,20 +58,20 @@ export default async function StartPage({ searchParams }: PageProps) {
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Ouvrir un dossier</h1>
         <p className="mt-1 text-ink-muted">
           {
-            "Four answers and whatever files you have. Orchelio does the rest and shows you what to check."
+            "Quatre réponses et les fichiers que vous avez. Orchelio fait le reste et vous montre ce qu’il faut vérifier."
           }
         </p>
       </header>
 
       {problem ? (
-        <Callout tone="danger" title="That did not go through" assertive>
+        <Callout tone="danger" title="Cela n’a pas abouti" assertive>
           {problem}
         </Callout>
       ) : null}
 
       <Card
-        title="What happens when you press the button"
-        description="Listed before, not reported after."
+        title="Ce qui se passe quand vous appuyez sur le bouton"
+        description="Annoncé avant, pas rapporté après."
       >
         <ol className="space-y-4">
           {readiness.steps.map((step, index) => (
@@ -88,7 +88,7 @@ export default async function StartPage({ searchParams }: PageProps) {
               </span>
               <div>
                 <p className="text-sm font-medium text-ink">
-                  {step.will ? step.title : `${step.title} — not this time`}
+                  {step.will ? step.title : `${step.title} — pas cette fois`}
                 </p>
                 <p className="mt-0.5 text-sm text-ink-muted">{step.note}</p>
               </div>
@@ -98,32 +98,32 @@ export default async function StartPage({ searchParams }: PageProps) {
       </Card>
 
       {readiness.canOpen ? (
-        <Card title="The matter">
+        <Card title="Le dossier">
           <StartPanel
             matterTypes={types.map((type) => ({ key: type.key, label: type.label }))}
             canAddDocuments={can(actor, "document.upload")}
           />
         </Card>
       ) : (
-        <Callout tone="warning" title="Not something your account can do here">
+        <Callout tone="warning" title="Votre compte ne peut pas faire cela ici">
           <p>{readiness.blocked}</p>
           <p className="mt-2">
             <Link href="/matters" className="font-medium text-brand underline underline-offset-4">
-              See the matters this firm already has
+              Voir les dossiers que ce cabinet possède déjà
             </Link>
           </p>
         </Callout>
       )}
 
-      <Card title="The long way round" description="Still there, and sometimes the right one.">
+      <Card title="La voie longue" description="Toujours là, et parfois la bonne.">
         <p className="text-sm text-ink-muted">
           {
-            "This screen asks for the minimum. When you already know the dates, the status and the rest of the detail, "
+            "Cet écran demande le minimum. Quand vous connaissez déjà les dates, le statut et le reste du détail, "
           }
           <Link href="/matters/new" className="font-medium text-brand underline underline-offset-4">
-            the full form
+            le formulaire complet
           </Link>
-          {" records all of it at once."}
+          {" enregistre tout d’un coup."}
         </p>
       </Card>
     </div>

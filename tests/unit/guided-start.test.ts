@@ -43,16 +43,16 @@ describe("when everything is in place", () => {
 
   it("says the file never leaves the person's computer, where they decide", () => {
     const documents = readiness.steps.find((step) => step.key === "documents");
-    expect(documents?.note).toMatch(/stay on your computer/i);
-    expect(documents?.note).toMatch(/never opens one/i);
+    expect(documents?.note).toMatch(/restent sur votre ordinateur/i);
+    expect(documents?.note).toMatch(/n’en ouvre aucun/i);
   });
 
   it("ends by saying nothing was decided", () => {
     const decision = readiness.steps.at(-1);
     expect(decision?.key).toBe("decision");
     // The last thing on the page, and the point of the product.
-    expect(decision?.note).toMatch(/nobody has stood behind/i);
-    expect(decision?.note).toMatch(/that person is you/i);
+    expect(decision?.note).toMatch(/personne ne s’est rangé/i);
+    expect(decision?.note).toMatch(/cette personne, c’est vous/i);
   });
 });
 
@@ -60,15 +60,15 @@ describe("when the form should not be offered", () => {
   it("refuses somebody who may not open a matter, and says who can", () => {
     const readiness = guidedReadiness({ ...ABLE, canCreateMatter: false });
     expect(readiness.canOpen).toBe(false);
-    expect(readiness.blocked).toMatch(/attorneys and firm administrators/i);
+    expect(readiness.blocked).toMatch(/appartient aux avocats et aux administrateurs/i);
     // A refusal without a route forward is a dead end.
-    expect(readiness.blocked).toMatch(/add documents to it/i);
+    expect(readiness.blocked).toMatch(/pourrez y ajouter des documents/i);
   });
 
   it("refuses a firm that has chosen no matter types, and says where to fix it", () => {
     const readiness = guidedReadiness({ ...ABLE, matterTypes: [] });
     expect(readiness.canOpen).toBe(false);
-    expect(readiness.blocked).toMatch(/Settings, under Matter types/i);
+    expect(readiness.blocked).toMatch(/Réglages, sous Types de dossier/i);
   });
 
   it("names the person's problem before the firm's when both apply", () => {
@@ -78,7 +78,7 @@ describe("when the form should not be offered", () => {
       canCreateMatter: false,
       matterTypes: [],
     });
-    expect(readiness.blocked).toMatch(/attorneys and firm administrators/i);
+    expect(readiness.blocked).toMatch(/appartient aux avocats et aux administrateurs/i);
   });
 });
 
@@ -89,7 +89,7 @@ describe("a step that will not run is shown, not hidden", () => {
 
     expect(readiness.canOpen).toBe(true);
     expect(documents?.will).toBe(false);
-    expect(documents?.note).toMatch(/matter will still be opened/i);
+    expect(documents?.note).toMatch(/dossier sera tout de même ouvert/i);
     // Dropping the step would let somebody believe their files were recorded.
     expect(readiness.steps).toHaveLength(4);
   });
@@ -99,8 +99,8 @@ describe("a step that will not run is shown, not hidden", () => {
     const analysis = readiness.steps.find((step) => step.key === "analysis");
 
     expect(analysis?.will).toBe(false);
-    expect(analysis?.note).toMatch(/switched off every AI feature/i);
-    expect(analysis?.note).toMatch(/Settings, under AI features/i);
+    expect(analysis?.note).toMatch(/a désactivé toutes les fonctions d’IA/i);
+    expect(analysis?.note).toMatch(/Réglages, sous Fonctions d’IA/i);
   });
 
   it("tells a role that cannot run one apart from a firm that switched them off", () => {
@@ -112,7 +112,7 @@ describe("a step that will not run is shown, not hidden", () => {
     const noteFor = (r: ReturnType<typeof guidedReadiness>) =>
       r.steps.find((step) => step.key === "analysis")?.note;
 
-    expect(noteFor(byRole)).toMatch(/Your role does not run an analysis/i);
+    expect(noteFor(byRole)).toMatch(/Votre rôle ne lance pas d’analyse/i);
     expect(noteFor(byRole)).not.toBe(noteFor(byFirm));
   });
 
