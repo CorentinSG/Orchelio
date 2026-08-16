@@ -101,26 +101,26 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Validations</h1>
         <p className="mt-1 text-ink-muted">
-          {counts.pending} waiting for a decision. Nothing here has taken effect.
+          {counts.pending} en attente d’une décision. Rien ici n’a pris effet.
         </p>
         {/* Which zone the dates below are in, said rather than assumed. */}
         <p className="mt-1 text-sm text-ink-subtle">{timezoneNotice(timezone)}</p>
       </header>
 
       {one(query["decided"]) ? (
-        <Callout tone="success" title="Decision recorded">
-          It is in this firm&apos;s activity log, with your name, the time and your note.{" "}
+        <Callout tone="success" title="Décision enregistrée">
+          Elle figure au journal d’activité du cabinet, avec votre nom, l’heure et votre note.{" "}
           <Link href="/activity" className="font-medium text-brand underline underline-offset-4">
-            See the log
+            Voir le journal
           </Link>
         </Callout>
       ) : null}
 
-      <Card title="Filters" description="Applied on the server, within this firm.">
+      <Card title="Filtres" description="Appliqués sur le serveur, dans le périmètre de ce cabinet.">
         <form method="get" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-ink">
-              Status
+              Statut
             </label>
             <select
               id="status"
@@ -128,13 +128,13 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               defaultValue={filters.status ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any status</option>
-              <option value="pending">Awaiting a decision</option>
-              <option value="approved">Approved</option>
-              <option value="approved_with_edits">Approved with edits</option>
-              <option value="new_analysis_requested">New analysis requested</option>
-              <option value="rejected">Rejected</option>
-              <option value="superseded">Superseded — nobody decided</option>
+              <option value="">Tous les statuts</option>
+              <option value="pending">En attente d’une décision</option>
+              <option value="approved">Validée</option>
+              <option value="approved_with_edits">Validée avec modifications</option>
+              <option value="new_analysis_requested">Nouvelle analyse demandée</option>
+              <option value="rejected">Refusée</option>
+              <option value="superseded">Remplacée — personne n’a décidé</option>
             </select>
           </div>
 
@@ -148,7 +148,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               defaultValue={filters.action ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any action</option>
+              <option value="">Toutes les actions</option>
               {actionsPresent.map((action) => (
                 <option key={action} value={action}>
                   {actionLabel(action)}
@@ -159,7 +159,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
 
           <div>
             <label htmlFor="risk" className="block text-sm font-medium text-ink">
-              Risk
+              Risque
             </label>
             <select
               id="risk"
@@ -167,10 +167,10 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               defaultValue={filters.riskLevel ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any risk</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="">Tous les risques</option>
+              <option value="high">Élevé</option>
+              <option value="medium">Moyen</option>
+              <option value="low">Faible</option>
             </select>
           </div>
 
@@ -179,29 +179,29 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
               type="submit"
               className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
             >
-              Apply
+              Appliquer
             </button>
             <Link
               href="/approvals"
               className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
             >
-              Clear
+              Effacer
             </Link>
           </div>
         </form>
       </Card>
 
       <Card
-        title={`Waiting for a decision (${counts.pending})`}
+        title={`En attente d’une décision (${counts.pending})`}
         description={
           counts.pending > pending.length
-            ? `Showing the ${pending.length} most recent. Narrow the filters above to reach the rest.`
+            ? `Les ${pending.length} plus récentes sont affichées. Resserrez les filtres pour atteindre les autres.`
             : undefined
         }
       >
         {pending.length === 0 ? (
-          <Callout tone="neutral" title="Nothing is waiting">
-            Nothing in this firm currently needs a person&apos;s decision.
+          <Callout tone="neutral" title="Rien n’attend">
+            Rien dans ce cabinet ne requiert actuellement la décision d’une personne.
           </Callout>
         ) : (
           <ul className="space-y-4">
@@ -221,7 +221,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
           </ul>
         )}
         {problem && !focus ? (
-          <Callout tone="danger" title="That decision was not recorded" assertive>
+          <Callout tone="danger" title="Cette décision n’a pas été enregistrée" assertive>
             {problem}
           </Callout>
         ) : null}
@@ -229,11 +229,11 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
 
       {decided.length > 0 ? (
         <Card
-          title={`Decided (${counts.decided})`}
+          title={`Décidées (${counts.decided})`}
           description={
             counts.decided > decided.length
-              ? `Kept, not cleared. Showing the ${decided.length} most recent.`
-              : "Kept, not cleared. A decision is a record of who took responsibility."
+              ? `Conservées, jamais purgées. Les ${decided.length} plus récentes sont affichées.`
+              : "Conservées, jamais purgées. Une décision est la trace de qui a pris la responsabilité."
           }
         >
           <ul className="space-y-4">
@@ -254,11 +254,11 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
 
       {superseded.length > 0 ? (
         <Card
-          title={`Superseded (${counts.superseded})`}
+          title={`Remplacées (${counts.superseded})`}
           description={
             counts.superseded > superseded.length
-              ? `Nobody decided these. Showing the ${superseded.length} most recent.`
-              : "Nobody decided these."
+              ? `Personne ne les a décidées. Les ${superseded.length} plus récentes sont affichées.`
+              : "Personne ne les a décidées."
           }
         >
           <p className="mb-4 text-sm text-ink-muted">{SUPERSEDED_EXPLANATION}</p>
@@ -279,8 +279,8 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
       ) : null}
 
       <Card
-        title="What raises an approval here"
-        description="And what this firm has chosen for each."
+        title="Ce qui crée une demande de validation ici"
+        description="Et ce que ce cabinet a choisi pour chacune."
       >
         <ul className="divide-y divide-line">
           {APPROVABLE_ACTIONS.map((action) => {
@@ -297,10 +297,10 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                   }
                 >
                   {reason === "locked"
-                    ? "Always — cannot be switched off"
+                    ? "Toujours — impossible à désactiver"
                     : reason === "configured"
-                      ? "This firm requires it"
-                      : "This firm does not require it"}
+                      ? "Ce cabinet l’exige"
+                      : "Ce cabinet ne l’exige pas"}
                 </Badge>
               </li>
             );
@@ -309,17 +309,17 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
       </Card>
 
       <Card
-        title="Rules this build does not yet raise"
-        description="Said plainly, because a rule nobody raises protects nobody."
+        title="Les règles que cette version ne déclenche pas encore"
+        description="Dit clairement, parce qu’une règle que rien ne déclenche ne protège personne."
       >
         <p className="text-sm text-ink-muted">
-          The onboarding questionnaire offers more rules than this build has actions for. A firm
-          that switched one of these on should know that no screen currently triggers it — not
-          assume it is being enforced.
+          Le questionnaire d’installation propose plus de règles que cette version n’a d’actions.
+          Un cabinet qui a activé l’une de celles-ci doit savoir qu’aucun écran ne la déclenche
+          aujourd’hui — pas croire qu’elle est appliquée.
         </p>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-sm font-medium text-ink">Locked, and not yet raised</p>
+            <p className="text-sm font-medium text-ink">Verrouillées, et pas encore déclenchées</p>
             <ul className="mt-1 space-y-0.5">
               {uncovered.locked.map((rule) => (
                 <li key={rule} className="text-sm text-ink-muted">
@@ -329,7 +329,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
             </ul>
           </div>
           <div>
-            <p className="text-sm font-medium text-ink">Configurable, and not yet raised</p>
+            <p className="text-sm font-medium text-ink">Configurables, et pas encore déclenchées</p>
             <ul className="mt-1 space-y-0.5">
               {uncovered.configurable.map((rule) => (
                 <li key={rule} className="text-sm text-ink-muted">
@@ -340,8 +340,9 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
           </div>
         </div>
         <p className="mt-4 text-sm text-ink-subtle">
-          Several are unreachable rather than unimplemented: Orchelio has no transport, so nothing
-          can be submitted, shared or sent, and nothing is ever permanently deleted.
+          Plusieurs sont hors d’atteinte plutôt que non implémentées : Orchelio n’a aucun
+          transport, donc rien ne peut être soumis, partagé ni envoyé, et rien n’est jamais
+          supprimé définitivement.
         </p>
       </Card>
     </div>

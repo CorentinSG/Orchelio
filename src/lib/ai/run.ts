@@ -15,7 +15,13 @@ import { prisma } from "@/lib/prisma";
 import { parseJsonObject } from "@/lib/json-field";
 import { aiProvider, type AIProvider } from "@/lib/ai/provider";
 import { raiseApproval, supersedeEarlierAnalysisApprovals } from "@/lib/approvals/raise";
-import type { MatterAnalysisInput, MatterAnalysisResult, RunUsage } from "@/lib/ai/types";
+import {
+  reviewStatusLabel,
+  type MatterAnalysisInput,
+  type MatterAnalysisResult,
+  type ReviewStatus,
+  type RunUsage,
+} from "@/lib/ai/types";
 import { serverEnv } from "@/lib/env";
 
 /**
@@ -242,7 +248,9 @@ function summariseForApproval(
     parts.push("Le relecteur a trouvé trop peu au dossier pour que l’analyse dise grand-chose.");
   }
 
-  parts.push(`Relecture indépendante : ${reviewStatus.split("_").join(" ")}.`);
+  // The label, not the stored key: "approved for human review" is vocabulary,
+  // and vocabulary went French with the rest of the product.
+  parts.push(`Relecture indépendante : ${reviewStatusLabel(reviewStatus as ReviewStatus).toLowerCase()}.`);
   return parts.join(" ");
 }
 

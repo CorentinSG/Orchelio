@@ -18,51 +18,51 @@ const STATUS_TONE: Record<string, Tone> = {
 export function activityLabel(action: string): string {
   switch (action) {
     case "auth.login.succeeded":
-      return "Signed in";
+      return "Connexion réussie";
     case "auth.login.failed":
-      return "Sign-in failed";
+      return "Connexion échouée";
     case "auth.login.throttled":
-      return "Sign-in throttled";
+      return "Connexions ralenties";
     case "auth.logout":
-      return "Signed out";
+      return "Déconnexion";
     case "access.denied":
-      return "Access refused";
+      return "Accès refusé";
     case "firm.created":
-      return "Firm created";
+      return "Cabinet créé";
     case "firm.viewed":
-      return "Dashboard opened";
+      return "Tableau de bord ouvert";
     case "firm.switched":
-      return "Switched firm";
+      return "Changement de cabinet";
     case "firm.configuration.updated":
-      return "Firm configuration changed";
+      return "Configuration du cabinet modifiée";
     case "matter.created":
-      return "Matter created";
+      return "Dossier créé";
     case "matter.viewed":
-      return "Matter opened";
+      return "Dossier ouvert";
     case "matter.closed":
-      return "Matter closed";
+      return "Dossier clos";
     case "matter.deadline.changed":
-      return "Date on a matter changed";
+      return "Date modifiée sur un dossier";
     case "document.added":
-      return "Document added";
+      return "Document ajouté";
     case "ai.analysis.started":
-      return "Analysis started";
+      return "Analyse lancée";
     case "ai.analysis.completed":
-      return "Analysis finished";
+      return "Analyse terminée";
     case "ai.review.completed":
-      return "Analysis reviewed";
+      return "Analyse relue";
     case "approval.requested":
-      return "Approval raised";
+      return "Demande de validation créée";
     case "approval.decided":
-      return "Decision recorded";
+      return "Décision enregistrée";
     case "communication.draft.prepared":
-      return "Draft prepared";
+      return "Brouillon préparé";
     case "communication.prepared":
-      return "Communication prepared";
+      return "Courrier préparé";
     case "membership.role.changed":
-      return "Role changed";
+      return "Rôle modifié";
     case "demo.seeded":
-      return "Demonstration data seeded";
+      return "Données de démonstration installées";
     default:
       return action.split(".").join(" · ");
   }
@@ -70,7 +70,8 @@ export function activityLabel(action: string): string {
 
 export function ActivityStatusBadge({ status }: { status: string }) {
   if (status === "success") return null;
-  return <Badge tone={STATUS_TONE[status] ?? "neutral"}>{status}</Badge>;
+  const label = status === "denied" ? "refusé" : status === "failure" ? "échec" : status;
+  return <Badge tone={STATUS_TONE[status] ?? "neutral"}>{label}</Badge>;
 }
 
 /**
@@ -88,11 +89,11 @@ export function ActivityDetail({ oldValue, newValue }: { oldValue: string | null
   const lines: string[] = [];
   const value = parsed ?? {};
 
-  if (typeof value["reference"] === "string") lines.push(`Matter ${value["reference"]}`);
+  if (typeof value["reference"] === "string") lines.push(`Dossier ${value["reference"]}`);
   if (typeof value["filename"] === "string") lines.push(String(value["filename"]));
   if (typeof value["subject"] === "string") lines.push(`"${value["subject"]}"`);
   if (typeof value["approvalAction"] === "string") {
-    lines.push(`Action: ${String(value["approvalAction"]).split("_").join(" ")}`);
+    lines.push(`Action : ${String(value["approvalAction"]).split("_").join(" ")}`);
   }
   if (typeof value["status"] === "string" && previous && typeof previous["status"] === "string") {
     lines.push(`${previous["status"]} → ${value["status"]}`);
@@ -100,17 +101,17 @@ export function ActivityDetail({ oldValue, newValue }: { oldValue: string | null
   if (typeof value["required"] === "string") {
     lines.push(
       value["required"] === "locked"
-        ? "Required by a rule that cannot be switched off"
+        ? "Requis par une règle impossible à désactiver"
         : value["required"] === "configured"
-          ? "Required because this firm asked for it"
-          : "No approval required by this firm",
+          ? "Requis parce que ce cabinet l’a demandé"
+          : "Aucune validation requise par ce cabinet",
     );
   }
-  if (typeof value["note"] === "string" && value["note"]) lines.push(`Note: ${value["note"]}`);
+  if (typeof value["note"] === "string" && value["note"]) lines.push(`Note : ${value["note"]}`);
   if (typeof value["effectApplied"] === "boolean") {
-    lines.push(value["effectApplied"] ? "The action took effect" : "Nothing took effect");
+    lines.push(value["effectApplied"] ? "L’action a pris effet" : "Rien n’a pris effet");
   }
-  if (typeof value["reason"] === "string") lines.push(`Reason: ${value["reason"]}`);
+  if (typeof value["reason"] === "string") lines.push(`Motif : ${value["reason"]}`);
   if (typeof value["because"] === "string") lines.push(String(value["because"]));
 
   if (lines.length === 0) return null;

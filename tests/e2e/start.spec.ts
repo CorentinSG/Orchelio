@@ -137,7 +137,7 @@ test.describe("Pressing it once", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/approvals?action=legal_analysis");
 
-    await expect(page.getByRole("region", { name: /^Waiting for a decision/ })).toContainText(
+    await expect(page.getByRole("region", { name: /^En attente d’une décision/ })).toContainText(
       "S’appuyer sur une analyse d’IA",
     );
   });

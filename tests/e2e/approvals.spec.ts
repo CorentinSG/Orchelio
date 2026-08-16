@@ -57,7 +57,7 @@ async function runAnalysis(page: import("@playwright/test").Page, reference: str
  */
 function pendingCard(page: import("@playwright/test").Page, reference: string) {
   return page
-    .getByRole("region", { name: /^Waiting for a decision/ })
+    .getByRole("region", { name: /^En attente d’une décision/ })
     .locator("li")
     .filter({ hasText: reference })
     .first();
@@ -77,7 +77,7 @@ test.describe("An analysis nobody has approved", () => {
     await runAnalysis(page, "IMM-2026-001");
     await page.goto("/approvals");
 
-    const waiting = page.getByRole("region", { name: /^Waiting for a decision/ });
+    const waiting = page.getByRole("region", { name: /^En attente d’une décision/ });
     await expect(waiting).toContainText("S’appuyer sur une analyse d’IA");
     await expect(waiting).toContainText("IMM-2026-001");
   });
@@ -89,8 +89,8 @@ test.describe("Deciding", () => {
     await runAnalysis(page, "IMM-2026-002");
     await page.goto("/approvals");
 
-    const waiting = page.getByRole("region", { name: /^Waiting for a decision/ });
-    await expect(waiting).toContainText("If you approve:");
+    const waiting = page.getByRole("region", { name: /^En attente d’une décision/ });
+    await expect(waiting).toContainText("Si vous validez :");
     await expect(waiting).toContainText(/Un avocat a-t-il lu cette analyse/i);
   });
 
@@ -99,12 +99,12 @@ test.describe("Deciding", () => {
     await runAnalysis(page, "IMM-2026-002");
     await page.goto("/approvals");
 
-    const waiting = page.getByRole("region", { name: /^Waiting for a decision/ });
+    const waiting = page.getByRole("region", { name: /^En attente d’une décision/ });
     for (const label of [
-      "Approved",
-      "Approved with edits",
-      "New analysis requested",
-      "Rejected",
+      "Validée",
+      "Validée avec modifications",
+      "Nouvelle analyse demandée",
+      "Refusée",
     ]) {
       await expect(waiting.getByRole("button", { name: new RegExp(`^${label}`) }).first()).toBeVisible();
     }
@@ -116,13 +116,13 @@ test.describe("Deciding", () => {
     await page.goto("/approvals");
 
     const card = pendingCard(page, "EMP-2026-001");
-    await card.getByRole("button", { name: /^Rejected/ }).click();
+    await card.getByRole("button", { name: /^Refusée/ }).click();
     await page.waitForURL(/\/approvals/);
 
-    await expect(page.locator("main").getByRole("alert")).toContainText(/needs a note/i);
+    await expect(page.locator("main").getByRole("alert")).toContainText(/La note est obligatoire/i);
     // Still waiting: a refused decision must not half-record.
-    await expect(page.getByRole("region", { name: /^Waiting for a decision/ })).toContainText(
-      "Awaiting a decision",
+    await expect(page.getByRole("region", { name: /^En attente d’une décision/ })).toContainText(
+      "En attente d’une décision",
     );
   });
 
@@ -133,14 +133,14 @@ test.describe("Deciding", () => {
 
     const card = pendingCard(page, "EMP-2026-002");
     await card.getByLabel("Note").fill("Read in full. The sequence is reported, not characterised.");
-    await card.getByRole("button", { name: /^Approved with edits/ }).click();
+    await card.getByRole("button", { name: /^Validée avec modifications/ }).click();
     await page.waitForURL(/\/approvals/);
 
-    await expect(page.getByText("Decision recorded")).toBeVisible();
-    await expect(page.getByRole("region", { name: /^Decided/ })).toContainText(
-      "Approved with edits",
+    await expect(page.getByText("Décision enregistrée")).toBeVisible();
+    await expect(page.getByRole("region", { name: /^Décidées/ })).toContainText(
+      "Validée avec modifications",
     );
-    await expect(page.getByRole("region", { name: /^Decided/ })).toContainText(
+    await expect(page.getByRole("region", { name: /^Décidées/ })).toContainText(
       "The sequence is reported",
     );
   });
@@ -149,7 +149,7 @@ test.describe("Deciding", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/approvals?status=approved_with_edits");
 
-    await expect(page.getByRole("region", { name: /^Decided/ })).toBeVisible();
+    await expect(page.getByRole("region", { name: /^Décidées/ })).toBeVisible();
   });
 });
 
@@ -170,7 +170,7 @@ test.describe("A locked rule", () => {
     await tabs(page).getByRole("link", { name: "Validations", exact: true }).click();
     const approvals = page.getByRole("region", { name: /^Validations sur ce dossier/ });
     await expect(approvals).toContainText("Valider un brouillon pour usage hors du cabinet");
-    await expect(approvals).toContainText("Cannot be switched off");
+    await expect(approvals).toContainText("Impossible à désactiver");
   });
 
   test("says Orchelio sends nothing, and approving does not change that", async ({ page }) => {
@@ -197,7 +197,7 @@ test.describe("A locked rule", () => {
     await expect(page.getByText("Demandé, en attente d’une personne")).toBeVisible();
     const approvals = page.getByRole("region", { name: /^Validations sur ce dossier/ });
     await expect(approvals).toContainText("Confirmer une date enregistrée");
-    await expect(approvals).toContainText("Cannot be switched off");
+    await expect(approvals).toContainText("Impossible à désactiver");
   });
 });
 
@@ -207,8 +207,8 @@ test.describe("What each role may do", () => {
     await page.goto("/approvals");
 
     await expect(page.getByRole("heading", { name: "Validations", level: 1 })).toBeVisible();
-    await expect(page.locator("main")).toContainText(/Your role does not decide these/i);
-    await expect(page.getByRole("button", { name: /^Approved$/ })).toHaveCount(0);
+    await expect(page.locator("main")).toContainText(/Votre rôle ne décide pas/i);
+    await expect(page.getByRole("button", { name: /^Validée$/ })).toHaveCount(0);
   });
 
   test("and is refused by the server, not only by a hidden button", async ({ page }) => {
@@ -273,15 +273,15 @@ test.describe("The activity log", () => {
     await runAnalysis(page, "EMP-2026-003");
     await page.goto("/approvals");
     const card = pendingCard(page, "EMP-2026-003");
-    await card.getByRole("button", { name: /^Approved$/ }).click();
+    await card.getByRole("button", { name: /^Validée$/ }).click();
     await page.waitForURL(/\/approvals/);
 
     await page.goto("/activity");
     await expect(page.getByRole("heading", { name: "Journal d’activité", level: 1 })).toBeVisible();
-    await expect(page.locator("main")).toContainText("Decision recorded");
+    await expect(page.locator("main")).toContainText("Décision enregistrée");
     // Honest about what the guarantee rests on.
-    await expect(page.locator("main")).toContainText(/append-only.*discipline/i);
-    await expect(page.locator("main")).toContainText(/write-once storage/i);
+    await expect(page.locator("main")).toContainText(/En ajout seul — par discipline/i);
+    await expect(page.locator("main")).toContainText(/écriture unique/i);
   });
 
   test("filters on the server", async ({ page }) => {
@@ -289,9 +289,9 @@ test.describe("The activity log", () => {
     await page.goto("/activity?action=approval.decided");
 
     await expect(page).toHaveURL(/action=approval.decided/);
-    const body = await page.getByRole("region", { name: /^Events/ }).innerText();
-    expect(body).toContain("Decision recorded");
-    expect(body).not.toContain("Document added");
+    const body = await page.getByRole("region", { name: /^Événements/ }).innerText();
+    expect(body).toContain("Décision enregistrée");
+    expect(body).not.toContain("Document ajouté");
   });
 
   test("shows a refusal as a refusal", async ({ page }) => {
@@ -307,7 +307,7 @@ test.describe("The activity log", () => {
     await signIn(page, "employment.attorney@demo.local");
     await page.goto("/activity?status=denied");
 
-    await expect(page.getByRole("region", { name: /^Events/ })).toContainText("Access refused");
+    await expect(page.getByRole("region", { name: /^Événements/ })).toContainText("Accès refusé");
   });
 
   test("never shows another firm's events", async ({ page }) => {
@@ -324,18 +324,18 @@ test.describe("The approval centre", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/approvals");
 
-    const honesty = page.getByRole("region", { name: "Rules this build does not yet raise" });
+    const honesty = page.getByRole("region", { name: "Les règles que cette version ne déclenche pas encore" });
     await expect(honesty).toBeVisible();
-    await expect(honesty).toContainText(/a rule nobody raises protects nobody/i);
+    await expect(honesty).toContainText(/une règle que rien ne déclenche ne protège personne/i);
   });
 
   test("says which rules this firm chose and which cannot be switched off", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
     await page.goto("/approvals");
 
-    const chosen = page.getByRole("region", { name: "What raises an approval here" });
-    await expect(chosen).toContainText("Always — cannot be switched off");
-    await expect(chosen).toContainText("This firm requires it");
+    const chosen = page.getByRole("region", { name: "Ce qui crée une demande de validation ici" });
+    await expect(chosen).toContainText("Toujours — impossible à désactiver");
+    await expect(chosen).toContainText("Ce cabinet l’exige");
   });
 
   test("never shows another firm's approvals", async ({ page }) => {
@@ -405,7 +405,7 @@ test.describe("Separation of duties", () => {
     await expect(card).toContainText("Vous avez formé cette demande");
     await expect(card).toContainText("cette personne, c’est vous");
     // Still decidable: informed, not blocked.
-    await expect(card.getByRole("button", { name: /^Approved$/ })).toBeVisible();
+    await expect(card.getByRole("button", { name: /^Validée$/ })).toBeVisible();
   });
 
   test("refuses to switch the rule on at a firm with one decider", async ({ page }) => {
@@ -480,7 +480,7 @@ test.describe("A request a newer analysis replaced", () => {
   }
 
   function supersededCards(page: import("@playwright/test").Page) {
-    return page.getByRole("region", { name: /^Superseded/ });
+    return page.getByRole("region", { name: /^Remplacées/ });
   }
 
   test("leaves one request waiting, not one per run", async ({ page }) => {
@@ -489,7 +489,7 @@ test.describe("A request a newer analysis replaced", () => {
     await page.goto("/approvals?action=legal_analysis");
 
     const waiting = page
-      .getByRole("region", { name: /^Waiting for a decision/ })
+      .getByRole("region", { name: /^En attente d’une décision/ })
       .locator("li")
       .filter({ hasText: REFERENCE });
     await expect(waiting).toHaveCount(1);
@@ -501,16 +501,16 @@ test.describe("A request a newer analysis replaced", () => {
     await page.goto("/approvals?action=legal_analysis");
 
     const superseded = supersededCards(page);
-    await expect(superseded).toContainText(/nobody decided/i);
-    await expect(superseded).toContainText(/nothing was approved/i);
+    await expect(superseded).toContainText(/personne ne l’a décidée/i);
+    await expect(superseded).toContainText(/rien n’a été validé/i);
     // And never in the section that says a person took responsibility. Counted
     // rather than asserted absent from the region: the region itself may not
     // exist yet, and a `not.toContainText` against nothing fails for the wrong
     // reason.
     const inDecided = await page
-      .getByRole("region", { name: /^Decided/ })
+      .getByRole("region", { name: /^Décidées/ })
       .locator("li")
-      .filter({ hasText: "Superseded" })
+      .filter({ hasText: "Remplacée" })
       .count();
     expect(inDecided).toBe(0);
   });
@@ -522,7 +522,7 @@ test.describe("A request a newer analysis replaced", () => {
 
     const superseded = supersededCards(page);
     await expect(superseded.locator("li").first()).toBeVisible();
-    for (const label of ["Approved", "Approved with edits", "New analysis requested", "Rejected"]) {
+    for (const label of ["Validée", "Validée avec modifications", "Nouvelle analyse demandée", "Refusée"]) {
       await expect(superseded.getByRole("button", { name: new RegExp(`^${label}`) })).toHaveCount(0);
     }
   });
@@ -550,10 +550,10 @@ test.describe("A request a newer analysis replaced", () => {
 
     await page.goto(result.url);
     const alert = page.locator("main").getByRole("alert");
-    await expect(alert).toContainText(/nothing left to decide/i);
+    await expect(alert).toContainText(/plus rien à décider/i);
     // Not "somebody has already decided this one": nobody did, and saying so
     // would send the reader looking for a decision that does not exist.
-    await expect(alert).not.toContainText(/already decided/i);
+    await expect(alert).not.toContainText(/déjà décidé/i);
   });
 
   test("keeps the row rather than deleting it", async ({ page }) => {
@@ -564,7 +564,7 @@ test.describe("A request a newer analysis replaced", () => {
     await page.waitForURL(/tab=approvals/);
 
     const section = page.getByRole("region", { name: /^Validations sur ce dossier/ });
-    await expect(section).toContainText("Superseded");
-    await expect(section).toContainText(/nobody decided it/i);
+    await expect(section).toContainText("Remplacée");
+    await expect(section).toContainText(/personne ne l’a décidée/i);
   });
 });

@@ -79,13 +79,13 @@ describe("superseded is not a decision", () => {
     // The second half of the sentence is the half that matters. A reader who
     // learns only that a newer analysis exists could still believe this
     // request was dealt with.
-    expect(SUPERSEDED_EXPLANATION).toMatch(/nobody decided it/i);
-    expect(SUPERSEDED_EXPLANATION).toMatch(/nothing was approved/i);
+    expect(SUPERSEDED_EXPLANATION).toMatch(/Personne ne l’a décidée/i);
+    expect(SUPERSEDED_EXPLANATION).toMatch(/rien n’a été validé/i);
   });
 
   it("tells somebody who tries to decide one what to do instead", () => {
-    expect(SUPERSEDED_REFUSAL).toMatch(/nothing left to decide/i);
-    expect(SUPERSEDED_REFUSAL).toMatch(/current analysis/i);
+    expect(SUPERSEDED_REFUSAL).toMatch(/plus rien à décider/i);
+    expect(SUPERSEDED_REFUSAL).toMatch(/l’analyse en cours/i);
   });
 
   it("never borrows the word 'decided' for its own refusal", () => {
@@ -98,9 +98,9 @@ describe("superseded is not a decision", () => {
 
 describe("the badge", () => {
   it("labels each status", () => {
-    expect(approvalStatusLabel(PENDING_STATUS)).toBe("Awaiting a decision");
-    expect(approvalStatusLabel("approved")).toBe("Approved");
-    expect(approvalStatusLabel(SUPERSEDED_STATUS)).toBe("Superseded");
+    expect(approvalStatusLabel(PENDING_STATUS)).toBe("En attente d’une décision");
+    expect(approvalStatusLabel("approved")).toBe("Validée");
+    expect(approvalStatusLabel(SUPERSEDED_STATUS)).toBe("Remplacée");
   });
 
   it("has a label for every status in the vocabulary", () => {

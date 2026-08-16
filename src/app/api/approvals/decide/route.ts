@@ -61,7 +61,7 @@ export async function POST(request: Request) {
   if (requiresNote(decision) && note.trim() === "") {
     return back(
       `focus=${encodeURIComponent(approvalId)}&problem=${encodeURIComponent(
-        "That decision needs a note saying why — it leaves somebody with work to do.",
+        "Cette décision demande une note qui dise pourquoi — elle laisse du travail à quelqu’un. La note est obligatoire.",
       )}`,
     );
   }
@@ -80,10 +80,10 @@ export async function POST(request: Request) {
         return seeOther("/403");
       case "already_decided":
         return back(
-          `problem=${encodeURIComponent("Somebody has already decided this one. Nothing was changed.")}`,
+          `problem=${encodeURIComponent("Quelqu’un a déjà décidé celle-ci. Rien n’a été modifié.")}`,
         );
       case "note_required":
-        return back(`problem=${encodeURIComponent("That decision needs a note saying why.")}`);
+        return back(`problem=${encodeURIComponent("Cette décision demande une note qui dise pourquoi — la note est obligatoire.")}`);
       case "same_person":
         // Refused by the server, not merely hidden from the screen: the buttons
         // are absent for a self-decision, and this is what answers a request

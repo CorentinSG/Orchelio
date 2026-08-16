@@ -57,7 +57,7 @@ const STATUS_TONE: Record<string, Tone> = {
 
 export function RiskBadge({ level }: { level: string }) {
   const tone = RISK_TONE[level as RiskLevel] ?? "neutral";
-  return <Badge tone={tone}>{level} risk</Badge>;
+  return <Badge tone={tone}>{riskLabel(level)}</Badge>;
 }
 
 export function ApprovalStatusBadge({ status }: { status: string }) {
@@ -152,19 +152,19 @@ export function ApprovalCard({
         <div className="flex flex-wrap items-center gap-2">
           <RiskBadge level={approval.riskLevel} />
           <ApprovalStatusBadge status={approval.status} />
-          {action?.lockedBy ? <Badge tone="neutral">Cannot be switched off</Badge> : null}
+          {action?.lockedBy ? <Badge tone="neutral">Impossible à désactiver</Badge> : null}
         </div>
       </div>
 
       <p className="mt-3 text-sm text-ink">{approval.summary}</p>
 
       <p className="mt-2 text-xs text-ink-subtle">
-        Requested by {approval.requestedBy?.name ?? "Orchelio"} on {formatDate(approval.createdAt, timezone)}
+        Demandée par {approval.requestedBy?.name ?? "Orchelio"} le {formatDate(approval.createdAt, timezone)}
         {href ? (
           <>
             {" · "}
             <Link href={href} className="font-medium text-brand underline underline-offset-4">
-              Open what is being decided
+              Ouvrir ce qui est en jeu
             </Link>
           </>
         ) : null}
@@ -177,13 +177,13 @@ export function ApprovalCard({
               <p className="text-sm font-medium text-ink">{action.question}</p>
               {/* Before the buttons, not in a dialogue after them. */}
               <p className="mt-1 text-sm text-ink-muted">
-                <span className="font-medium">If you approve:</span> {action.effect}
+                <span className="font-medium">Si vous validez :</span> {action.effect}
               </p>
             </div>
           ) : null}
 
           {problem ? (
-            <Callout tone="danger" title="That decision was not recorded" assertive>
+            <Callout tone="danger" title="Cette décision n’a pas été enregistrée" assertive>
               {problem}
             </Callout>
           ) : null}
@@ -192,7 +192,7 @@ export function ApprovalCard({
             <div className="mt-3">
               <Callout
                 tone={blocked ? "warning" : "neutral"}
-                title={blocked ? "Somebody else has to decide this one" : "You raised this request"}
+                title={blocked ? "Quelqu’un d’autre doit décider celle-ci" : "Vous avez formé cette demande"}
               >
                 {blocked ? SELF_DECISION_REFUSAL : SELF_DECISION_NOTICE}
               </Callout>
@@ -212,8 +212,8 @@ export function ApprovalCard({
                   Note
                 </label>
                 <p className="text-xs text-ink-subtle">
-                  Required for every decision except a plain approval — the three others leave
-                  somebody with work to do, and a bare verdict tells them nothing.
+                  Obligatoire pour toute décision sauf la validation simple — les trois autres
+                  laissent du travail à quelqu’un, et un verdict nu ne lui dit rien.
                 </p>
                 <textarea
                   id={`note-${approval.id}`}
@@ -245,7 +245,7 @@ export function ApprovalCard({
                       // and the accessible name would otherwise run the two
                       // together. Paid for three times now.
                       <span className="text-xs font-normal text-ink-subtle">
-                        {" — needs a note"}
+                        {" — note obligatoire"}
                       </span>
                     ) : null}
                   </button>
@@ -253,9 +253,9 @@ export function ApprovalCard({
               </div>
             </form>
           ) : (
-            <Callout tone="neutral" title="Your role does not decide these">
-              You can see what is waiting, which is what a queue is for. Deciding is held by
-              attorneys and firm administrators.
+            <Callout tone="neutral" title="Votre rôle ne décide pas">
+              Vous voyez ce qui attend — c’est à cela que sert une file. Décider appartient aux
+              avocats et aux administrateurs du cabinet.
             </Callout>
           )}
         </>
@@ -265,14 +265,14 @@ export function ApprovalCard({
         // and there is no name to put here.
         <div className="mt-3 rounded-md border border-line bg-surface-muted px-3 py-2.5">
           <p className="text-sm text-ink">
-            {`Superseded on ${formatDate(approval.supersededAt, timezone)} — nobody decided it`}
+            {`Remplacée le ${formatDate(approval.supersededAt, timezone)} — personne ne l’a décidée`}
           </p>
           <p className="mt-1 text-sm text-ink-muted">{SUPERSEDED_EXPLANATION}</p>
         </div>
       ) : (
         <div className="mt-3 rounded-md border border-line bg-surface-muted px-3 py-2.5">
           <p className="text-sm text-ink">
-            {decisionLabel(approval.status)} by {approval.decidedBy?.name ?? "a person"} on{" "}
+            {decisionLabel(approval.status)} par {approval.decidedBy?.name ?? "une personne"} le{" "}
             {formatDate(approval.decidedAt, timezone)}
           </p>
           {approval.decisionNote ? (
@@ -282,4 +282,18 @@ export function ApprovalCard({
       )}
     </li>
   );
+}
+
+/** The stored risk levels, in the reader's language. An unknown value shows as stored. */
+function riskLabel(level: string): string {
+  switch (level) {
+    case "high":
+      return "risque élevé";
+    case "medium":
+      return "risque moyen";
+    case "low":
+      return "risque faible";
+    default:
+      return level;
+  }
 }

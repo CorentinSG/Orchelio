@@ -66,8 +66,8 @@ export default async function ActivityPage({ searchParams }: PageProps) {
         <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Journal d’activité</h1>
         <p className="mt-1 text-ink-muted">
-          {total} event{total === 1 ? "" : "s"}
-          {activeFilters > 0 ? " matching these filters" : ""} for this firm.
+          {total} événement{total === 1 ? "" : "s"}
+          {activeFilters > 0 ? " correspondant à ces filtres" : ""} pour ce cabinet.
         </p>
         {/* The log is the one screen where the time of day is the point, so it
             is the one screen that shows it — and it now shows it in the firm's
@@ -75,14 +75,15 @@ export default async function ActivityPage({ searchParams }: PageProps) {
         <p className="mt-1 text-sm text-ink-subtle">{timezoneNotice(timezone)}</p>
       </header>
 
-      <Callout tone="neutral" title="Append-only, by discipline rather than by the database">
+      <Callout tone="neutral" title="En ajout seul — par discipline, pas par la base de données">
         <p>
-          Nothing in Orchelio updates or deletes a log entry — there is one write function and no
-          other path. That is a property of this codebase, not of the storage underneath it.
+          Rien dans Orchelio ne modifie ni ne supprime une entrée du journal — il existe une seule
+          fonction d’écriture et aucun autre chemin. C’est une propriété de ce code, pas du
+          stockage au-dessous.
         </p>
         <p className="mt-2">
-          A production deployment needs write-once storage or an insert-only database role before
-          this could be relied on in a dispute. See{" "}
+          Un déploiement réel exigerait un stockage à écriture unique ou un rôle de base de données
+          en insertion seule avant que ce journal puisse compter dans un litige. Voir{" "}
           <Link
             href="https://github.com/CorentinSG/Orchelio/blob/main/docs/PRODUCTION_READINESS.md"
             className="font-medium text-brand underline underline-offset-4"
@@ -93,7 +94,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
         </p>
       </Callout>
 
-      <Card title="Filters" description="Applied on the server, within this firm.">
+      <Card title="Filtres" description="Appliqués sur le serveur, dans le périmètre de ce cabinet.">
         <form method="get" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label htmlFor="action" className="block text-sm font-medium text-ink">
@@ -105,7 +106,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
               defaultValue={filters.action ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any action</option>
+              <option value="">Toutes les actions</option>
               {actions.map((action) => (
                 <option key={action} value={action}>
                   {activityLabel(action)}
@@ -116,7 +117,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
 
           <div>
             <label htmlFor="user" className="block text-sm font-medium text-ink">
-              Who
+              Qui
             </label>
             <select
               id="user"
@@ -124,7 +125,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
               defaultValue={filters.userId ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Anyone</option>
+              <option value="">Tout le monde</option>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.name}
@@ -135,7 +136,7 @@ export default async function ActivityPage({ searchParams }: PageProps) {
 
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-ink">
-              Outcome
+              Issue
             </label>
             <select
               id="status"
@@ -143,16 +144,16 @@ export default async function ActivityPage({ searchParams }: PageProps) {
               defaultValue={filters.status ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any outcome</option>
-              <option value="success">Succeeded</option>
-              <option value="denied">Refused</option>
-              <option value="failure">Failed</option>
+              <option value="">Toutes les issues</option>
+              <option value="success">Réussi</option>
+              <option value="denied">Refusé</option>
+              <option value="failure">Échoué</option>
             </select>
           </div>
 
           <div>
             <label htmlFor="days" className="block text-sm font-medium text-ink">
-              When
+              Quand
             </label>
             <select
               id="days"
@@ -160,10 +161,10 @@ export default async function ActivityPage({ searchParams }: PageProps) {
               defaultValue={one(query["days"]) ?? ""}
               className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
-              <option value="">Any time</option>
-              <option value="1">Last 24 hours</option>
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
+              <option value="">Toute la période</option>
+              <option value="1">Dernières 24 heures</option>
+              <option value="7">7 derniers jours</option>
+              <option value="30">30 derniers jours</option>
             </select>
           </div>
 
@@ -172,14 +173,14 @@ export default async function ActivityPage({ searchParams }: PageProps) {
               type="submit"
               className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-strong"
             >
-              Apply
+              Appliquer
             </button>
             {activeFilters > 0 ? (
               <Link
                 href="/activity"
                 className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-surface-muted"
               >
-                Clear
+                Effacer
               </Link>
             ) : null}
           </div>
@@ -187,18 +188,18 @@ export default async function ActivityPage({ searchParams }: PageProps) {
       </Card>
 
       <Card
-        title={`Events (${events.length} shown)`}
+        title={`Événements (${events.length} affichés)`}
         description={
           total > events.length
-            ? `Most recent ${PAGE_SIZE}. Narrow the filters to see further back.`
-            : "Most recent first."
+            ? `Les ${PAGE_SIZE} plus récents. Resserrez les filtres pour remonter plus loin.`
+            : "Les plus récents d’abord."
         }
       >
         {events.length === 0 ? (
-          <Callout tone="neutral" title="Nothing matches">
+          <Callout tone="neutral" title="Rien ne correspond">
             {activeFilters > 0
-              ? "No event in this firm's log matches those filters."
-              : "This firm has no recorded activity yet."}
+              ? "Aucun événement du journal de ce cabinet ne correspond à ces filtres."
+              : "Ce cabinet n’a encore aucune activité enregistrée."}
           </Callout>
         ) : (
           <ul className="divide-y divide-line">

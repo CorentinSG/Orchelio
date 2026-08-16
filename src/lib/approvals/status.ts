@@ -73,11 +73,11 @@ export function isSupersededStatus(status: string): boolean {
  * with.
  */
 export const SUPERSEDED_EXPLANATION =
-  "A newer analysis was run on this matter, so this request is no longer the question. Nobody decided it and nothing was approved.";
+  "Une analyse plus récente a été lancée sur ce dossier : cette demande n’est plus la question. Personne ne l’a décidée et rien n’a été validé.";
 
 /** Returned when somebody tries to decide one anyway. */
 export const SUPERSEDED_REFUSAL =
-  "A newer analysis has replaced the one this request was about, so there is nothing left to decide here. Open the matter and decide the current analysis instead.";
+  "Une analyse plus récente a remplacé celle que visait cette demande : il n’y a plus rien à décider ici. Ouvrez le dossier et décidez de l’analyse en cours.";
 
 /**
  * The words on the badge.
@@ -87,5 +87,5 @@ export const SUPERSEDED_REFUSAL =
  * "Approved" on one screen and "approved" on another.
  */
 export function approvalStatusLabel(status: string): string {
-  return isSupersededStatus(status) ? "Superseded" : decisionLabel(status);
+  return isSupersededStatus(status) ? "Remplacée" : decisionLabel(status);
 }

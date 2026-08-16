@@ -172,15 +172,15 @@ export function isApprovalDecision(value: string): value is ApprovalDecision {
 export function decisionLabel(decision: string): string {
   switch (decision) {
     case "approved":
-      return "Approved";
+      return "Validée";
     case "approved_with_edits":
-      return "Approved with edits";
+      return "Validée avec modifications";
     case "new_analysis_requested":
-      return "New analysis requested";
+      return "Nouvelle analyse demandée";
     case "rejected":
-      return "Rejected";
+      return "Refusée";
     case "pending":
-      return "Awaiting a decision";
+      return "En attente d’une décision";
     default:
       return decision.split("_").join(" ");
   }
