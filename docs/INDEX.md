@@ -42,6 +42,10 @@ layers and proved by tests.
 The demonstration was built in nine phases, all delivered. **Version 1 — the
 connected cockpit — is underway**: see [Roadmap](ROADMAP.md) for status and
 [Plan V1](PLAN-V1.md) for the owner-approved construction plan (in French).
+A transversal track runs beside it: the
+[Plan Lisibilité](PLAN-LISIBILITE.md), making the product faster to read and
+to use, with its budgets in
+[ADR-0029](decisions/ADR-0029-reading-budgets-and-journey-ceilings.md).
 
 ---
 
@@ -81,6 +85,7 @@ decided, and what it cost.
 | 26 | [Documents will be read](decisions/ADR-0026-documents-will-be-read.md) | V1-1 |
 | 27 | [Real AI behind the same gate, routed by cost](decisions/ADR-0027-real-ai-behind-the-same-gate.md) | V1-1 |
 | 28 | [From a local file to European hosting, without a rewrite](decisions/ADR-0028-from-local-file-to-european-hosting.md) | V1-1 |
+| 29 | [Reading budgets and journey ceilings](decisions/ADR-0029-reading-budgets-and-journey-ceilings.md) | L-0 |
 
 Three of these exist because a test failed in a way that looked like flakiness
 and turned out to be a real defect: [6](decisions/ADR-0006-forms-post-to-route-handlers.md)
@@ -107,6 +112,8 @@ differently without knowing what you knew. Preferences do not need a note.
   and the defects found on the way.
 - [Plan V1](PLAN-V1.md) — the construction plan for Version 1, the connected
   cockpit. In French; approved by the owner on 6 August 2026.
+- [Plan Lisibilité](PLAN-LISIBILITE.md) — the transversal readability and
+  efficiency track, in French; L-0 launched by the owner on 16 August 2026.
 - [Glossaire](GLOSSAIRE.md) — the product's French, decided once before the
   first screen was translated. Every screen translation follows it.
 - [Acceptance criteria](ACCEPTANCE.md) — every phase's criterion and the tests

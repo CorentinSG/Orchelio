@@ -30,6 +30,12 @@ file when a phase status changes, so the product and the documentation cannot di
 
 What each phase delivers, proves, and requires from the owner: [Plan V1](PLAN-V1.md).
 
+A transversal track runs beside the V1 phases: the **Chantier Lisibilité**
+([Plan Lisibilité](PLAN-LISIBILITE.md)) — measured reading and journey
+budgets, queues that survive real volume, a dashboard that leads. Phase L-0
+(measure, and pin the ceilings) is delivered; its numbers and budgets are
+[ADR-0029](decisions/ADR-0029-reading-budgets-and-journey-ceilings.md).
+
 ---
 
 ## Phase 1 — Initialisation ✅ Delivered

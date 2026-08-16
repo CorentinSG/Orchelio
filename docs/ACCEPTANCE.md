@@ -450,6 +450,28 @@ and a firm should expect to find out on its own machine.
 
 ---
 
+## L-0 — the cost of using the product, measured and pinned
+
+**Criterion.** The six most frequent journeys are walked by tests that count
+every action a person takes, each pinned at today's cost as a ceiling that
+later phases lower; the volume-independent screens carry word ceilings; and
+the budgets, with the two queue numbers no test can yet hold honestly, are
+recorded in
+[ADR-0029](decisions/ADR-0029-reading-budgets-and-journey-ceilings.md).
+
+Proved by:
+
+- `tests/e2e/efficiency.spec.ts` — "finding a matter by its reference takes at most four actions"
+- `tests/e2e/efficiency.spec.ts` — "finding a matter by its client takes at most four actions"
+- `tests/e2e/efficiency.spec.ts` — "running an analysis takes at most six actions"
+- `tests/e2e/efficiency.spec.ts` — "deciding a pending approval takes at most two actions"
+- `tests/e2e/efficiency.spec.ts` — "adding a document takes at most eight actions"
+- `tests/e2e/efficiency.spec.ts` — "switching firm takes one action"
+- `tests/e2e/efficiency.spec.ts` — "the dashboard stays within 600 words"
+- `tests/e2e/efficiency.spec.ts` — "the confidentiality register stays within 2000 words"
+
+---
+
 ## V1-1 — real AI behind the same gate, governed and counted
 
 **Criterion.** A hosted Mistral model may write the summary's wording under

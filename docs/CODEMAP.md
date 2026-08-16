@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 192.
+Modules: 193.
 
 ## `prisma/`
 
@@ -840,6 +840,10 @@ Phase 7 acceptance, in a real browser.
 ### `tests/e2e/auth.spec.ts`
 
 Phase 2 acceptance.
+
+### `tests/e2e/efficiency.spec.ts`
+
+Chantier Lisibilité, phase L-0 — the cost of using the product, measured.
 
 ### `tests/e2e/firm-isolation.spec.ts`
 
