@@ -67,8 +67,8 @@ describe("naming the day", () => {
   });
 
   it("formats a date, a string or nothing", () => {
-    expect(formatDate(EVENING_IN_PACIFIC, PACIFIC)).toBe("2026-07-30");
-    expect(formatDate("2026-07-31T01:30:00Z", PACIFIC)).toBe("2026-07-30");
+    expect(formatDate(EVENING_IN_PACIFIC, PACIFIC)).toBe("30 juillet 2026");
+    expect(formatDate("2026-07-31T01:30:00Z", PACIFIC)).toBe("30 juillet 2026");
     expect(formatDate(null, PACIFIC)).toBe("Inconnue");
     expect(formatDate(undefined, PACIFIC)).toBe("Inconnue");
     expect(formatDate("not a date", PACIFIC)).toBe("Inconnue");

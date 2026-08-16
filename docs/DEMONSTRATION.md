@@ -1,156 +1,174 @@
 ---
-title: Giving a demonstration
+title: Donner une démonstration
 tags: [reference, guide]
 ---
 
-# Orchelio — giving a demonstration
+# Orchelio — donner une démonstration
 
-How to show Orchelio to somebody, from a cold machine to a firm they created
-themselves. Written for the person running the demonstration; the person
-*watching* it wants the in-product walkthrough at
-[`/guide`](http://localhost:3000/guide), which is the same twenty-one steps
-with a link on each one.
+Comment montrer Orchelio à quelqu'un, d'une machine vierge jusqu'au cabinet
+qu'il aura créé lui-même. Écrit pour la personne qui **donne** la
+démonstration — comme le [plan V1](PLAN-V1.md) et le
+[glossaire](GLOSSAIRE.md), ce document appartient au propriétaire et s'écrit
+donc en français. La personne qui **regarde** la démonstration, elle, veut la
+visite intégrée à [`/guide`](http://localhost:3000/guide) : les mêmes
+vingt-et-une étapes, avec un lien sur chacune.
 
 ---
 
-## 1. Before anybody is watching
+## 1. Avant que quiconque regarde
 
 ```bash
 npm install
 cp .env.example .env
 npx prisma migrate deploy
 npm run seed
-npm run harness:doctor     # says whether anything is missing, and the fix
+npm run harness:doctor     # dit ce qui manque, et la commande qui répare
 npm run dev                # http://localhost:3000
 ```
 
-Five minutes on a cold machine, most of it `npm install`. Nothing needs a
-network after that, no API key, no account, no cloud service, and no money.
+Cinq minutes sur une machine vierge, dont l'essentiel est `npm install`. Rien
+n'a besoin du réseau ensuite : ni clé d'API, ni compte, ni service en nuage,
+ni argent. (Le fournisseur Mistral existe depuis la V1, mais la démonstration
+tourne sous la simulation — c'est le réglage par défaut, et c'est dit à
+l'écran.)
 
-**Check the state you are starting from.** The browser test suite creates firms
-and matters as it runs, so a machine that has run `npm run test:e2e` has more
-firms than the two the seed writes. That is not a problem to hide — it is
-visible in Platform administration → Firms — but decide before you start whether
-you want it. To go back to exactly the seeded state:
+**Vérifiez l'état d'où vous partez.** La suite de tests navigateur crée des
+cabinets et des dossiers en s'exécutant : une machine qui a lancé
+`npm run test:e2e` a plus de cabinets que les deux installés par
+`npm run seed`. Ce n'est pas un problème à cacher — c'est visible dans
+Administration de la plateforme → Cabinets — mais décidez avant de commencer
+si vous en voulez. Pour revenir exactement à l'état d'origine :
 
 ```bash
-npm run reset-demo    # erases everything and re-seeds. Cannot be undone.
+npm run reset-demo    # efface tout et réinstalle. Irréversible.
 ```
 
-Say the last part out loud to yourself before pressing return. It erases every
-firm on the instance.
+Dites-vous la dernière partie à voix haute avant d'appuyer sur Entrée. Cela
+efface tous les cabinets de l'instance.
 
 ---
 
-## 2. The ten-minute version
+## 2. La version en dix minutes
 
-If you have ten minutes, show the claim rather than the features. The claim is:
-*one codebase, and each firm gets a different product.*
+Si vous avez dix minutes, montrez la promesse plutôt que les fonctions. La
+promesse est : *un seul code, et chaque cabinet reçoit un produit différent.*
 
-1. **Sign in** as `immigration.attorney@demo.local` (password `orchelio-demo`,
-   printed on the page). Read the dashboard: status expirations, priority dates.
-2. **Open a matter.** The fields are immigration fields.
-3. **Run an analysis** from the Analysis tab. It takes about a second.
-4. **Read what it does not say.** There is no conclusion, and no empty space
-   where one would go.
-5. **Go to Approvals.** The analysis is waiting for a person. Reject it, and
-   watch Orchelio insist on a written reason.
-6. **Sign in as `reviewer@demo.local`**, who belongs to both firms, and switch
-   to the employment firm. Different cards, different fields, different words —
-   "evidence collection" rather than "document collection".
-7. **Paste a matter link from the first firm** into the address bar. The refusal
-   is worded exactly as it would be for a matter that does not exist.
+1. **Connectez-vous** comme `immigration.attorney@demo.local` (mot de passe
+   `orchelio-demo`, affiché sur la page). Lisez le tableau de bord : titres
+   arrivant à expiration, pièces de séjour manquantes.
+2. **Ouvrez un dossier.** Les champs sont ceux du droit des étrangers —
+   titre de séjour, préfecture, OQTF.
+3. **Lancez une analyse** depuis l'onglet Analyse. Environ une seconde.
+4. **Lisez ce qu'elle ne dit pas.** Aucune conclusion, et aucun emplacement
+   vide où elle irait.
+5. **Allez dans Validations.** L'analyse attend une personne. Refusez-la, et
+   regardez Orchelio exiger un motif écrit.
+6. **Connectez-vous comme `reviewer@demo.local`**, qui appartient aux deux
+   cabinets, et basculez vers Cabinet Carter. D'autres cartes, d'autres
+   champs, d'autres mots — « collecte des preuves » plutôt que « collecte des
+   documents ».
+7. **Collez dans la barre d'adresse le lien d'un dossier du premier
+   cabinet.** Le refus est formulé exactement comme pour un dossier qui
+   n'existe pas.
 
-Steps 6 and 7 are the demonstration. The rest is context for them.
-
----
-
-## 3. The full version
-
-Follow [`/guide`](http://localhost:3000/guide) — twenty-one steps, about twenty
-minutes, ending with the viewer creating a third firm themselves. That last part
-is worth the time: a claim about configurability is much less convincing than
-watching somebody produce a working firm in four minutes without anybody
-touching the code.
-
-The guide names the account for each step, so it can be handed to somebody to
-follow alone.
+Les étapes 6 et 7 *sont* la démonstration. Le reste est leur contexte.
 
 ---
 
-## 4. What to say about the limits, and when
+## 3. La version complète
 
-Say them early rather than when asked. A demonstration that has to be corrected
-under questioning has already lost the argument.
+Suivez [`/guide`](http://localhost:3000/guide) — vingt-et-une étapes, une
+vingtaine de minutes, qui se terminent par la création d'un troisième cabinet
+par le spectateur lui-même. Cette dernière partie vaut son temps : une
+affirmation sur la configurabilité convainc beaucoup moins que le spectacle
+de quelqu'un produisant un cabinet qui fonctionne, en quatre minutes, sans
+que personne touche au code.
 
-| When | What to say |
-| ---- | ----------- |
-| Before signing in | Everything here is invented. No real client, matter, person or document exists in this build. |
-| Before the first analysis | The AI is **simulated**. No key, no request, no charge, and nothing leaves this machine. The simulation derives its output from each matter's own fields, intake answers and document *names*. |
-| At the first analysis result | It never opens a document. There is no OCR: Orchelio stores a filename, a type and a size. |
-| At the approvals screen | Nine rules cannot be switched off by anyone, from any screen. Four of the eighteen rules are actually raised in this build, and the screen says which. |
-| At any draft communication | Orchelio has no way to send anything. There is no "sent" status in the database and no transport in the code. Approving a draft means a person is content for those words to leave the firm; that person then sends them. |
-| If asked about production | It is not production-ready, and the gaps are written down rather than summarised. See [Production readiness](PRODUCTION_READINESS.md). The largest is that multi-tenant isolation is enforced in the application, not by the database. |
+La visite nomme le compte de chaque étape : on peut donc la confier à
+quelqu'un qui la suivra seul.
 
 ---
 
-## 5. Questions that come up, with honest answers
+## 4. Les limites : quoi dire, et quand
 
-**"Is this really one codebase?"**
-Yes. `src/lib/roadmap.ts`, the dashboard widgets and the matter fields are all
-selected from the firm's stored configuration. Show Firm settings → AI features,
-switch one off, and watch the dashboard card disappear rather than show a zero.
+Dites-les tôt plutôt qu'en réponse à une question. Une démonstration qu'il
+faut corriger sous les questions a déjà perdu la discussion.
 
-**"Can it do my area of law?"**
-Two areas ship a full template: immigration, and employment and labour. The
-questionnaire offers others and says "template coming soon" beside them, and
-refuses to let a firm finish onboarding into one. Adding an area is a data
-change plus a field table — see
-[Architecture §8.1](ARCHITECTURE.md).
+| Quand | Quoi dire |
+| ----- | --------- |
+| Avant la connexion | Tout ici est inventé. Aucun client, dossier, personne ou document réel n'existe dans cette version. |
+| Avant la première analyse | L'IA est **simulée**. Pas de clé, pas de requête, pas de frais, et rien ne quitte cette machine. La simulation dérive son résultat des champs de chaque dossier, des réponses au questionnaire et des *noms* des documents. |
+| Au premier résultat d'analyse | Elle n'ouvre jamais un document. Il n'y a pas d'OCR : Orchelio conserve un nom de fichier, un type et une taille. |
+| À l'écran des validations | Neuf règles ne peuvent être désactivées par personne, depuis aucun écran. Quatre des dix-huit règles sont réellement déclenchées dans cette version, et l'écran dit lesquelles. |
+| Devant un projet de courrier | Orchelio n'a aucun moyen d'envoyer quoi que ce soit. Il n'y a pas de statut « envoyé » dans la base et pas de transport dans le code. Valider un brouillon signifie qu'une personne accepte que ces mots quittent le cabinet ; c'est ensuite elle qui les envoie. |
+| Sur le vocabulaire juridique | Les dossiers fictifs parlent la procédure française — titres de séjour, prud'hommes — mais ce vocabulaire est **plausible, pas vérifié** : aucun praticien ne l'a relu. C'est une exigence déjà inscrite avant tout usage réel. |
+| Si l'on demande la production | Ce n'est pas prêt pour la production, et les manques sont écrits plutôt que résumés. Voir [Production readiness](PRODUCTION_READINESS.md). Le plus grand : l'isolement entre cabinets est appliqué par l'application, pas par la base de données. |
 
-**"What would it cost to run for real?"**
-This build cannot tell you, and the usage screen says so. Its token counts are
-derived from the size of each matter, not measured from a model. What a real
-deployment costs depends on the model, the prompt and the documents actually
-sent, none of which exist here.
+---
 
-**"Could a firm see another firm's data?"**
-Three independent layers say no, and there are integration tests with two firms
-holding deliberately similar records — the same client name, the same document
-filename, the same matter title — asserting that one cannot reach the other's
-copy. All three layers run inside the application, so they protect against a
-programming mistake and not against a compromised process. That is the honest
-answer and it is the same one in
+## 5. Les questions qui reviennent, avec les réponses honnêtes
+
+**« C'est vraiment un seul code ? »**
+Oui. `src/lib/roadmap.ts`, les cartes du tableau de bord et les champs de
+dossier sont tous choisis d'après la configuration enregistrée du cabinet.
+Montrez Réglages → Fonctions d'IA, désactivez-en une, et regardez la carte du
+tableau de bord disparaître plutôt qu'afficher zéro.
+
+**« Il peut faire mon domaine de droit ? »**
+Deux domaines disposent d'un modèle complet : le droit des étrangers, et le
+droit du travail. Le questionnaire propose les autres avec « Modèle bientôt
+disponible » à côté, et refuse de laisser un cabinet terminer son
+installation dans l'un d'eux. Ajouter un domaine est un changement de
+données plus une table de champs — voir [Architecture §8.1](ARCHITECTURE.md).
+
+**« Ça coûterait combien en vrai ? »**
+Cette version ne peut pas vous le dire, et l'écran de consommation le dit.
+Ses comptes de jetons sont dérivés de la taille de chaque dossier, pas
+mesurés sur un modèle. Ce qu'un déploiement réel coûte dépend du modèle, de
+l'instruction et des documents réellement envoyés — rien de tout cela
+n'existe ici. (Le barème Mistral de la V1 donne un ordre de grandeur :
+quelques centimes par analyse, marqués « estimé » tant que la facture ne les
+a pas confirmés.)
+
+**« Un cabinet pourrait voir les données d'un autre ? »**
+Trois couches indépendantes disent non, et des tests d'intégration font
+tourner deux cabinets aux enregistrements délibérément semblables — même nom
+de client, même nom de fichier, même intitulé de dossier — en vérifiant que
+l'un n'atteint jamais la copie de l'autre. Les trois couches s'exécutent dans
+l'application : elles protègent d'une erreur de programmation, pas d'un
+processus compromis. C'est la réponse honnête, et c'est la même que dans
 [Production readiness](PRODUCTION_READINESS.md).
 
-**"Can I have it hosted?"**
-Not from this build. It runs locally on SQLite by design, because one of the
-specification's constraints was that it costs nothing to run. Moving to
-PostgreSQL is a connection-string change plus a migration — see
-[Architecture §8.5](ARCHITECTURE.md) — but hosting, authentication and isolation
-all need real work first.
+**« Je peux l'avoir hébergé ? »**
+Pas depuis cette version. Elle tourne en local sur SQLite par conception,
+parce qu'une contrainte du cahier des charges était de ne rien coûter.
+Passer à PostgreSQL est un changement de chaîne de connexion plus une
+migration — voir [Architecture §8.5](ARCHITECTURE.md) — mais l'hébergement,
+l'authentification et l'isolement demandent d'abord un vrai travail.
+L'hébergement européen est au plan V1 (ADR-0028), pour les pilotes.
 
 ---
 
-## 6. If something goes wrong mid-demonstration
+## 6. Si quelque chose casse en pleine démonstration
 
 ```bash
 npm run harness:doctor
 ```
 
-It checks the things that actually break — a missing `.env`, an un-migrated
-database, an empty seed, no browser — and prints the exact command for each.
+Il vérifie ce qui casse réellement — un `.env` absent, une base non migrée,
+des données d'exemple vides, pas de navigateur — et imprime la commande
+exacte pour chaque cas.
 
-A blank or broken screen shows a branded error page with a reference code, and
-the details go to the terminal rather than to the browser: an error message is
-one of the easiest places to leak another firm's data from, so the screen says
-little on purpose.
+Un écran vide ou cassé affiche une page d'erreur au nom du produit avec un
+code de référence, et le détail part dans le terminal plutôt que dans le
+navigateur : un message d'erreur est l'un des endroits les plus faciles d'où
+faire fuir les données d'un autre cabinet, alors l'écran en dit peu, exprès.
 
 ---
 
-## See also
+## Voir aussi
 
-- [Roadmap](ROADMAP.md) — what each phase delivered
-- [Acceptance criteria](ACCEPTANCE.md) — and the tests that prove them
-- [Production readiness](PRODUCTION_READINESS.md) — what is deliberately not done
-- [Architecture](ARCHITECTURE.md) — how it is put together, and the procedures
+- [Roadmap](ROADMAP.md) — ce que chaque phase a livré
+- [Acceptance criteria](ACCEPTANCE.md) — et les tests qui les prouvent
+- [Production readiness](PRODUCTION_READINESS.md) — ce qui n'est délibérément pas fait
+- [Plan V1](PLAN-V1.md) — le chantier en cours vers le cockpit connecté

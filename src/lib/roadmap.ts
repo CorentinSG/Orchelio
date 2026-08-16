@@ -81,8 +81,8 @@ export const PHASES: readonly Phase[] = [
   {
     number: 10,
     title: "V1 — Fondations",
-    summary: "Décisions écrites, interface en français, nouveau design, passerelle d’IA routée et comptée.",
-    status: "in_progress",
+    summary: "Décisions écrites, produit en français jusqu’au droit de ses dossiers, nouveau design, passerelle d’IA routée et comptée.",
+    status: "done",
   },
   {
     number: 11,

@@ -19,7 +19,7 @@ file when a phase status changes, so the product and the documentation cannot di
 
 | # | Phase | Status |
 | - | ----- | ------ |
-| V1-1 | Foundations — written decisions, French, new design, routed AI gateway | 🔨 In progress |
+| V1-1 | Foundations — written decisions, French to the law of its matters, new design, routed AI gateway | ✅ Done |
 | V1-2 | Documents, finally read — extraction, OCR, classification, per-firm index | Planned |
 | V1-3 | The matter understood — typed assertions, sourced summary and timeline | Planned |
 | V1-4 | Emails — confidence-scored filing and the triage inbox | Planned |
@@ -519,6 +519,41 @@ Automated rules detect roughly a third of WCAG, and not the hard third. Nothing 
 been tested with a real screen reader, by a keyboard-only user, or by anybody with a disability.
 That sentence is in the README, in `docs/ACCEPTANCE.md` and at the top of the test file, because
 a bounded claim stated once is a bounded claim nobody reads.
+
+---
+
+## Phase V1-1 — Foundations ✅ Delivered
+
+**Goal:** the four founding constraints lifted by written decisions, and the existing product
+carried whole into its V1 shape — French, re-skinned, with a real AI gateway behind the same
+governance the simulation had.
+
+Delivered:
+
+- **Four ADRs lift four locks** (0025–0028): governed egress with an enforced allow-list —
+  every module that can make an outbound request is named with its hosts and its deciding ADR,
+  proved by planting; reading documents, real AI, and hosting decided for later phases.
+- **The Mistral gateway** (`src/lib/ai/routing.ts`, `mistral-provider.ts`): one key, three
+  task classes routed to three models, a dated price table, costs recorded in integer
+  micro-euros with `costEstimated` so a fraction of a cent never prints as free. The mock
+  remains the default and the test engine; the build never requires the network.
+- **The shared summary-rewrite contract**: local and hosted models are given the same single
+  job — reword a summary from figures Orchelio derived — through one implementation, with
+  `judgeSummary` refusing outcomes, invented figures, links and missing references, in either
+  language. Twelve French conclusion patterns joined the English ones, with tests proving both fire.
+- **The whole product in French**, eight batches, screen by screen — engine sentences,
+  provider notices, settings, questionnaire, administration, the confidentiality register,
+  the 21-step guide — with `docs/GLOSSAIRE.md` fixing the vocabulary once. `<html lang="fr">`,
+  written-out dates (« 30 juillet 2026 »), fr-FR number and currency formatting.
+- **The demonstration speaks French law**: titres de séjour, préfecture, OQTF, forfait jours,
+  conseil de prud'hommes — same matter shapes, so the analysis still proves what it proved.
+  The vocabulary is plausible, not verified; a specialist review is required before any real use.
+- **Two honesty corrections found on the way**: the usage screen no longer asserts "no charge
+  was incurred" beside a provider that bills, and real-charge rows are described as billed
+  rather than unexplained — both true of the demo, false since ADR-0027.
+
+Proved by: the V1-1 section of [ACCEPTANCE.md](ACCEPTANCE.md), `npm run verify` (642
+unit/integration tests), and the full browser suite (198) — all green in both themes.
 
 ---
 

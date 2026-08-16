@@ -86,22 +86,40 @@ export function calendarDayIn(value: Date, timezone: string): string {
   }).format(value);
 }
 
-/** A date in the firm's zone, or « Inconnue ». */
+/**
+ * A date in the firm's zone, written out — « 30 juillet 2026 » — or « Inconnue ».
+ *
+ * Written rather than numeric because the glossary commits to it: a numeric
+ * date is ambiguous between conventions, and a screen read by a lawyer should
+ * not require knowing which one the product chose. The activity log is the one
+ * deliberate exception (see `formatMoment`).
+ */
 export function formatDate(
   value: Date | string | null | undefined,
   timezone: string,
 ): string {
   const date = toDate(value);
-  return date ? calendarDayIn(date, timezone) : "Inconnue";
+  if (!date) return "Inconnue";
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: timezone,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
 }
 
 /**
- * A date and the time of day, in the firm's zone, with the zone named.
+ * A date and the time of day, in the firm's zone.
  *
  * Used only where the time of day is part of what happened — the activity log,
  * where two entries a minute apart are the point. Everywhere else the day is
  * the whole answer, and a timestamp is noise that makes a screen harder to
  * read.
+ *
+ * Deliberately the technical `YYYY-MM-DD HH:MM:SS` form rather than the
+ * written date every other screen uses: a ledger is scanned and compared, not
+ * read aloud, and a fixed-width timestamp is what makes two entries a minute
+ * apart visibly a minute apart. The glossary records this exception.
  */
 export function formatMoment(
   value: Date | string | null | undefined,

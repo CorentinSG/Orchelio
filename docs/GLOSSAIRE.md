@@ -13,7 +13,11 @@ puis les écrans déjà traduits.*
 Le registre est celui d'un cabinet français : le mot du métier quand il
 existe, jamais le calque de l'anglais, jamais le jargon d'IA. Vouvoiement
 partout. Les dates s'écrivent en toutes lettres (`11 février 2024`), au
-fuseau du cabinet, comme l'exige ADR-0021.
+fuseau du cabinet, comme l'exige ADR-0021 — à une exception près, dite ici
+pour qu'elle reste une décision : le journal d'activité garde l'horodatage
+technique `AAAA-MM-JJ HH:MM:SS`, parce qu'un registre se balaie et se
+compare plus qu'il ne se lit, et que deux entrées à une minute d'écart
+doivent se voir à une minute d'écart.
 
 ## Navigation et objets
 
