@@ -100,7 +100,7 @@ model Firm {
   id   String @id @default(uuid())
   /// URL-safe identifier, e.g. "dupont-immigration-law".
   slug String @unique
-  /// Display name shown in the sidebar, e.g. "Dupont Immigration Law".
+  /// Display name shown in the sidebar, e.g. « Dupont & Associés ».
   name String
 
   /// Primary practice area key, e.g. "immigration" or "employment_law".

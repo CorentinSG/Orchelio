@@ -19,8 +19,8 @@ import { PRACTICE_AREAS, isPracticeAreaAvailable } from "@/lib/practice-areas";
 
 describe("slugify", () => {
   it("makes a readable identifier", () => {
-    expect(slugify("Dupont Immigration Law")).toBe("dupont-immigration-law");
-    expect(slugify("Carter Employment & Labor Law")).toBe("carter-employment-labor-law");
+    expect(slugify("Dupont & Associés")).toBe("dupont-associes");
+    expect(slugify("Cabinet Carter")).toBe("cabinet-carter");
   });
 
   it("folds accents rather than dropping them", () => {

@@ -18,8 +18,8 @@ Ce document répond aux six points demandés dans le cahier des charges avant l'
    il ne duplique jamais le code et n'appelle jamais un développeur.
 3. Cette configuration détermine les types de dossiers, les workflows, les champs, les fonctions
    IA, les validations humaines, le vocabulaire et le dashboard.
-4. Deux cabinets fictifs servent de démonstration : Dupont Immigration Law (Immigration Law) et
-   Carter Employment & Labor Law (Employment & Labor Law).
+4. Deux cabinets fictifs servent de démonstration : Dupont & Associés (Immigration Law) et
+   Cabinet Carter (Employment & Labor Law).
 5. L'isolation entre cabinets est la propriété centrale à démontrer : aucune requête ne doit jamais
    franchir la frontière d'un cabinet.
 6. L'IA est simulée dans cette version : deux rôles distincts, Claude Analyst et Claude Reviewer,

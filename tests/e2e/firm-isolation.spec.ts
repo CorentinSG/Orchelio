@@ -23,7 +23,7 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
 test.describe("Firm switcher", () => {
   test("is hidden from a user who belongs to a single firm", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     // Offering a switcher with one option would be noise.
     await expect(page.getByRole("region", { name: "Vos cabinets" })).toHaveCount(0);
@@ -36,26 +36,26 @@ test.describe("Firm switcher", () => {
     await expect(switcher).toBeVisible();
 
     // Lands in the first firm alphabetically.
-    await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinet Carter" })).toBeVisible();
 
-    await switcher.getByRole("button", { name: /Dupont Immigration Law/ }).click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await switcher.getByRole("button", { name: /Dupont & Associés/ }).click();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     // Switching replaces the workspace; it does not merge the two.
-    await expect(page.locator("main")).not.toContainText("Carter Employment & Labor Law");
+    await expect(page.locator("main")).not.toContainText("Cabinet Carter");
   });
 
   test("remembers the chosen firm across a reload", async ({ page }) => {
     await signIn(page, "reviewer@demo.local");
     await page
       .getByRole("region", { name: "Vos cabinets" })
-      .getByRole("button", { name: /Dupont Immigration Law/ })
+      .getByRole("button", { name: /Dupont & Associés/ })
       .click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     await page.goto("/dashboard");
 
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
   });
 
   test("shows the read-only reviewer only viewing rights, in either firm", async ({ page }) => {
@@ -76,9 +76,9 @@ test.describe("Cross-firm access", () => {
     await signIn(page, "reviewer@demo.local");
     await page
       .getByRole("region", { name: "Vos cabinets" })
-      .getByRole("button", { name: /Dupont Immigration Law/ })
+      .getByRole("button", { name: /Dupont & Associés/ })
       .click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     const cookies = await context.cookies();
     const dupontFirmId = cookies.find((cookie) => cookie.name === "orchelio_active_firm")?.value;
@@ -86,7 +86,7 @@ test.describe("Cross-firm access", () => {
 
     await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "employment.paralegal@demo.local");
-    await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinet Carter" })).toBeVisible();
 
     // Plant the other firm's identifier as this user's active firm.
     await context.addCookies([
@@ -101,8 +101,8 @@ test.describe("Cross-firm access", () => {
 
     // The cookie is a preference, not a credential: it selects only among the
     // firms this user's memberships already allow, so it is ignored.
-    await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
-    await expect(page.locator("main")).not.toContainText("Dupont Immigration Law");
+    await expect(page.getByRole("heading", { name: "Cabinet Carter" })).toBeVisible();
+    await expect(page.locator("main")).not.toContainText("Dupont & Associés");
   });
 
   test("submitting another firm's identifier to the switcher is refused", async ({
@@ -112,16 +112,16 @@ test.describe("Cross-firm access", () => {
     await signIn(page, "reviewer@demo.local");
     await page
       .getByRole("region", { name: "Vos cabinets" })
-      .getByRole("button", { name: /Dupont Immigration Law/ })
+      .getByRole("button", { name: /Dupont & Associés/ })
       .click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     const cookies = await context.cookies();
     const dupontFirmId = cookies.find((cookie) => cookie.name === "orchelio_active_firm")?.value;
 
     await page.getByRole("button", { name: "Se déconnecter" }).click();
     await signIn(page, "employment.paralegal@demo.local");
-    await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinet Carter" })).toBeVisible();
 
     // Rewrite the hidden field, exactly as an attacker with developer tools
     // would, and submit the form.
@@ -141,9 +141,9 @@ test.describe("Cross-firm access", () => {
     page,
   }) => {
     await signIn(page, "employment.attorney@demo.local");
-    await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinet Carter" })).toBeVisible();
 
     const body = await page.locator("body").innerText();
-    expect(body).not.toContain("Dupont Immigration Law");
+    expect(body).not.toContain("Dupont & Associés");
   });
 });

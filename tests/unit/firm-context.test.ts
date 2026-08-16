@@ -20,7 +20,7 @@ function firm(id: string, name: string): SessionFirm {
   };
 }
 
-const DUPONT = firm("firm-dupont", "Dupont Immigration Law");
+const DUPONT = firm("firm-dupont", "Dupont & Associés");
 const CARTER = firm("firm-carter", "Carter Employment Law");
 
 describe("resolveActiveFirm", () => {

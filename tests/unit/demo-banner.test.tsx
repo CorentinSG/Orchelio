@@ -28,11 +28,11 @@ describe("DemoBanner", () => {
 
 describe("OrchelioWordmark", () => {
   it("names the product and the open firm so the tenant is never ambiguous", () => {
-    render(<OrchelioWordmark subtitle="Dupont Immigration Law" />);
+    render(<OrchelioWordmark subtitle="Dupont & Associés" />);
 
     expect(screen.getByText("Orchelio")).toBeInTheDocument();
     expect(screen.getByText("Démo")).toBeInTheDocument();
-    expect(screen.getByText("Dupont Immigration Law")).toBeInTheDocument();
+    expect(screen.getByText("Dupont & Associés")).toBeInTheDocument();
   });
 
   it("exposes an accessible name for the logo", () => {

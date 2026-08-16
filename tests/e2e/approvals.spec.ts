@@ -248,9 +248,9 @@ test.describe("What each role may do", () => {
     await signIn(page, "reviewer@demo.local");
     await page
       .getByRole("region", { name: "Vos cabinets" })
-      .getByRole("button", { name: /Dupont Immigration Law/ })
+      .getByRole("button", { name: /Dupont & Associés/ })
       .click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     await openMatter(page, "IMM-2026-001");
     await tabs(page).getByRole("link", { name: "Courriers" }).click();

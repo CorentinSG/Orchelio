@@ -241,9 +241,9 @@ test.describe("What each role may do", () => {
     await signIn(page, "reviewer@demo.local");
     await page
       .getByRole("region", { name: "Vos cabinets" })
-      .getByRole("button", { name: /Dupont Immigration Law/ })
+      .getByRole("button", { name: /Dupont & Associés/ })
       .click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     await openMatter(page, "IMM-2026-001");
     await page
@@ -259,9 +259,9 @@ test.describe("What each role may do", () => {
     await signIn(page, "reviewer@demo.local");
     await page
       .getByRole("region", { name: "Vos cabinets" })
-      .getByRole("button", { name: /Dupont Immigration Law/ })
+      .getByRole("button", { name: /Dupont & Associés/ })
       .click();
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
 
     await openMatter(page, "IMM-2026-001");
     const matterId = page.url().split("/matters/")[1]?.split("?")[0] ?? "";

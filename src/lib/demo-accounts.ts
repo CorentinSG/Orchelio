@@ -36,28 +36,28 @@ export const DEMO_ACCOUNTS: readonly DemoAccount[] = [
     password: DEMO_PASSWORD,
     name: "Claire Dupont",
     roleLabel: "Administratrice du cabinet et avocate",
-    firmName: "Dupont Immigration Law",
+    firmName: "Dupont & Associés",
   },
   {
     email: "immigration.paralegal@demo.local",
     password: DEMO_PASSWORD,
     name: "Noah Petit",
     roleLabel: "Assistant juridique",
-    firmName: "Dupont Immigration Law",
+    firmName: "Dupont & Associés",
   },
   {
     email: "employment.attorney@demo.local",
     password: DEMO_PASSWORD,
     name: "Alex Carter",
     roleLabel: "Administrateur du cabinet et avocat",
-    firmName: "Carter Employment & Labor Law",
+    firmName: "Cabinet Carter",
   },
   {
     email: "employment.paralegal@demo.local",
     password: DEMO_PASSWORD,
     name: "Jordan Ellis",
     roleLabel: "Assistant juridique",
-    firmName: "Carter Employment & Labor Law",
+    firmName: "Cabinet Carter",
   },
   {
     // Sixth account, beyond the five named in the specification. It exists to

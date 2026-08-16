@@ -95,7 +95,7 @@ test.describe("Workspaces", () => {
     await signIn(page, "immigration.attorney@demo.local");
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: "Dupont Immigration Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dupont & Associés" })).toBeVisible();
     await expect(page.getByText("Droit de l’immigration").first()).toBeVisible();
     await expect(page.getByText("Administrateur du cabinet").first()).toBeVisible();
   });
@@ -106,7 +106,7 @@ test.describe("Workspaces", () => {
     await signIn(page, "employment.paralegal@demo.local");
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: "Carter Employment & Labor Law" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cabinet Carter" })).toBeVisible();
 
     // The specification forbids a paralegal from approving an analysis,
     // confirming a deadline or closing a matter.
@@ -121,7 +121,7 @@ test.describe("Workspaces", () => {
     await signIn(page, "immigration.attorney@demo.local");
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await expect(page.locator("body")).not.toContainText("Carter Employment & Labor Law");
+    await expect(page.locator("body")).not.toContainText("Cabinet Carter");
   });
 
   test("a firm user is refused platform administration", async ({ page }) => {
@@ -141,8 +141,8 @@ test.describe("Workspaces", () => {
     // them to platform administration rather than into a firm.
     await expect(page).toHaveURL(/\/admin\/firms/);
     await expect(page.getByRole("heading", { name: "Cabinets", exact: true })).toBeVisible();
-    await expect(page.getByText("Dupont Immigration Law")).toBeVisible();
-    await expect(page.getByText("Carter Employment & Labor Law")).toBeVisible();
+    await expect(page.getByText("Dupont & Associés")).toBeVisible();
+    await expect(page.getByText("Cabinet Carter")).toBeVisible();
     await expect(page.getByText("Portée de ce rôle")).toBeVisible();
   });
 });

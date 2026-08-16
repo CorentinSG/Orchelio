@@ -178,7 +178,7 @@ const WORKFLOW_TEMPLATES: ReadonlyArray<{
 const DEMO_FIRMS = [
   {
     slug: "dupont-immigration-law",
-    name: "Dupont Immigration Law",
+    name: "Dupont & Associés",
     primaryPracticeArea: "immigration",
     status: "active",
     configuration: {
@@ -210,7 +210,7 @@ const DEMO_FIRMS = [
   },
   {
     slug: "carter-employment-labor-law",
-    name: "Carter Employment & Labor Law",
+    name: "Cabinet Carter",
     primaryPracticeArea: "employment_law",
     status: "active",
     configuration: {

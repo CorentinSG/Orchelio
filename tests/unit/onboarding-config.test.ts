@@ -33,10 +33,10 @@ const BASE: Omit<
   workflowStepIds: ["lead_intake", "conflict_check", "initial_consultation", "document_collection"],
 };
 
-describe("Dupont Immigration Law — the specification's configuration", () => {
+describe("Dupont & Associés — the specification's configuration", () => {
   const configuration = buildConfiguration({
     ...BASE,
-    firmName: "Dupont Immigration Law",
+    firmName: "Dupont & Associés",
     primaryPracticeArea: "immigration",
     practiceAreas: ["immigration"],
     matterTypes: ["family_based", "employment_based", "naturalisation"],
@@ -51,7 +51,7 @@ describe("Dupont Immigration Law — the specification's configuration", () => {
   });
 
   it("produces the published firm name, area and matter types", () => {
-    expect(configuration.firmName).toBe("Dupont Immigration Law");
+    expect(configuration.firmName).toBe("Dupont & Associés");
     expect(configuration.primaryPracticeArea).toBe("immigration");
     expect(configuration.practiceAreas).toEqual(["immigration"]);
     expect(configuration.matterTypes).toEqual([
@@ -95,10 +95,10 @@ describe("Dupont Immigration Law — the specification's configuration", () => {
   });
 });
 
-describe("Carter Employment & Labor Law — the specification's configuration", () => {
+describe("Cabinet Carter — the specification's configuration", () => {
   const configuration = buildConfiguration({
     ...BASE,
-    firmName: "Carter Employment & Labor Law",
+    firmName: "Cabinet Carter",
     primaryPracticeArea: "employment_law",
     practiceAreas: ["employment_law"],
     matterTypes: [

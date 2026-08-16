@@ -45,7 +45,7 @@ test.describe("usage and costs", () => {
     await page.goto("/usage");
 
     // Whatever the numbers are, the page is scoped to the open firm and says so.
-    await expect(page.getByRole("main")).toContainText("Carter Employment & Labor Law");
+    await expect(page.getByRole("main")).toContainText("Cabinet Carter");
     await expect(page.getByRole("main")).toContainText("ce cabinet");
   });
 

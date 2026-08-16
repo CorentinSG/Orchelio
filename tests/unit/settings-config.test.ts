@@ -117,8 +117,8 @@ describe("branding", () => {
   });
 
   it("falls back to the firm's real name when no display name is set", () => {
-    expect(firmDisplayName({ displayName: "", accent: "default" }, "Dupont Immigration Law")).toBe(
-      "Dupont Immigration Law",
+    expect(firmDisplayName({ displayName: "", accent: "default" }, "Dupont & Associés")).toBe(
+      "Dupont & Associés",
     );
     expect(firmDisplayName({ displayName: "  ", accent: "default" }, "Dupont")).toBe("Dupont");
     expect(firmDisplayName({ displayName: "Dupont Law", accent: "default" }, "Dupont")).toBe(

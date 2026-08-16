@@ -118,7 +118,7 @@ test.describe("The seven-step questionnaire", () => {
 
     // Step 1
     await page.goto("/onboarding/1");
-    await page.getByLabel("Nom du cabinet").fill("Dupont Immigration Law");
+    await page.getByLabel("Nom du cabinet").fill("Dupont & Associés");
     await page.getByLabel("Administrateur du cabinet").fill("Claire Dupont");
     await page.getByLabel("Adresse e-mail").fill("claire@demo.local");
     await continueStep(page);
@@ -173,7 +173,7 @@ test.describe("The seven-step questionnaire", () => {
     // Step 7 — the summary reports what was chosen.
     await expect(page.getByText("Étape 7 sur 7")).toBeVisible();
     const summary = page.getByRole("region", { name: "Récapitulatif" });
-    await expect(summary).toContainText("Dupont Immigration Law");
+    await expect(summary).toContainText("Dupont & Associés");
     await expect(summary).toContainText("Droit de l’immigration");
 
     const matterTypesCard = page.getByRole("region", { name: "Types de dossier" });
