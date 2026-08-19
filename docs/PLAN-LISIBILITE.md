@@ -52,7 +52,7 @@ les budgets décidés et le cliquet qui les tient.
 | # | Phase | L'essentiel | Preuve | Statut |
 | - | ----- | ----------- | ------ | ------ |
 | L-0 | Mesurer, fixer les budgets | Les six parcours fréquents comptés en actions et épinglés comme tests ; budgets de mots décidés (ADR-0029) | `tests/e2e/efficiency.spec.ts`, dix tests verts | ✅ Livrée |
-| L-1 | Des files qui tiennent la charge | Validations regroupées par dossier, une carte dépliée à la fois, formulaires au dépliage ; liste des dossiers paginée et triable ; recherche côté serveur | L'écran Validations passe sous son budget de mots *avec la base chargée d'aujourd'hui* ; les plafonds de parcours ne se dégradent pas | Planifiée |
+| L-1 | Des files qui tiennent la charge | Cartes de validation repliées (accordéon exclusif natif, sans JavaScript), formulaires de décision au dépliage ; les deux files paginées à vingt ; liste des dossiers triable par colonne ; compte filtré | Validations : 11 136 → **1 261 mots**. Liste des dossiers : 3 579 → **564**. Mesuré sur la base chargée, plafonds inscrits dans `efficiency.spec.ts` | ✅ Livrée |
 | L-2 | Un tableau de bord qui conduit | Chaque tuile chiffrée devient un lien vers la vue déjà filtrée ; file « À faire aujourd'hui » en tête | Le parcours « du chiffre à l'action » tombe à un clic, mesuré | Planifiée |
 | L-3 | La fiche dossier porte son état | En-tête permanent (statut, date non confirmée, dernière analyse et sa relecture, validation en attente) ; onglets réordonnés ; vérification de documents en série | « Où en est ce dossier ? » a sa réponse depuis chaque onglet, testé | Planifiée |
 | L-4 | Le poids juste des explications | Encadrés repliables (première phrase visible) ; le budget de 600 mots devient un test sur chaque écran de travail ; intitulés stabilisés au glossaire | Le test de budget en place et vert ; l'audit d'accessibilité re-prouvé dans les deux thèmes | Planifiée |
@@ -70,6 +70,20 @@ les budgets décidés et le cliquet qui les tient.
 - **V1-6 (l'installation en cliquant) n'est pas touchée** : le questionnaire
   a son propre chantier au plan V1.
 - L-4 et L-5 s'intercalent quand elles arrangent — elles ne bloquent rien.
+
+## Ce que L-1 a coûté, et ce qu'elle a rapporté
+
+Décider une validation demande une action de plus qu'avant : la carte se
+replie, donc la question posée et l'effet de la réponse se lisent *avant* que
+les quatre boutons apparaissent. Mettre les boutons sur la ligne repliée
+aurait gardé les deux actions — et cassé la règle plus ancienne sous laquelle
+ils existent : chaque carte dit ce que valider provoque avant les boutons,
+jamais dans une confirmation après. Quatre boutons au-dessus d'une
+explication repliée, c'est cette règle à l'envers.
+
+Une action échangée contre un écran qui passe de 11 136 à 1 261 mots. La
+personne qui décide dix demandes d'affilée paie dix clics et cesse de faire
+défiler neuf mille mots qu'elle n'allait pas lire.
 
 ## Ce que L-0 a trouvé en chemin
 

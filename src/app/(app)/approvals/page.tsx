@@ -2,10 +2,12 @@ import Link from "next/link";
 
 import { Badge, Callout, Card } from "@/components/ui";
 import { ApprovalCard } from "@/components/approval-ui";
+import { Pager, pageFrom } from "@/components/pager";
 import { requireWorkspacePermission } from "@/lib/auth/workspace";
 import { can } from "@/lib/auth/permissions";
 import { actorFor } from "@/lib/auth/session";
 import {
+  APPROVALS_PER_PAGE,
   approvalActions,
   approvalCounts,
   listDecidedApprovals,
@@ -33,16 +35,15 @@ export const metadata = { title: "Validations" };
 export const dynamic = "force-dynamic";
 
 /**
- * How many cards the page renders.
+ * How many cards a page renders, per section.
  *
- * The counts beside the headings come from their own queries, so a bound here
- * shortens the page without changing what it claims. Both are stated on screen
- * whenever there is more than fits — a silent truncation reads as "that is all
- * of them".
+ * One number now, and a real pager under each section rather than a silent
+ * window: the counts beside the headings come from their own queries, so the
+ * page can say both what you are looking at and what you are looking through.
+ * Fifty fully-rendered cards was the eleven-thousand-word screen ADR-0029
+ * measured; twenty folded ones is what replaced it.
  */
-const PENDING_SHOWN = 50;
-const DECIDED_SHOWN = 25;
-const SUPERSEDED_SHOWN = 25;
+const PER_PAGE = APPROVALS_PER_PAGE;
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -72,6 +73,11 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
   };
   const problem = one(query["problem"]) ?? null;
   const focus = one(query["focus"]) ?? one(query["decided"]) ?? null;
+  // One cursor for the three sections. Each states its own bounds, so a page
+  // that runs past the end of a short section simply renders none of it rather
+  // than claiming something untrue about it.
+  const page = pageFrom(query["page"]);
+  const skip = (page - 1) * PER_PAGE;
 
   // Three groups, and each asks for itself. This used to be a pair, with
   // "everything that is not pending" standing in for "decided" — which became
@@ -82,9 +88,9 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
   const showSuperseded = !filters.status || isSupersededStatus(filters.status);
 
   const [pending, decided, superseded, counts, actionsPresent, configuration] = await Promise.all([
-    showPending ? listPendingApprovals(scope, filters, PENDING_SHOWN) : [],
-    showDecided ? listDecidedApprovals(scope, filters, DECIDED_SHOWN) : [],
-    showSuperseded ? listSupersededApprovals(scope, filters, SUPERSEDED_SHOWN) : [],
+    showPending ? listPendingApprovals(scope, filters, PER_PAGE, skip) : [],
+    showDecided ? listDecidedApprovals(scope, filters, PER_PAGE, skip) : [],
+    showSuperseded ? listSupersededApprovals(scope, filters, PER_PAGE, skip) : [],
     approvalCounts(scope, filters),
     approvalActions(scope),
     firmConfiguration(scope),
@@ -93,6 +99,10 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
   const timezone = firmTimezone(configuration?.timezone);
   const firmApprovals = parseJsonObject(configuration?.approvals);
   const canDecide = can(actorFor(session.user, firm.id), "approval.decide");
+  // Deciding returns to the page the reader was on. Sending them back to the
+  // first page of an unfiltered queue would lose their place after every
+  // single decision — the opposite of what a queue is for.
+  const returnTo = page > 1 ? `/approvals?page=${page}` : "/approvals";
   const uncovered = rulesWithoutActions();
 
   return (
@@ -193,18 +203,16 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
 
       <Card
         title={`En attente d’une décision (${counts.pending})`}
-        description={
-          counts.pending > pending.length
-            ? `Les ${pending.length} plus récentes sont affichées. Resserrez les filtres pour atteindre les autres.`
-            : undefined
-        }
+        description="Chaque ligne s’ouvre sur la question posée, l’effet de la décision, et les quatre choix."
       >
         {pending.length === 0 ? (
           <Callout tone="neutral" title="Rien n’attend">
-            Rien dans ce cabinet ne requiert actuellement la décision d’une personne.
+            {counts.pending > 0
+              ? "Cette page ne contient rien. Revenez à la première page de la file."
+              : "Rien dans ce cabinet ne requiert actuellement la décision d’une personne."}
           </Callout>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {pending.map((approval) => (
               <ApprovalCard
                 key={approval.id}
@@ -213,13 +221,22 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                 requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                 timezone={timezone}
                 canDecide={canDecide}
-                returnTo="/approvals"
+                returnTo={returnTo}
                 problem={focus === approval.id ? problem : null}
                 focused={focus === approval.id}
+                group="validation-en-attente"
               />
             ))}
           </ul>
         )}
+        <Pager
+          page={page}
+          perPage={PER_PAGE}
+          total={counts.pending}
+          params={query}
+          basePath="/approvals"
+          noun="demandes en attente"
+        />
         {problem && !focus ? (
           <Callout tone="danger" title="Cette décision n’a pas été enregistrée" assertive>
             {problem}
@@ -230,13 +247,9 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
       {decided.length > 0 ? (
         <Card
           title={`Décidées (${counts.decided})`}
-          description={
-            counts.decided > decided.length
-              ? `Conservées, jamais purgées. Les ${decided.length} plus récentes sont affichées.`
-              : "Conservées, jamais purgées. Une décision est la trace de qui a pris la responsabilité."
-          }
+          description="Conservées, jamais purgées. Une décision est la trace de qui a pris la responsabilité."
         >
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {decided.map((approval) => (
               <ApprovalCard
                 key={approval.id}
@@ -245,24 +258,29 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                 requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                 timezone={timezone}
                 canDecide={false}
-                returnTo="/approvals"
+                returnTo={returnTo}
+                group="validation-decidee"
               />
             ))}
           </ul>
+          <Pager
+            page={page}
+            perPage={PER_PAGE}
+            total={counts.decided}
+            params={query}
+            basePath="/approvals"
+            noun="demandes décidées"
+          />
         </Card>
       ) : null}
 
       {superseded.length > 0 ? (
         <Card
           title={`Remplacées (${counts.superseded})`}
-          description={
-            counts.superseded > superseded.length
-              ? `Personne ne les a décidées. Les ${superseded.length} plus récentes sont affichées.`
-              : "Personne ne les a décidées."
-          }
+          description="Personne ne les a décidées."
         >
           <p className="mb-4 text-sm text-ink-muted">{SUPERSEDED_EXPLANATION}</p>
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {superseded.map((approval) => (
               <ApprovalCard
                 key={approval.id}
@@ -271,10 +289,19 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
                 requireSeparateApprover={configuration?.requireSeparateApprover ?? false}
                 timezone={timezone}
                 canDecide={false}
-                returnTo="/approvals"
+                returnTo={returnTo}
+                group="validation-remplacee"
               />
             ))}
           </ul>
+          <Pager
+            page={page}
+            perPage={PER_PAGE}
+            total={counts.superseded}
+            params={query}
+            basePath="/approvals"
+            noun="demandes remplacées"
+          />
         </Card>
       ) : null}
 

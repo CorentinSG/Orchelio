@@ -22,8 +22,10 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
 }
 
 async function openMatter(page: import("@playwright/test").Page, reference: string) {
-  await page.goto("/matters");
-  await page.getByRole("link", { name: new RegExp(reference) }).click();
+  // Searched rather than scrolled: the list pages at twenty since L-1, so a
+  // seeded matter is only on the first page by luck.
+  await page.goto(`/matters?q=${encodeURIComponent(reference)}`);
+  await page.getByRole("link", { name: new RegExp(reference) }).first().click();
   await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
 }
 

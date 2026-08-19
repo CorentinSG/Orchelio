@@ -35,6 +35,21 @@ import type { RiskLevel } from "@/lib/constants";
  *    buttons, not in a confirmation afterwards.
  *  * Let a rejection be a shrug. Three of the four decisions leave somebody
  *    with work to do, and each demands a note saying what.
+ *
+ * ## Why the card folds (L-1)
+ *
+ * A queue rendering fifty of these in full reached eleven thousand words, and
+ * nobody reads fifty questions and fifty effects. Each card is now a summary
+ * line that opens on demand, in a native `<details>` — no JavaScript, works
+ * from the keyboard, and `name` makes the group exclusive so one card is open
+ * at a time.
+ *
+ * The decision buttons stay *behind* the fold with the question and the
+ * effect, never on the summary line. Putting them on the line would show four
+ * buttons above a hidden explanation of what they cause, which is precisely
+ * the second rule above. Deciding therefore costs one action more than it did
+ * — the trade is recorded in ADR-0029, against a reading cost that falls by
+ * an order of magnitude.
  */
 
 const RISK_TONE: Record<RiskLevel, Tone> = {
@@ -107,6 +122,7 @@ export function ApprovalCard({
   viewerId,
   timezone,
   requireSeparateApprover = false,
+  group,
 }: {
   approval: ApprovalCardData;
   canDecide: boolean;
@@ -120,6 +136,12 @@ export function ApprovalCard({
   timezone: string;
   /** Whether this firm refuses a decision from the person who asked. */
   requireSeparateApprover?: boolean;
+  /**
+   * The accordion this card belongs to. Cards sharing a group open one at a
+   * time; omitting it leaves the card open and unfoldable, which is what a
+   * single card on a matter's own tab wants.
+   */
+  group?: string;
 }) {
   const action = approvableAction(approval.action);
   const href = resourceHref(approval.resourceType, approval.matter?.id ?? null);
@@ -132,30 +154,30 @@ export function ApprovalCard({
   const self = isSelfDecision(approval.requestedBy?.id, viewerId);
   const blocked = self && requireSeparateApprover;
 
-  return (
-    <li
-      id={`approval-${approval.id}`}
-      className={`rounded-card border px-4 py-4 ${
-        focused ? "border-brand bg-brand-soft" : "border-line bg-surface"
-      }`}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-medium text-ink">{actionLabel(approval.action)}</p>
-          {approval.matter ? (
-            <p className="text-sm text-ink-muted">
-              <span className="font-mono text-xs">{approval.matter.reference}</span> —{" "}
-              {approval.matter.title}
-            </p>
-          ) : null}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <RiskBadge level={approval.riskLevel} />
-          <ApprovalStatusBadge status={approval.status} />
-          {action?.lockedBy ? <Badge tone="neutral">Impossible à désactiver</Badge> : null}
-        </div>
+  // The line a reader scans: what is being decided, on which matter, how risky,
+  // and who is waiting. Everything a person needs to choose whether to open
+  // this one — and nothing that would let them act without reading further.
+  const line = (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="font-medium text-ink">{actionLabel(approval.action)}</p>
+        {approval.matter ? (
+          <p className="text-sm text-ink-muted">
+            <span className="font-mono text-xs">{approval.matter.reference}</span> —{" "}
+            {approval.matter.title}
+          </p>
+        ) : null}
       </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <RiskBadge level={approval.riskLevel} />
+        <ApprovalStatusBadge status={approval.status} />
+        {action?.lockedBy ? <Badge tone="neutral">Impossible à désactiver</Badge> : null}
+      </div>
+    </div>
+  );
 
+  const body = (
+    <>
       <p className="mt-3 text-sm text-ink">{approval.summary}</p>
 
       <p className="mt-2 text-xs text-ink-subtle">
@@ -279,6 +301,39 @@ export function ApprovalCard({
             <p className="mt-1 text-sm text-ink-muted">{approval.decisionNote}</p>
           ) : null}
         </div>
+      )}
+    </>
+  );
+
+  return (
+    <li
+      id={`approval-${approval.id}`}
+      className={`rounded-card border px-4 py-4 ${
+        focused ? "border-brand bg-brand-soft" : "border-line bg-surface"
+      }`}
+    >
+      {group ? (
+        // `open` when focused: a decision the server refused must show its
+        // reason without the reader having to go looking for it.
+        <details name={group} open={focused} className="group/fold">
+          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            <div className="flex items-start gap-2">
+              <span
+                aria-hidden
+                className="mt-1 shrink-0 text-ink-subtle transition-transform group-open/fold:rotate-90"
+              >
+                ▸
+              </span>
+              <div className="min-w-0 flex-1">{line}</div>
+            </div>
+          </summary>
+          {body}
+        </details>
+      ) : (
+        <>
+          {line}
+          {body}
+        </>
       )}
     </li>
   );

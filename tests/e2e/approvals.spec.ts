@@ -32,8 +32,10 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
 }
 
 async function openMatter(page: import("@playwright/test").Page, reference: string) {
-  await page.goto("/matters");
-  await page.getByRole("link", { name: new RegExp(reference) }).click();
+  // Searched rather than scrolled: the list pages at twenty since L-1, so a
+  // seeded matter is only on the first page by luck.
+  await page.goto(`/matters?q=${encodeURIComponent(reference)}`);
+  await page.getByRole("link", { name: new RegExp(reference) }).first().click();
   await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
 }
 
@@ -63,6 +65,19 @@ function pendingCard(page: import("@playwright/test").Page, reference: string) {
     .first();
 }
 
+/**
+ * The same card, opened.
+ *
+ * Since L-1 a pending card is a folded `<details>`: the question, the effect
+ * and the four buttons are behind a summary line. Anything that decides has
+ * to open it first, exactly as a person does.
+ */
+async function openPendingCard(page: import("@playwright/test").Page, reference: string) {
+  const card = pendingCard(page, reference);
+  await card.locator("summary").click();
+  return card;
+}
+
 test.describe("An analysis nobody has approved", () => {
   test("says so, before the analysis rather than after it", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
@@ -89,9 +104,17 @@ test.describe("Deciding", () => {
     await runAnalysis(page, "IMM-2026-002");
     await page.goto("/approvals");
 
-    const waiting = page.getByRole("region", { name: /^En attente d’une décision/ });
-    await expect(waiting).toContainText("Si vous validez :");
-    await expect(waiting).toContainText(/Un avocat a-t-il lu cette analyse/i);
+    // Opened first, and asserted with toBeVisible rather than toContainText:
+    // since L-1 folded the card, toContainText reads the collapsed text too,
+    // so it would pass on a screen where nobody could see any of this.
+    const card = await openPendingCard(page, "IMM-2026-002");
+
+    await expect(card.getByText("Si vous validez :")).toBeVisible();
+    await expect(card.getByText(/Un avocat a-t-il lu cette analyse/i)).toBeVisible();
+    // And the effect really is above the buttons, not after them.
+    const effectY = (await card.getByText("Si vous validez :").boundingBox())?.y ?? 0;
+    const buttonY = (await card.getByRole("button", { name: /^Validée$/ }).boundingBox())?.y ?? 0;
+    expect(effectY).toBeLessThan(buttonY);
   });
 
   test("offers four decisions, none of them the obvious one", async ({ page }) => {
@@ -99,14 +122,19 @@ test.describe("Deciding", () => {
     await runAnalysis(page, "IMM-2026-002");
     await page.goto("/approvals");
 
-    const waiting = page.getByRole("region", { name: /^En attente d’une décision/ });
+    const card = await openPendingCard(page, "IMM-2026-002");
+
     for (const label of [
       "Validée",
       "Validée avec modifications",
       "Nouvelle analyse demandée",
       "Refusée",
     ]) {
-      await expect(waiting.getByRole("button", { name: new RegExp(`^${label}`) }).first()).toBeVisible();
+      // Anchored at both ends: "Validée" is a prefix of "Validée avec
+      // modifications", and a loose match would find two buttons.
+      await expect(
+        card.getByRole("button", { name: new RegExp(`^${label}( —|$)`) }),
+      ).toBeVisible();
     }
   });
 
@@ -115,7 +143,7 @@ test.describe("Deciding", () => {
     await runAnalysis(page, "EMP-2026-001");
     await page.goto("/approvals");
 
-    const card = pendingCard(page, "EMP-2026-001");
+    const card = await openPendingCard(page, "EMP-2026-001");
     await card.getByRole("button", { name: /^Refusée/ }).click();
     await page.waitForURL(/\/approvals/);
 
@@ -131,7 +159,7 @@ test.describe("Deciding", () => {
     await runAnalysis(page, "EMP-2026-002");
     await page.goto("/approvals");
 
-    const card = pendingCard(page, "EMP-2026-002");
+    const card = await openPendingCard(page, "EMP-2026-002");
     await card.getByLabel("Note").fill("Read in full. The sequence is reported, not characterised.");
     await card.getByRole("button", { name: /^Validée avec modifications/ }).click();
     await page.waitForURL(/\/approvals/);
@@ -272,7 +300,7 @@ test.describe("The activity log", () => {
     await signIn(page, "employment.attorney@demo.local");
     await runAnalysis(page, "EMP-2026-003");
     await page.goto("/approvals");
-    const card = pendingCard(page, "EMP-2026-003");
+    const card = await openPendingCard(page, "EMP-2026-003");
     await card.getByRole("button", { name: /^Validée$/ }).click();
     await page.waitForURL(/\/approvals/);
 
@@ -401,7 +429,7 @@ test.describe("Separation of duties", () => {
     await runAnalysis(page, "IMM-2026-003");
     await page.goto("/approvals");
 
-    const card = pendingCard(page, "IMM-2026-003");
+    const card = await openPendingCard(page, "IMM-2026-003");
     await expect(card).toContainText("Vous avez formé cette demande");
     await expect(card).toContainText("cette personne, c’est vous");
     // Still decidable: informed, not blocked.

@@ -455,7 +455,7 @@ and a firm should expect to find out on its own machine.
 **Criterion.** The six most frequent journeys are walked by tests that count
 every action a person takes, each pinned at today's cost as a ceiling that
 later phases lower; the volume-independent screens carry word ceilings; and
-the budgets, with the two queue numbers no test can yet hold honestly, are
+the budgets — including the two queue numbers L-1 went on to pay — are
 recorded in
 [ADR-0029](decisions/ADR-0029-reading-budgets-and-journey-ceilings.md).
 
@@ -464,11 +464,32 @@ Proved by:
 - `tests/e2e/efficiency.spec.ts` — "finding a matter by its reference takes at most four actions"
 - `tests/e2e/efficiency.spec.ts` — "finding a matter by its client takes at most four actions"
 - `tests/e2e/efficiency.spec.ts` — "running an analysis takes at most six actions"
-- `tests/e2e/efficiency.spec.ts` — "deciding a pending approval takes at most two actions"
 - `tests/e2e/efficiency.spec.ts` — "adding a document takes at most eight actions"
 - `tests/e2e/efficiency.spec.ts` — "switching firm takes one action"
 - `tests/e2e/efficiency.spec.ts` — "the dashboard stays within 600 words"
 - `tests/e2e/efficiency.spec.ts` — "the confidentiality register stays within 2000 words"
+
+---
+
+## L-1 — queues that hold up under a real firm's volume
+
+**Criterion.** Neither queue's weight grows with the firm's data: both page at
+twenty, the approval cards fold so the question and the effect are read before
+the four buttons rather than beside forty-nine other open forms, and the two
+ceilings are asserted against the loaded database the browser suite leaves
+behind. Approvals fell from 11 136 words to 1 261, the matter list from 3 579
+to 564. Deciding costs one action more, and
+[ADR-0029](decisions/ADR-0029-reading-budgets-and-journey-ceilings.md) says
+why.
+
+Proved by:
+
+- `tests/e2e/efficiency.spec.ts` — "the approvals queue stays within 1400 words whatever the firm's volume"
+- `tests/e2e/efficiency.spec.ts` — "the matter list stays within 900 words whatever the firm's volume"
+- `tests/e2e/efficiency.spec.ts` — "deciding a pending approval takes at most three actions"
+- `tests/e2e/approvals.spec.ts` — "states what approving will cause, above the buttons"
+- `tests/e2e/approvals.spec.ts` — "offers four decisions, none of them the obvious one"
+- `tests/e2e/matters.spec.ts` — "filters on the server, and the filter survives in the address bar"
 
 ---
 

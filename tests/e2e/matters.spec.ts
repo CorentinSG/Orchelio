@@ -24,8 +24,10 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
 
 /** Opens the matter whose reference is given, from the list. */
 async function openMatter(page: import("@playwright/test").Page, reference: string) {
-  await page.goto("/matters");
-  await page.getByRole("link", { name: new RegExp(reference) }).click();
+  // Searched rather than scrolled: the list pages at twenty since L-1, so a
+  // seeded matter is only on the first page by luck.
+  await page.goto(`/matters?q=${encodeURIComponent(reference)}`);
+  await page.getByRole("link", { name: new RegExp(reference) }).first().click();
   // Waiting on the URL, not on a heading: the list has a heading too, so
   // "a heading is visible" is satisfied before the click has gone anywhere.
   await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
@@ -97,12 +99,12 @@ test.describe("The matter list", () => {
 
   test("filters on the server, and the filter survives in the address bar", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
-    await page.goto("/matters");
-
-    // Both are visible unfiltered. Counting every matter instead would be a
-    // test that other tests in this file can change underneath it.
-    await expect(page.getByRole("link", { name: /IMM-2026-001/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /IMM-2026-002/ })).toBeVisible();
+    // Both are reachable before the filter narrows to one. Asked for by their
+    // shared prefix rather than read off page one, which since L-1 holds
+    // twenty of however many the firm has.
+    await page.goto("/matters?q=IMM-2026-00");
+    await expect(page.getByRole("link", { name: /IMM-2026-001/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /IMM-2026-002/ }).first()).toBeVisible();
 
     await page.getByLabel("Rechercher").fill("Moreau");
     await page.getByRole("button", { name: "Appliquer" }).click();

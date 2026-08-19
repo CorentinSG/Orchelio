@@ -15,7 +15,7 @@ For questions about how modules *reach* each other — call paths, hubs, unexpec
 coupling — use the knowledge graph instead: `npm run graph:explain -- "someSymbol"`.
 See `docs/HARNESS.md`.
 
-Modules: 193.
+Modules: 194.
 
 ## `prisma/`
 
@@ -103,7 +103,7 @@ Exports: `metadata`, `dynamic`, `AiWorkspacePage`
 
 ### `src/app/(app)/approvals/page.tsx`
 
-How many cards the page renders.
+How many cards a page renders, per section.
 
 Exports: `metadata`, `dynamic`, `ApprovalsPage`
 
@@ -399,6 +399,12 @@ The audience is a lawyer, not an administrator: every control is a labelled chec
 
 Exports: `ProgressBar`, `Field`, `CheckboxOption`, `LockIcon`, `StepActions`, `WorkflowPreview`, `inputClass`
 
+### `src/components/pager.tsx`
+
+A queue that renders every row was the product's largest reading cost (ADR-0029): the approvals screen reached eleven thousand words and two hundred buttons on a firm …
+
+Exports: `Pager`, `pageFrom`, `PagerProps`
+
 ### `src/components/settings-ui.tsx`
 
 Two rules shape everything here.
@@ -621,7 +627,7 @@ Exports: `getAnalysis`, `listAnalysesForMatter`, `listRecentAnalyses`, `getRevie
 
 The important function here is `decideApproval`, and the important thing about it is that it is the only way a sensitive action takes effect.
 
-Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `listSupersededApprovals`, `matterApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `supersedeEarlierApprovals`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
+Exports: `listApprovals`, `getApproval`, `countPendingApprovals`, `approvalCounts`, `listPendingApprovals`, `listDecidedApprovals`, `listSupersededApprovals`, `matterApprovals`, `approvalsForResource`, `createApprovalRequest`, `decideApproval`, `supersedeEarlierApprovals`, `applySensitiveEffect`, `approvedRequestFor`, `approvalActions`, `pendingApprovalFor`, `knownAction`, `APPROVALS_PER_PAGE`, `ApprovalFilters`, `NewApprovalRequest`, `DecisionOutcome`
 
 ### `src/lib/data/catalogues.ts`
 
@@ -663,7 +669,7 @@ Exports: `firmConfiguration`, `firmTimezoneFor`, `firmMembers`, `enabledWorkflow
 
 Note the shape of every function here: the firm comes first and is required.
 
-Exports: `getMatter`, `listMatters`, `countMatters`, `matterCountsByStatus`, `nextReference`, `createMatter`, `matterDetail`, `touchMatter`, `MatterFilters`, `NewMatter`
+Exports: `getMatter`, `isMatterSort`, `listMatters`, `countMattersMatching`, `countMatters`, `matterCountsByStatus`, `nextReference`, `createMatter`, `matterDetail`, `touchMatter`, `MATTER_SORTS`, `MATTERS_PER_PAGE`, `MatterFilters`, `MatterSort`, `NewMatter`
 
 ### `src/lib/data/onboarding.ts`
 

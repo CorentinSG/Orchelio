@@ -15,12 +15,11 @@ import { expect, test, type Page } from "@playwright/test";
  * separately, as words on the screen — and signing in is the shared price of
  * every journey, so it is counted in none of them.
  *
- * The word ceilings cover only screens whose length does not grow with the
- * firm's data. The queues — the matter list, the approvals — are deliberately
- * absent: their length is today's known problem, L-1 makes them
- * volume-independent, and a ceiling that fails because the test suite added
- * rows would be flakiness measuring nothing. ADR-0029 records their numbers
- * and the obligation.
+ * The word ceilings cover screens whose length does not grow with the firm's
+ * data. Since L-1 that includes the two queues: both page, so their weight is
+ * a property of the design rather than of how much the suite has created.
+ * They are asserted here on a database the browser suite has loaded with
+ * hundreds of rows, which is the only way the claim means anything.
  */
 
 const PASSWORD = "orchelio-demo";
@@ -100,12 +99,12 @@ test.describe("what a journey costs, in actions", () => {
     expect(count.total()).toBeLessThanOrEqual(6);
   });
 
-  test("deciding a pending approval takes at most two actions", async ({ page }) => {
+  test("deciding a pending approval takes at most three actions", async ({ page }) => {
     await signIn(page, "immigration.attorney@demo.local");
 
     // Setup, not journey: make sure something is waiting. The journey starts
     // once the request exists, as it would for the person asked to decide.
-    await page.goto("/matters");
+    await page.goto("/matters?q=IMM-2026-003");
     await page.getByRole("link", { name: /IMM-2026-003/ }).first().click();
     await page.waitForURL(/\/matters\/[0-9a-f-]{36}/);
     await matterTabs(page).getByRole("link", { name: "Analyse" }).click();
@@ -124,13 +123,17 @@ test.describe("what a journey costs, in actions", () => {
       .locator("li")
       .filter({ hasText: "IMM-2026-003" })
       .first();
+    await count.act(() => card.locator("summary").click());
     await count.act(() => card.getByRole("button", { name: /^Validée$/ }).click());
     await page.waitForURL(/\/approvals/);
 
     await expect(page.getByText("Décision enregistrée")).toBeVisible();
-    // Two actions to act — but finding the card in the queue is the real cost
-    // today, and it is paid in words, not clicks. That is L-1's number.
-    expect(count.total()).toBeLessThanOrEqual(2);
+    // Three, not two: L-1 folded the card, so the question and the effect are
+    // read before the buttons appear rather than sitting open on a screen
+    // nobody could read. The trade — one action for eleven thousand words down
+    // to twelve hundred — is written into ADR-0029, which is the only place a
+    // ceiling may be raised.
+    expect(count.total()).toBeLessThanOrEqual(3);
   });
 
   test("adding a document takes at most eight actions", async ({ page }) => {
@@ -214,5 +217,19 @@ test.describe("what a screen costs, in words", () => {
   test("the confidentiality register stays within 2000 words", async ({ page }) => {
     // A reference document, read once and slowly — its budget says so.
     expect(await wordsOn(page, "/settings?section=confidentiality")).toBeLessThanOrEqual(2000);
+  });
+
+  test("the approvals queue stays within 1400 words whatever the firm's volume", async ({
+    page,
+  }) => {
+    // Was 11 136 before L-1. The remaining weight is the two reference cards
+    // at the foot of the screen, which L-4 folds; the queue itself is now a
+    // page of summary lines and cannot grow.
+    expect(await wordsOn(page, "/approvals")).toBeLessThanOrEqual(1400);
+  });
+
+  test("the matter list stays within 900 words whatever the firm's volume", async ({ page }) => {
+    // Was 3 579, and unbounded — the list had no page at all.
+    expect(await wordsOn(page, "/matters")).toBeLessThanOrEqual(900);
   });
 });

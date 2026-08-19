@@ -36,37 +36,106 @@ export async function getMatter({ matterId, firmId }: { matterId: string } & Fir
   });
 }
 
-export async function listMatters(scope: FirmScope, filters: MatterFilters = {}) {
+/** How a matter list may be ordered. Anything else is refused, not guessed. */
+export const MATTER_SORTS = ["activity", "reference", "client", "status", "deadline"] as const;
+export type MatterSort = (typeof MATTER_SORTS)[number];
+
+export function isMatterSort(value: string): value is MatterSort {
+  return (MATTER_SORTS as readonly string[]).includes(value);
+}
+
+/** How many matters one page of the list holds (ADR-0029). */
+export const MATTERS_PER_PAGE = 20;
+
+/**
+ * The `where` clause, built once.
+ *
+ * Shared by the list and its count so the two cannot disagree — a page that
+ * says "132 matters" above twenty rows drawn from a different set is worse
+ * than either number alone. Every branch names the firm through the caller's
+ * scope; the `OR` here is inside an `AND` with `firmId`, which is the shape
+ * the scoping guard requires.
+ */
+function matterWhere(scope: FirmScope, filters: MatterFilters) {
   const search = filters.search?.trim();
 
+  return {
+    firmId: scope.firmId,
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.matterTypeKey ? { matterTypeKey: filters.matterTypeKey } : {}),
+    ...(filters.responsibleAttorneyId
+      ? { responsibleAttorneyId: filters.responsibleAttorneyId }
+      : {}),
+    ...(filters.representationSide ? { representationSide: filters.representationSide } : {}),
+    ...(search
+      ? {
+          OR: [
+            { reference: { contains: search } },
+            { title: { contains: search } },
+            { clientProfile: { displayName: { contains: search } } },
+          ],
+        }
+      : {}),
+  };
+}
+
+/**
+ * The ordering for each sort a column header can ask for.
+ *
+ * A secondary key on every one of them: two matters sharing a status would
+ * otherwise come back in whatever order the database felt like, and a list
+ * that reshuffles under a reader between page one and page two is a list they
+ * stop trusting.
+ */
+function matterOrder(sort: MatterSort): Record<string, unknown>[] {
+  switch (sort) {
+    case "reference":
+      return [{ reference: "asc" }];
+    case "client":
+      return [{ clientProfile: { displayName: "asc" } }, { reference: "asc" }];
+    case "status":
+      return [{ status: "asc" }, { lastActivityAt: "desc" }];
+    case "deadline":
+      // Nulls last: a matter with no recorded date is not the most urgent one.
+      return [{ nextDeadlineAt: { sort: "asc", nulls: "last" } }, { reference: "asc" }];
+    case "activity":
+      return [{ lastActivityAt: "desc" }];
+  }
+}
+
+export async function listMatters(
+  scope: FirmScope,
+  filters: MatterFilters = {},
+  options: { page?: number; sort?: MatterSort } = {},
+) {
+  const page = Math.max(1, Math.trunc(options.page ?? 1));
+
   return prisma.matter.findMany({
-    where: {
-      firmId: scope.firmId,
-      ...(filters.status ? { status: filters.status } : {}),
-      ...(filters.matterTypeKey ? { matterTypeKey: filters.matterTypeKey } : {}),
-      ...(filters.responsibleAttorneyId
-        ? { responsibleAttorneyId: filters.responsibleAttorneyId }
-        : {}),
-      ...(filters.representationSide
-        ? { representationSide: filters.representationSide }
-        : {}),
-      ...(search
-        ? {
-            OR: [
-              { reference: { contains: search } },
-              { title: { contains: search } },
-              { clientProfile: { displayName: { contains: search } } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { lastActivityAt: "desc" },
+    where: matterWhere(scope, filters),
+    orderBy: matterOrder(options.sort ?? "activity"),
+    skip: (page - 1) * MATTERS_PER_PAGE,
+    take: MATTERS_PER_PAGE,
     include: {
       clientProfile: { select: { displayName: true } },
       matterType: { select: { label: true } },
       responsibleAttorney: { select: { name: true } },
     },
   });
+}
+
+/**
+ * How many matters match, whatever the page shows.
+ *
+ * The list is a window; this is the size of what it looks through. Reported on
+ * screen beside the window's own bounds, because "20 matters" above twenty
+ * rows of a hundred and thirty-two is a false claim of the kind
+ * `approvalCounts` was written to stop making.
+ */
+export async function countMattersMatching(
+  scope: FirmScope,
+  filters: MatterFilters = {},
+): Promise<number> {
+  return prisma.matter.count({ where: matterWhere(scope, filters) });
 }
 
 export async function countMatters(scope: FirmScope): Promise<number> {

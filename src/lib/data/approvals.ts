@@ -39,7 +39,15 @@ export type ApprovalFilters = {
   riskLevel?: string;
 };
 
-export async function listApprovals(scope: FirmScope, filters: ApprovalFilters = {}, take = 100) {
+/** How many requests one page of a queue holds (ADR-0029). */
+export const APPROVALS_PER_PAGE = 20;
+
+export async function listApprovals(
+  scope: FirmScope,
+  filters: ApprovalFilters = {},
+  take = 100,
+  skip = 0,
+) {
   return prisma.approvalRequest.findMany({
     where: {
       firmId: scope.firmId,
@@ -48,11 +56,13 @@ export async function listApprovals(scope: FirmScope, filters: ApprovalFilters =
       ...(filters.matterId ? { matterId: filters.matterId } : {}),
       ...(filters.riskLevel ? { riskLevel: filters.riskLevel } : {}),
     },
-    // Grouped by status, then most recent first. The status ordering is
-    // alphabetical rather than meaningful — every screen asks for one status at
-    // a time, and arranges the groups itself.
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    // Grouped by status, then most recent first, then by id — the last key
+    // matters once the queue pages: two requests raised in the same second
+    // would otherwise be free to swap places between page one and page two,
+    // which loses one of them from the reader's view entirely.
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }, { id: "asc" }],
     take,
+    skip,
     include: {
       matter: { select: { id: true, reference: true, title: true } },
       requestedBy: { select: { id: true, name: true } },
@@ -123,8 +133,9 @@ export async function listPendingApprovals(
   scope: FirmScope,
   filters: ApprovalFilters = {},
   take = 50,
+  skip = 0,
 ) {
-  return listApprovals(scope, { ...filters, status: PENDING_STATUS }, take);
+  return listApprovals(scope, { ...filters, status: PENDING_STATUS }, take, skip);
 }
 
 /**
@@ -144,6 +155,7 @@ export async function listDecidedApprovals(
   scope: FirmScope,
   filters: ApprovalFilters = {},
   take = 25,
+  skip = 0,
 ) {
   const decided: readonly string[] = APPROVAL_DECISIONS;
   return prisma.approvalRequest.findMany({
@@ -157,8 +169,9 @@ export async function listDecidedApprovals(
       ...(filters.matterId ? { matterId: filters.matterId } : {}),
       ...(filters.riskLevel ? { riskLevel: filters.riskLevel } : {}),
     },
-    orderBy: [{ decidedAt: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ decidedAt: "desc" }, { createdAt: "desc" }, { id: "asc" }],
     take,
+    skip,
     include: {
       matter: { select: { id: true, reference: true, title: true } },
       requestedBy: { select: { id: true, name: true } },
@@ -178,8 +191,9 @@ export async function listSupersededApprovals(
   scope: FirmScope,
   filters: ApprovalFilters = {},
   take = 25,
+  skip = 0,
 ) {
-  return listApprovals(scope, { ...filters, status: SUPERSEDED_STATUS }, take);
+  return listApprovals(scope, { ...filters, status: SUPERSEDED_STATUS }, take, skip);
 }
 
 /**

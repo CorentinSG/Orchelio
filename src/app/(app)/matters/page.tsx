@@ -11,7 +11,15 @@ import { requireMatterAccess } from "@/lib/auth/workspace";
 import { requestNow } from "@/lib/clock";
 import { can } from "@/lib/auth/permissions";
 import { actorFor } from "@/lib/auth/session";
-import { matterCountsByStatus, listMatters } from "@/lib/data/matters";
+import {
+  MATTERS_PER_PAGE,
+  countMattersMatching,
+  isMatterSort,
+  listMatters,
+  matterCountsByStatus,
+  type MatterSort,
+} from "@/lib/data/matters";
+import { Pager, pageFrom } from "@/components/pager";
 import { matterTypesForPracticeAreas } from "@/lib/data/catalogues";
 import { firmConfiguration } from "@/lib/data/firms";
 import { firmTimezone } from "@/lib/format/dates";
@@ -42,8 +50,16 @@ export default async function MattersPage({ searchParams }: PageProps) {
     search: one(query["q"]),
   };
 
-  const [matters, configuration, counts] = await Promise.all([
-    listMatters(scope, filters),
+  const page = pageFrom(query["page"]);
+  const requested = one(query["sort"]) ?? "";
+  const sort: MatterSort = isMatterSort(requested) ? requested : "activity";
+
+  const [matters, total, configuration, counts] = await Promise.all([
+    listMatters(scope, filters, { page, sort }),
+    // What matches, not what fits on the page. The header used to report the
+    // rendered row count as the size of the list, which was the whole list
+    // only because the list had no bound.
+    countMattersMatching(scope, filters),
     firmConfiguration(scope),
     matterCountsByStatus(scope),
   ]);
@@ -68,8 +84,8 @@ export default async function MattersPage({ searchParams }: PageProps) {
           <p className="text-sm font-medium uppercase tracking-wide text-brand">{firm.name}</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Dossiers</h1>
           <p className="mt-1 text-ink-muted">
-            {matters.length} affiché(s){activeFilters > 0 ? " (filtrés)" : ""} · chaque dossier ici
-            appartient à ce cabinet.
+            {total} dossier{total === 1 ? "" : "s"}
+            {activeFilters > 0 ? " correspondant aux filtres" : ""} · chacun appartient à ce cabinet.
           </p>
         </div>
         {canCreate ? (
@@ -177,22 +193,34 @@ export default async function MattersPage({ searchParams }: PageProps) {
       <Card title="Liste des dossiers">
         {matters.length === 0 ? (
           <Callout tone="neutral" title="Rien à afficher">
-            {activeFilters > 0
-              ? "Aucun dossier de ce cabinet ne correspond à ces filtres."
-              : "Ce cabinet n’a pas encore de dossier."}
+            {total > 0
+              ? "Cette page ne contient rien. Revenez à la première page de la liste."
+              : activeFilters > 0
+                ? "Aucun dossier de ce cabinet ne correspond à ces filtres."
+                : "Ce cabinet n’a pas encore de dossier."}
           </Callout>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[52rem] text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-ink-muted">
-                  <th className="py-2 pr-4 font-medium">Dossier</th>
-                  <th className="py-2 pr-4 font-medium">Client</th>
+                  <SortableHeader label="Dossier" sort="reference" active={sort} query={query} />
+                  <SortableHeader label="Client" sort="client" active={sort} query={query} />
                   <th className="py-2 pr-4 font-medium">Type</th>
-                  <th className="py-2 pr-4 font-medium">Statut</th>
+                  <SortableHeader label="Statut" sort="status" active={sort} query={query} />
                   <th className="py-2 pr-4 font-medium">Responsable</th>
-                  <th className="py-2 pr-4 font-medium">Prochaine date</th>
-                  <th className="py-2 pr-4 font-medium">Dernière activité</th>
+                  <SortableHeader
+                    label="Prochaine date"
+                    sort="deadline"
+                    active={sort}
+                    query={query}
+                  />
+                  <SortableHeader
+                    label="Dernière activité"
+                    sort="activity"
+                    active={sort}
+                    query={query}
+                  />
                   <th className="py-2 font-medium">AI</th>
                 </tr>
               </thead>
@@ -231,6 +259,14 @@ export default async function MattersPage({ searchParams }: PageProps) {
             </table>
           </div>
         )}
+        <Pager
+          page={page}
+          perPage={MATTERS_PER_PAGE}
+          total={total}
+          params={query}
+          basePath="/matters"
+          noun="dossiers"
+        />
       </Card>
 
       <Callout tone="ai" title="La colonne IA est un état, pas un verdict">
@@ -239,5 +275,49 @@ export default async function MattersPage({ searchParams }: PageProps) {
         utilisée.
       </Callout>
     </div>
+  );
+}
+
+/**
+ * A column header that sorts, and says which way it is sorting.
+ *
+ * A link rather than a button: sorting is a different view of the same list,
+ * so it belongs in the address bar where it can be shared, bookmarked and
+ * gone back from. Pressing it returns to page one — staying on page seven of
+ * a list that has just been reordered would show a reader rows they have no
+ * way to place.
+ */
+function SortableHeader({
+  label,
+  sort,
+  active,
+  query,
+}: {
+  label: string;
+  sort: MatterSort;
+  active: MatterSort;
+  query: Record<string, string | string[] | undefined>;
+}) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (key === "sort" || key === "page") continue;
+    const only = Array.isArray(value) ? value[0] : value;
+    if (only) params.set(key, only);
+  }
+  params.set("sort", sort);
+
+  const current = active === sort;
+  return (
+    <th scope="col" className="py-2 pr-4 font-medium" aria-sort={current ? "ascending" : "none"}>
+      <Link
+        href={`/matters?${params.toString()}`}
+        className={`inline-flex items-center gap-1 hover:text-ink ${current ? "text-ink" : ""}`}
+      >
+        {label}
+        <span aria-hidden className={current ? "text-brand" : "text-ink-subtle/40"}>
+          ↓
+        </span>
+      </Link>
+    </th>
   );
 }
